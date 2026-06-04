@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" x-data="onboarding()" :class="{ 'dark': darkMode }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Sales Saathi | Onboarding</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="./src/main.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        darkBg: '#09090b',
+                        darkCard: '#18181b',
+                        darkBorder: 'rgba(255,255,255,0.08)',
+                        brandIndigo: '#4f46e5',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-darkBg text-slate-900 dark:text-slate-200 font-sans antialiased min-h-screen flex items-center justify-center p-4">
+
+    <!-- Global Loading -->
+    <div x-show="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-50 dark:bg-darkBg">
+        <svg class="animate-spin w-8 h-8 text-brandIndigo" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+    </div>
+
+    <main class="w-full max-w-2xl bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-3xl shadow-2xl overflow-hidden" x-show="!loading" x-cloak x-transition.opacity>
+        
+        <div class="h-1.5 w-full bg-gradient-to-r from-brandIndigo to-emerald-500"></div>
+        
+        <div class="p-8 sm:p-12">
+            <div class="text-center mb-10">
+                <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">Welcome to Sales Saathi</h1>
+                <p class="text-slate-500 dark:text-zinc-400 font-medium">Let's customize your workspace to match your workflow.</p>
+            </div>
+
+            <form @submit.prevent="saveProfile()" class="space-y-8">
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">What is your role?</label>
+                        <select x-model="profile.role" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[#111113] border border-slate-200 dark:border-darkBorder focus:ring-2 focus:ring-brandIndigo font-medium outline-none">
+                            <option value="" disabled>Select your role</option>
+                            <option>Account Executive</option>
+                            <option>Sales Development Rep (SDR)</option>
+                            <option>Sales Leader / Manager</option>
+                            <option>Revenue Operations</option>
+                            <option>Founder / CEO</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">What CRM do you use?</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <template x-for="crm in ['Salesforce', 'HubSpot', 'Pipedrive', 'Other']">
+                                <button type="button" @click="profile.crm = crm" 
+                                        class="py-3 px-2 rounded-xl border text-sm font-bold transition-all outline-none"
+                                        :class="profile.crm === crm ? 'border-brandIndigo bg-brandIndigo/10 text-brandIndigo' : 'border-slate-200 dark:border-darkBorder text-slate-600 dark:text-zinc-400 hover:border-slate-300 dark:hover:border-zinc-700'">
+                                    <span x-text="crm"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">What is your team size?</label>
+                        <select x-model="profile.team_size" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[#111113] border border-slate-200 dark:border-darkBorder focus:ring-2 focus:ring-brandIndigo font-medium outline-none">
+                            <option value="" disabled>Select team size</option>
+                            <option>Just me</option>
+                            <option>2-10</option>
+                            <option>11-50</option>
+                            <option>51-200</option>
+                            <option>200+</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 dark:border-white/10">
+                    <button type="submit" class="w-full py-4 rounded-xl bg-brandIndigo hover:bg-indigo-500 text-white font-bold text-lg shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98] transition-all flex justify-center items-center gap-2">
+                        <span>Go to Dashboard</span>
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('onboarding', () => ({
+                darkMode: true,
+                loading: true,
+                profile: {
+                    role: '',
+                    crm: '',
+                    team_size: ''
+                },
+                init() {
+                    // Watch for auth state changes
+                    this.$watch('$store.auth.isLoggedIn', (loggedIn) => {
+                        if (loggedIn) {
+                            if(this.$store.auth.user?.role) {
+                                window.location.href = 'dashboard.html';
+                            } else {
+                                this.loading = false;
+                            }
+                        }
+                    });
+
+                    // Check immediately (with slight delay for Alpine store init)
+                    setTimeout(() => {
+                        if (this.$store.auth.isLoggedIn) {
+                            if(this.$store.auth.user?.role) {
+                                window.location.href = 'dashboard.html';
+                            } else {
+                                this.loading = false;
+                            }
+                        } else if (!this.$store.auth.loading && !window.location.hash.includes('access_token=') && !window.location.search.includes('code=')) {
+                            // Fallback: If no session and no callback URL
+                            window.location.href = 'auth.html';
+                        }
+                    }, 300);
+                },
+                async saveProfile() {
+                    this.loading = true;
+                    try {
+                        const { db } = await import('./src/db.js');
+                        await db.updateUser(this.$store.auth.user.id, this.profile);
+                        
+                        // Update local store
+                        this.$store.auth.user = { ...this.$store.auth.user, ...this.profile };
+                        if(localStorage.getItem('sales_saathi_mock_session')) {
+                            localStorage.setItem('sales_saathi_mock_session', JSON.stringify(this.$store.auth.user));
+                        }
+                        
+                        window.location.href = 'dashboard.html';
+                    } catch(e) {
+                        alert("Error saving profile: " + e.message);
+                        this.loading = false;
+                    }
+                }
+            }));
+        });
+    </script>
+</body>
+</html>

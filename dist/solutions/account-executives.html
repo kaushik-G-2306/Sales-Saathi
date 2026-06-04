@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{ 
+    activeTimelineStep: 1, 
+    currentProblemView: 'research', 
+    darkMode: true, 
+    profileDropdownOpen: false,
+    scrolled: false,
+    mobileMenuOpen: false,
+    activeDropdown: null,
+    openAccord: null
+}" @scroll.window="scrolled = (window.pageYOffset > 20)" :class="{ 'dark': darkMode }">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Executives Hub | Sales Saathi Enterprise</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js Plugins -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        darkBg: '#09090b',
+                        darkCard: '#18181b',
+                        darkBorder: 'rgba(255,255,255,0.08)',
+                        lightBorder: 'rgba(15,23,42,0.08)',
+                        brandIndigo: '#4f46e5',
+                        brandViolet: '#6366f1',
+                        brandEmerald: '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            letter-spacing: -0.03em;
+        }
+
+        .grid-bg {
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .light-grid-bg {
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-50 dark:bg-darkBg text-slate-900 dark:text-zinc-100 font-sans antialiased min-h-screen transition-colors duration-300 selection:bg-brandIndigo selection:text-white"
+    @keydown.escape="activeDropdown = null; mobileMenuOpen = false">
+
+    <!-- SECTION 1: Sticky Navigation Header -->
+    <header class="fixed top-0 w-full z-50 transition-all duration-300"
+            :class="[
+                isScrolled 
+                    ? (darkMode ? 'bg-[#09090b]/75 backdrop-blur-xl border-b border-white/5 shadow-2xl' : 'bg-white/80 backdrop-blur-xl border-b border-slate-200/80 shadow-sm')
+                    : 'bg-transparent border-transparent'
+            ]"
+            x-data="{ mobileMenuOpen: false, activeDropdown: null, isScrolled: false }"
+            @scroll.window="isScrolled = (window.pageYOffset > 20) ? true : false"
+            @keydown.escape="activeDropdown = null; mobileMenuOpen = false">
+            
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 lg:h-20">
+                
+                <!-- Left: Logo & Brand -->
+                <a href="../index.html" class="flex items-center gap-2.5 group outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-lg shrink-0 z-50 relative">
+                    <img src="/assets/logo-Cwh9YEgE.png" alt="Sales Saathi Logo" class="h-9 w-auto rounded-lg shadow-lg group-hover:scale-105 transition-transform duration-200 object-contain" style="min-width:36px;" />
+                    <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white transition-colors duration-200">Sales Saathi</span>
+                </a>
+
+                <!-- Middle: Desktop Navigation Structure -->
+                <nav class="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2 h-full" @click.away="activeDropdown = null">
+                    
+                    <!-- Features w/ Full 10-Item Mega-Dropdown -->
+                    <div class="relative h-full flex items-center">
+                        <button @click="activeDropdown = activeDropdown === 'features' ? null : 'features'"
+                                @mouseenter="activeDropdown = 'features'"
+                                class="px-4 py-2 flex items-center gap-1.5 text-sm font-semibold rounded-md outline-none transition-colors duration-200"
+                                :class="activeDropdown === 'features' ? 'text-slate-900 dark:text-white bg-slate-100/50 dark:bg-white/5' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5'">
+                            Features
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="activeDropdown === 'features' ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <!-- Full 10-Feature Frosted Dark Mega Menu Panel -->
+                        <div x-show="activeDropdown === 'features'" x-transition.opacity.duration.200ms x-cloak
+                             @mouseleave="activeDropdown = null"
+                             class="absolute top-full left-1/2 -translate-x-1/2 w-[95vw] max-w-[700px] mt-2 p-5 bg-white/95 dark:bg-[#18181b]/95 border border-slate-200 dark:border-white/5 rounded-2xl shadow-2xl backdrop-blur-xl overflow-hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 relative z-10">
+
+                                <!-- Item 1: Pre-Meeting Briefs -->
+                                <a href="../features.html#briefs" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-500/15 text-brandIndigo flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-brandIndigo transition-colors leading-tight">Pre-Meeting Briefs</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Generate AI-powered meeting briefs with CRM, company, and stakeholder insights.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 2: Smart Ice-Breakers -->
+                                <a href="../features.html#icebreakers" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 text-brandEmerald flex items-center justify-center shrink-0 border border-emerald-100 dark:border-emerald-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-brandEmerald transition-colors leading-tight">Smart Ice-Breakers</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Create personalized conversation starters instantly.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 3: Live Meeting Coach -->
+                                <a href="../features.html#coach" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-500/15 text-purple-500 flex items-center justify-center shrink-0 border border-purple-100 dark:border-purple-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-purple-500 transition-colors leading-tight">Live Meeting Coach</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Get real-time coaching, objection handling, and talking points during calls.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 4: AI Meeting Summaries -->
+                                <a href="../features.html#summaries" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0 border border-amber-100 dark:border-amber-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-amber-500 transition-colors leading-tight">AI Meeting Summaries</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Automatically capture, summarize, and organize meeting outcomes.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 5: Follow-Up Automation -->
+                                <a href="../features.html#automation" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-500/15 text-sky-500 flex items-center justify-center shrink-0 border border-sky-100 dark:border-sky-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-sky-500 transition-colors leading-tight">Follow-Up Automation</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Generate personalized follow-up emails and action items in seconds.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 6: Outreach Generator -->
+                                <a href="../features.html#outreach" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-500/15 text-blue-500 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-blue-500 transition-colors leading-tight">Outreach Generator</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Create highly personalized outbound messages at scale.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 7: Deal Risk Predictor -->
+                                <a href="../features.html#risk" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-rose-50 dark:bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0 border border-rose-100 dark:border-rose-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-rose-500 transition-colors leading-tight">Deal Risk Predictor</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Identify at-risk deals before they impact pipeline performance.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 8: Relationship Intelligence -->
+                                <a href="../features.html#intelligence" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-violet-50 dark:bg-violet-500/15 text-violet-500 flex items-center justify-center shrink-0 border border-violet-100 dark:border-violet-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-violet-500 transition-colors leading-tight">Relationship Intelligence</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Map stakeholder relationships and influence across accounts.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 9: Pipeline Analytics -->
+                                <a href="../features.html#analytics" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-teal-50 dark:bg-teal-500/15 text-teal-500 flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-teal-500 transition-colors leading-tight">Pipeline Analytics</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Track pipeline health, conversion trends, and revenue performance.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 10: Revenue Intelligence -->
+                                <a href="../features.html#revenue" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-orange-50 dark:bg-orange-500/15 text-orange-500 flex items-center justify-center shrink-0 border border-orange-100 dark:border-orange-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-orange-500 transition-colors leading-tight">Revenue Intelligence</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Forecast revenue and uncover next-best actions using AI.</p>
+                                    </div>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Solutions w/ Mega-Dropdown -->
+                    <div class="relative h-full flex items-center">
+                        <button @click="activeDropdown = activeDropdown === 'solutions' ? null : 'solutions'"
+                                @mouseenter="activeDropdown = 'solutions'"
+                                class="px-4 py-2 flex items-center gap-1.5 text-sm font-semibold rounded-md outline-none transition-colors duration-200"
+                                :class="activeDropdown === 'solutions' ? 'text-slate-900 dark:text-white bg-slate-100/50 dark:bg-white/5' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5'">
+                            Solutions
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="activeDropdown === 'solutions' ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="activeDropdown === 'solutions'" x-transition.opacity.duration.200ms x-cloak
+                             @mouseleave="activeDropdown = null"
+                             class="absolute top-full left-1/2 -translate-x-1/2 w-[500px] mt-1 p-6 bg-white dark:bg-[#121215] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                            <div class="grid grid-cols-1 gap-4">
+                                <div onclick="window.location.href='../solutions/account-executives.html'" class="cursor-pointer group flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-slate-700 dark:text-zinc-300">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brandIndigo transition-colors">For Account Executives</h4>
+                                        <p class="text-xs text-slate-500 dark:text-zinc-400 font-medium">Close deals faster with automated prep and follow-up.</p>
+                                    </div>
+                                </div>
+                                <div onclick="window.location.href='../solutions/sales-leaders.html'" class="cursor-pointer group flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-slate-700 dark:text-zinc-300">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brandIndigo transition-colors">For Sales Leaders</h4>
+                                        <p class="text-xs text-slate-500 dark:text-zinc-400 font-medium">Scale winning behaviors and gain pipeline visibility.</p>
+                                    </div>
+                                </div>
+                                <div onclick="window.location.href='../solutions/revenue-operations.html'" class="cursor-pointer group flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-slate-700 dark:text-zinc-300">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brandIndigo transition-colors">For Revenue Operations</h4>
+                                        <p class="text-xs text-slate-500 dark:text-zinc-400 font-medium">Ensure 100% CRM hygiene without nagging reps.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="../pricing.html" class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5 rounded-md transition-colors duration-200">Pricing</a>
+                    <a href="../resources.html" class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5 rounded-md transition-colors duration-200">Resources</a>
+                    <a href="../contact.html" class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5 rounded-md transition-colors duration-200">Contact</a>
+                </nav>
+
+                <!-- Right: Action Control Cluster -->
+                <div class="hidden lg:flex items-center gap-3 relative z-50">
+                    <!-- Theme Toggle -->
+                    <button @click="darkMode = !darkMode" 
+                            class="p-2 rounded-full text-slate-500 dark:text-zinc-400 hover:bg-slate-200/50 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo" 
+                            aria-label="Toggle Theme">
+                        <svg x-show="!darkMode" x-cloak class="w-5 h-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <svg x-show="darkMode" x-cloak class="w-5 h-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </button>
+                    
+                    <div class="w-px h-5 bg-slate-300 dark:bg-white/10 mx-1"></div>
+                    
+                    <template x-if="!$store.auth.isLoggedIn">
+                        <div class="flex items-center gap-3">
+                            <a href="../auth.html#login" class="px-4 py-2 text-sm font-bold text-slate-700 dark:text-zinc-200 bg-slate-100/50 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-full transition-all">Log In</a>
+                            <a href="../auth.html#signup" class="relative inline-flex items-center justify-center px-6 py-2 text-sm font-bold text-white bg-gradient-to-b from-brandIndigo to-brandViolet rounded-full shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.5)] hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
+                                Sign Up
+                            </a>
+                        </div>
+                    </template>
+
+                    <template x-if="$store.auth.isLoggedIn">
+                        <div class="relative" x-data="{ profileOpen: false }" @click.away="profileOpen = false">
+                            <button @click="profileOpen = !profileOpen" class="flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-full pr-2">
+                                <div class="text-right hidden xl:block">
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white leading-tight" x-text="$store.auth.user?.name || 'Loading...'"></p>
+                                    <p class="text-[10px] font-semibold text-brandIndigo dark:text-indigo-400 uppercase tracking-wider">Pro Tier</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-full border border-slate-200 dark:border-darkBorder overflow-hidden bg-slate-100 dark:bg-darkCard">
+                                    <img :src="../'https://ui-avatars.com/api/?name=' + encodeURIComponent($store.auth.user?.name || 'Loading...') + '&background=4f46e5&color=fff&bold=true'" :alt="userName" class="w-full h-full object-cover" />
+                                </div>
+                            </button>
+                            <div x-show="profileOpen" x-transition.opacity.duration.200ms x-cloak class="absolute top-full right-0 mt-3 w-56 bg-white dark:bg-[#121215] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl py-2 overflow-hidden z-50">
+                                <a href="../dashboard.html" class="block px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                    Dashboard Workspace
+                                </a>
+                                <a href="../settings.html" class="block px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                    Account Settings
+                                </a>
+                                <div class="h-px bg-slate-100 dark:bg-white/10 my-1"></div>
+                                <button @click="isLoggedIn = false; profileOpen = false" class="w-full text-left px-4 py-2.5 text-sm font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-white/5 transition-colors outline-none">
+                                    Log Out
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Mobile & Tablet Framework (<1024px) -->
+                <div class="flex lg:hidden items-center gap-4 relative z-50">
+                    <button @click="darkMode = !darkMode" class="p-2 text-slate-500 dark:text-zinc-400">
+                        <svg x-show="!darkMode" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <svg x-show="darkMode" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </button>
+                    
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 -mr-2 text-slate-900 dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-md z-50 relative">
+                        <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        <svg x-show="mobileMenuOpen" x-cloak class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide-Out Utility Navigation Drawer (Mobile) -->
+        <div x-show="mobileMenuOpen" x-cloak
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-[-10px]"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 translate-y-[-10px]"
+             class="lg:hidden absolute top-full left-0 w-full bg-white dark:bg-[#09090b] border-t border-slate-200 dark:border-white/10 shadow-2xl z-40">
+            <div class="flex flex-col p-6 space-y-4">
+                <div x-data="{ openAccord: null }" class="flex flex-col divide-y divide-slate-100 dark:divide-white/5 border-y border-slate-100 dark:border-white/5">
+                    <div class="py-4">
+                        <button @click="openAccord = openAccord === 'features' ? null : 'features'" class="w-full flex justify-between items-center text-left outline-none">
+                            <span class="text-lg font-bold text-slate-900 dark:text-white">Features</span>
+                            <svg class="w-5 h-5 text-slate-500 transition-transform duration-200" :class="openAccord === 'features' ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="openAccord === 'features'" x-collapse x-cloak class="pt-4 pb-2 space-y-3">
+                            <a href="../features.html#briefs" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Pre-Meeting Briefs</a>
+                            <a href="../features.html#icebreakers" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Smart Ice-Breakers</a>
+                            <a href="../features.html#coach" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Live Meeting Coach</a>
+                            <a href="../features.html#summaries" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">AI Meeting Summaries</a>
+                            <a href="../features.html#automation" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Follow-Up Automation</a>
+                            <a href="../features.html#outreach" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Outreach Generator</a>
+                            <a href="../features.html#risk" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Deal Risk Predictor</a>
+                            <a href="../features.html#intelligence" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Relationship Intelligence</a>
+                            <a href="../features.html#analytics" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Pipeline Analytics</a>
+                            <a href="../features.html#revenue" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Revenue Intelligence</a>
+                        </div>
+                    </div>
+                    <div class="py-4">
+                        <div class="w-full flex justify-between items-center text-left outline-none">
+                            <a href="../solutions.html" class="text-lg font-bold text-slate-900 dark:text-white flex-1">Solutions</a>
+                            <button @click="openAccord = openAccord === 'solutions' ? null : 'solutions'" class="p-2 -mr-2">
+                                <svg class="w-5 h-5 text-slate-500 transition-transform duration-200" :class="openAccord === 'solutions' ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                        </div>
+                        <div x-show="openAccord === 'solutions'" x-collapse x-cloak class="pt-4 pb-2 space-y-4">
+                            <div onclick="window.location.href='../solutions/account-executives.html'" class="cursor-pointer block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-slate-200 dark:border-white/10">For Account Executives</div>
+                            <div onclick="window.location.href='../solutions/sales-leaders.html'" class="cursor-pointer block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-slate-200 dark:border-white/10">For Sales Leaders</div>
+                            <div onclick="window.location.href='../solutions/revenue-operations.html'" class="cursor-pointer block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-slate-200 dark:border-white/10">For Revenue Operations</div>
+                        </div>
+                    </div>
+                    <a href="../pricing.html" class="py-4 text-lg font-bold text-slate-900 dark:text-white block">Pricing</a>
+                    <a href="../resources.html" class="py-4 text-lg font-bold text-slate-900 dark:text-white block">Resources</a>
+                    <a href="../contact.html" class="py-4 text-lg font-bold text-slate-900 dark:text-white block">Contact</a>
+                </div>
+                <div class="pt-6 mt-auto">
+                    <template x-if="!$store.auth.isLoggedIn">
+                        <div class="space-y-3">
+                            <a href="../auth.html#login" class="w-full py-3.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white text-center font-bold text-lg block hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Log In</a>
+                            <a href="../auth.html#signup" class="w-full py-3.5 rounded-full bg-gradient-to-b from-brandIndigo to-brandViolet text-white text-center font-bold text-lg block shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-transform">Sign Up</a>
+                        </div>
+                    </template>
+                    <template x-if="$store.auth.isLoggedIn">
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4 mb-6 border-b border-slate-100 dark:border-white/5 pb-6">
+                                <div class="w-12 h-12 rounded-full border border-slate-200 dark:border-darkBorder overflow-hidden bg-slate-100 dark:bg-darkCard">
+                                    <img :src="../'https://ui-avatars.com/api/?name=' + encodeURIComponent($store.auth.user?.name || 'Loading...') + '&background=4f46e5&color=fff&bold=true'" :alt="userName" class="w-full h-full object-cover" />
+                                </div>
+                                <div>
+                                    <p class="text-base font-bold text-slate-900 dark:text-white leading-tight" x-text="$store.auth.user?.name || 'Loading...'"></p>
+                                    <p class="text-xs font-semibold text-brandIndigo dark:text-indigo-400 uppercase tracking-wider">Pro Tier</p>
+                                </div>
+                            </div>
+                            <a href="../dashboard.html" class="block text-lg font-bold text-slate-900 dark:text-white">Dashboard Workspace</a>
+                            <a href="../settings.html" class="block text-lg font-bold text-slate-900 dark:text-white">Account Settings</a>
+                            <button @click="isLoggedIn = false" class="block w-full text-left text-lg font-bold text-rose-500 mt-4 outline-none">Log Out</button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Section 1: Cinematic AE Hero Canvas -->
+    <section class="pt-40 pb-24 relative overflow-hidden flex items-center justify-center min-h-[90vh]">
+        <div class="absolute inset-0 z-0">
+            <div :class="darkMode ? 'grid-bg' : 'light-grid-bg'" class="absolute inset-0 opacity-40"></div>
+            <div
+                class="absolute top-1/4 right-1/4 w-[600px] h-[600px] bg-brandIndigo/20 dark:bg-brandIndigo/10 rounded-full blur-[140px] pointer-events-none">
+            </div>
+            <div
+                class="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/20 dark:bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none">
+            </div>
+            <div class="absolute inset-0 bg-slate-50/80 dark:bg-darkBg/80 backdrop-blur-[2px]"></div>
+        </div>
+        <div
+            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <!-- Left: Typography & CTAs -->
+            <div class="text-left">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brandIndigo/20 bg-brandIndigo/5 dark:bg-brandIndigo/10 mb-8 backdrop-blur-md">
+                    <span class="w-2 h-2 rounded-full bg-brandIndigo animate-pulse"></span>
+                    <span class="text-xs font-bold uppercase tracking-wider text-brandIndigo dark:text-indigo-400">For
+                        Account Executives</span>
+                </div>
+                <h1
+                    class="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-[1.1]">
+                    Close Deals Faster With <br />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brandIndigo to-emerald-500">Meeting
+                        Intelligence</span>
+                </h1>
+                <p
+                    class="text-lg md:text-xl text-slate-600 dark:text-zinc-400 max-w-xl mb-10 font-medium leading-relaxed">
+                    Spend less time researching accounts and logging CRM data, and more time selling. Sales Saathi sits
+                    with you on every call to surface live battlecards and automate follow-ups.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <a href="../auth.html"
+                        class="w-full sm:w-auto px-8 py-4 text-base font-bold rounded-xl bg-brandIndigo text-white hover:bg-indigo-500 transition-all shadow-[0_0_30px_rgba(79,70,229,0.3)] hover:shadow-[0_0_40px_rgba(79,70,229,0.5)] transform hover:-translate-y-0.5 text-center">Start
+                        Free Trial</a>
+                    <a href="../auth.html"
+                        class="w-full sm:w-auto px-8 py-4 text-base font-bold rounded-xl border border-slate-300 dark:border-darkBorder bg-white/50 dark:bg-[#121215]/50 backdrop-blur-md text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all shadow-sm text-center">Book
+                        a Demo</a>
+                </div>
+                <div class="mt-8 flex items-center gap-4 text-sm font-semibold text-slate-500 dark:text-zinc-500">
+                    <div class="flex -space-x-2">
+                        <img class="w-8 h-8 rounded-full border-2 border-slate-50 dark:border-darkBg"
+                            src="https://i.pravatar.cc/100?img=11" alt="Avatar">
+                        <img class="w-8 h-8 rounded-full border-2 border-slate-50 dark:border-darkBg"
+                            src="https://i.pravatar.cc/100?img=12" alt="Avatar">
+                        <img class="w-8 h-8 rounded-full border-2 border-slate-50 dark:border-darkBg"
+                            src="https://i.pravatar.cc/100?img=13" alt="Avatar">
+                    </div>
+                    <p>Trusted by 4,500+ Top Performing AEs</p>
+                </div>
+            </div>
+
+            <!-- Right: Interactive Workspace Mockup -->
+            <div
+                class="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 group bg-slate-100 dark:bg-zinc-900">
+                <div class="absolute inset-0 bg-cover bg-center opacity-40 transition-transform duration-700 group-hover:scale-105"
+                    style="background-image: url('https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');">
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent"></div>
+
+                <!-- Live AI Panel Mockup -->
+                <div
+                    class="absolute bottom-6 right-6 left-6 md:left-auto md:w-80 bg-white/95 dark:bg-darkCard/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-2xl transform translate-y-2 group-hover:translate-y-0 transition-all duration-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Live
+                                Coach Active</span>
+                        </div>
+                        <span class="text-xs font-mono text-slate-500 dark:text-zinc-400">14:02</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div
+                            class="bg-indigo-50 dark:bg-brandIndigo/10 p-3 rounded-lg border border-indigo-100 dark:border-brandIndigo/20">
+                            <p class="text-[10px] font-bold text-brandIndigo uppercase tracking-wider mb-1">Competitor
+                                Mentioned</p>
+                            <p class="text-sm font-semibold text-slate-900 dark:text-white">Prospect asked about Gong.
+                            </p>
+                            <p class="text-xs text-slate-600 dark:text-zinc-400 mt-2 line-clamp-2">"We integrate faster
+                                with less overhead. Highlight our native CRM writeback capability which they lack
+                                natively."</p>
+                        </div>
+                        <div
+                            class="bg-slate-50 dark:bg-white/5 p-3 rounded-lg border border-slate-100 dark:border-white/5 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                </svg>
+                                <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300">Talk Ratio</span>
+                            </div>
+                            <span class="text-xs font-bold text-emerald-500">42% You / 58% Them</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Friction Identification Block (The AE Dilemma) -->
+    <section class="py-24 bg-white dark:bg-darkCard border-y border-lightBorder dark:border-darkBorder relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-4">The Pipeline
+                    Blockades</h2>
+                <p class="text-lg text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto">Modern Account Executives are
+                    drowning in administrative work. We quantify exactly where your time goes.</p>
+            </div>
+
+            <!-- 2x2 Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                <!-- Pain 1 -->
+                <div
+                    class="p-8 rounded-3xl border border-lightBorder dark:border-darkBorder bg-slate-50 dark:bg-zinc-900/30 flex gap-6 group hover:border-rose-500 transition-colors">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg></div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3
+                                class="text-xl font-bold text-slate-900 dark:text-white group-hover:text-rose-500 transition-colors">
+                                Manual Research Drain</h3>
+                            <span
+                                class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400">30%
+                                Loss</span>
+                        </div>
+                        <p class="text-slate-600 dark:text-zinc-400 text-sm leading-relaxed mb-4">Scouring LinkedIn,
+                            reading 10-Ks, and checking recent news for 30 minutes before every single discovery call
+                            just to find one talking point.</p>
+                    </div>
+                </div>
+                <!-- Pain 2 -->
+                <div
+                    class="p-8 rounded-3xl border border-lightBorder dark:border-darkBorder bg-slate-50 dark:bg-zinc-900/30 flex gap-6 group hover:border-amber-500 transition-colors">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg></div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3
+                                class="text-xl font-bold text-slate-900 dark:text-white group-hover:text-amber-500 transition-colors">
+                                Data Entry Paralysis</h3>
+                            <span
+                                class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400">6
+                                Hrs/Wk</span>
+                        </div>
+                        <p class="text-slate-600 dark:text-zinc-400 text-sm leading-relaxed mb-4">Fridays spent trying
+                            to remember what was discussed on Tuesday to update MEDDIC fields in Salesforce so
+                            management stops nagging.</p>
+                    </div>
+                </div>
+                <!-- Pain 3 -->
+                <div
+                    class="p-8 rounded-3xl border border-lightBorder dark:border-darkBorder bg-slate-50 dark:bg-zinc-900/30 flex gap-6 group hover:border-purple-500 transition-colors">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg></div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3
+                                class="text-xl font-bold text-slate-900 dark:text-white group-hover:text-purple-500 transition-colors">
+                                Follow-Up Leakage</h3>
+                            <span
+                                class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400">48h
+                                Delay</span>
+                        </div>
+                        <p class="text-slate-600 dark:text-zinc-400 text-sm leading-relaxed mb-4">Momentum dies when it
+                            takes two days to write a comprehensive follow-up email outlining the next steps and sending
+                            the requested collateral.</p>
+                    </div>
+                </div>
+                <!-- Pain 4 -->
+                <div
+                    class="p-8 rounded-3xl border border-lightBorder dark:border-darkBorder bg-slate-50 dark:bg-zinc-900/30 flex gap-6 group hover:border-blue-500 transition-colors">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                        </svg></div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <h3
+                                class="text-xl font-bold text-slate-900 dark:text-white group-hover:text-blue-500 transition-colors">
+                                Blind Spot Objections</h3>
+                            <span
+                                class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400">Lost
+                                Deals</span>
+                        </div>
+                        <p class="text-slate-600 dark:text-zinc-400 text-sm leading-relaxed mb-4">Stumbling on live
+                            calls when a prospect mentions an obscure competitor feature or pricing objection that you
+                            aren't immediately prepared to counter.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Strategic Solution Matrix -->
+    <section class="py-24 bg-slate-50 dark:bg-darkBg relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-4">The Platform Arsenal
+                </h2>
+                <p class="text-lg text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto">Five core transactional pillars
+                    that completely replace the manual administrative workflow of an Account Executive.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <!-- Pillar 1 -->
+                <div
+                    class="md:col-span-8 bg-white dark:bg-darkCard rounded-3xl p-8 border border-lightBorder dark:border-darkBorder shadow-sm relative overflow-hidden group">
+                    <div
+                        class="absolute top-0 right-0 w-64 h-64 bg-brandIndigo/5 rounded-bl-full pointer-events-none transition-transform group-hover:scale-110">
+                    </div>
+                    <div
+                        class="w-12 h-12 bg-indigo-50 dark:bg-brandIndigo/10 text-brandIndigo rounded-xl flex items-center justify-center mb-6 relative z-10">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg></div>
+                    <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-3 relative z-10">AI Pre-Meeting
+                        Briefs</h3>
+                    <p class="text-slate-600 dark:text-zinc-400 mb-6 max-w-md relative z-10">Receive a complete dossier
+                        in your inbox 30 minutes before every call. It synthesizes CRM history, recent news, 10-K risk
+                        factors, and social media activity.</p>
+                    <a href="../auth.html"
+                        class="inline-flex items-center gap-2 text-sm font-bold text-brandIndigo hover:text-indigo-600 transition-colors relative z-10">See
+                        an example brief <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg></a>
+                </div>
+                <!-- Pillar 2 -->
+                <div
+                    class="md:col-span-4 bg-white dark:bg-darkCard rounded-3xl p-8 border border-lightBorder dark:border-darkBorder shadow-sm">
+                    <div
+                        class="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg></div>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Smart Ice-Breakers</h3>
+                    <p class="text-slate-600 dark:text-zinc-400 text-sm">Automatically generated conversational hooks
+                        that go beyond "how's the weather" based on deep profile parsing.</p>
+                </div>
+                <!-- Pillar 3 -->
+                <div
+                    class="md:col-span-4 bg-white dark:bg-darkCard rounded-3xl p-8 border border-lightBorder dark:border-darkBorder shadow-sm">
+                    <div
+                        class="w-12 h-12 bg-amber-50 dark:bg-amber-500/10 text-amber-500 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                        </svg></div>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Live In-Call Coaching</h3>
+                    <p class="text-slate-600 dark:text-zinc-400 text-sm">A real-time side panel that listens to the
+                        conversation, surfaces battlecards when competitors are mentioned, and monitors talk ratios.</p>
+                </div>
+                <!-- Pillar 4 & 5 -->
+                <div
+                    class="md:col-span-8 bg-white dark:bg-darkCard rounded-3xl p-8 border border-lightBorder dark:border-darkBorder shadow-sm relative overflow-hidden group">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-transparent to-slate-50 dark:to-white/5 pointer-events-none">
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-8 relative z-10">
+                        <div class="flex-1">
+                            <div
+                                class="w-12 h-12 bg-purple-50 dark:bg-purple-500/10 text-purple-500 rounded-xl flex items-center justify-center mb-6">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+                                </svg></div>
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Instant AI Summaries</h3>
+                            <p class="text-slate-600 dark:text-zinc-400 text-sm">The second you hang up, the transcript
+                                is parsed and mapped directly into your CRM's MEDDIC, BANT, or custom fields.</p>
+                        </div>
+                        <div class="w-px bg-slate-200 dark:bg-darkBorder hidden md:block"></div>
+                        <div class="flex-1">
+                            <div
+                                class="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center mb-6">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg></div>
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">Follow-Up Automation</h3>
+                            <p class="text-slate-600 dark:text-zinc-400 text-sm">A drafted email detailing the exact
+                                next steps, objections handled, and relevant PDF attachments is ready to send instantly.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Synchronous Linear Workflow Timeline -->
+    <section class="py-24 bg-white dark:bg-darkCard border-y border-lightBorder dark:border-darkBorder relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-4">The Zero-Friction
+                    Lifecycle</h2>
+                <p class="text-lg text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto">Watch how data flows autonomously
+                    from the moment a meeting is booked.</p>
+            </div>
+
+            <div
+                class="bg-slate-50 dark:bg-zinc-900/30 rounded-3xl p-8 lg:p-12 border border-lightBorder dark:border-darkBorder shadow-inner">
+                <!-- Step Navigation -->
+                <div class="flex overflow-x-auto hide-scrollbar border-b border-slate-200 dark:border-darkBorder mb-8">
+                    <button @click="activeTimelineStep = 1"
+                        class="flex-1 min-w-[150px] pb-4 text-center font-bold text-sm uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap outline-none"
+                        :class="activeTimelineStep === 1 ? 'border-brandIndigo text-brandIndigo' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'">1.
+                        Scheduled</button>
+                    <button @click="activeTimelineStep = 2"
+                        class="flex-1 min-w-[150px] pb-4 text-center font-bold text-sm uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap outline-none"
+                        :class="activeTimelineStep === 2 ? 'border-brandIndigo text-brandIndigo' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'">2.
+                        Mining</button>
+                    <button @click="activeTimelineStep = 3"
+                        class="flex-1 min-w-[150px] pb-4 text-center font-bold text-sm uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap outline-none"
+                        :class="activeTimelineStep === 3 ? 'border-brandIndigo text-brandIndigo' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'">3.
+                        Brief</button>
+                    <button @click="activeTimelineStep = 4"
+                        class="flex-1 min-w-[150px] pb-4 text-center font-bold text-sm uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap outline-none"
+                        :class="activeTimelineStep === 4 ? 'border-brandIndigo text-brandIndigo' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'">4.
+                        Live Coaching</button>
+                    <button @click="activeTimelineStep = 5"
+                        class="flex-1 min-w-[150px] pb-4 text-center font-bold text-sm uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap outline-none"
+                        :class="activeTimelineStep === 5 ? 'border-brandIndigo text-brandIndigo' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'">5.
+                        Drafting</button>
+                    <button @click="activeTimelineStep = 6"
+                        class="flex-1 min-w-[150px] pb-4 text-center font-bold text-sm uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap outline-none"
+                        :class="activeTimelineStep === 6 ? 'border-brandIndigo text-brandIndigo' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'">6.
+                        Sync</button>
+                </div>
+
+                <!-- Content Area -->
+                <div class="min-h-[250px] flex items-center justify-center">
+                    <div x-show="activeTimelineStep === 1" x-transition.opacity.duration.300ms
+                        class="text-center max-w-2xl">
+                        <div
+                            class="w-16 h-16 mx-auto bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center text-slate-600 dark:text-zinc-400 mb-6">
+                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg></div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Meeting Scheduled via
+                            Calendly/ChiliPiper</h3>
+                        <p class="text-lg text-slate-600 dark:text-zinc-400 leading-relaxed">The moment a prospect hits
+                            your calendar, the workflow triggers. Webhooks securely transmit the attendee email and
+                            corporate domain into our encrypted AI processing queue.</p>
+                    </div>
+                    <div x-show="activeTimelineStep === 2" x-transition.opacity.duration.300ms x-cloak
+                        class="text-center max-w-2xl">
+                        <div
+                            class="w-16 h-16 mx-auto bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center text-slate-600 dark:text-zinc-400 mb-6">
+                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg></div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Autonomous Research Mining
+                        </h3>
+                        <p class="text-lg text-slate-600 dark:text-zinc-400 leading-relaxed">Our LLM agents autonomously
+                            crawl public 10-K filings, recent press releases, LinkedIn job postings, and historical CRM
+                            data related to the domain to map their current tech stack and pain points.</p>
+                    </div>
+                    <div x-show="activeTimelineStep === 3" x-transition.opacity.duration.300ms x-cloak
+                        class="text-center max-w-2xl">
+                        <div
+                            class="w-16 h-16 mx-auto bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center text-slate-600 dark:text-zinc-400 mb-6">
+                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg></div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Delivery of the Brief</h3>
+                        <p class="text-lg text-slate-600 dark:text-zinc-400 leading-relaxed">30 minutes prior to the
+                            meeting, you receive a Slack notification and email containing a highly structured 1-page
+                            dossier. It highlights exactly what to ask and what ice-breakers to use.</p>
+                    </div>
+                    <div x-show="activeTimelineStep === 4" x-transition.opacity.duration.300ms x-cloak
+                        class="text-center max-w-2xl">
+                        <div
+                            class="w-16 h-16 mx-auto bg-brandIndigo/10 rounded-full flex items-center justify-center text-brandIndigo mb-6">
+                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg></div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">In-Call Dynamic Coaching</h3>
+                        <p class="text-lg text-slate-600 dark:text-zinc-400 leading-relaxed">During the call, a discreet
+                            desktop widget provides real-time transcription analysis. If the prospect says "we currently
+                            use [Competitor]", a battlecard instantly appears to guide your response.</p>
+                    </div>
+                    <div x-show="activeTimelineStep === 5" x-transition.opacity.duration.300ms x-cloak
+                        class="text-center max-w-2xl">
+                        <div
+                            class="w-16 h-16 mx-auto bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center text-slate-600 dark:text-zinc-400 mb-6">
+                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg></div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Automated Follow-Up Drafting
+                        </h3>
+                        <p class="text-lg text-slate-600 dark:text-zinc-400 leading-relaxed">Five seconds after the
+                            meeting ends, an email draft is generated in your Gmail/Outlook outbox summarizing the
+                            agreed-upon next steps and attaching relevant case studies discussed.</p>
+                    </div>
+                    <div x-show="activeTimelineStep === 6" x-transition.opacity.duration.300ms x-cloak
+                        class="text-center max-w-2xl">
+                        <div
+                            class="w-16 h-16 mx-auto bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500 mb-6">
+                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg></div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Zero-Click CRM Sync</h3>
+                        <p class="text-lg text-slate-600 dark:text-zinc-400 leading-relaxed">Simultaneously, the call
+                            transcript is parsed against your custom MEDDIC fields and pushed directly into
+                            Salesforce/HubSpot, achieving 100% data hygiene without manual data entry.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Quantified GTM Telemetry & Benefits -->
+    <section class="py-24 bg-slate-50 dark:bg-darkBg relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-4">Telemetry of Top
+                    Performers</h2>
+                <p class="text-lg text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto">Metrics aggregated from over
+                    2,500 active quota-carrying Account Executives using our architecture.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1 -->
+                <div
+                    class="bg-white dark:bg-darkCard p-6 rounded-3xl border border-lightBorder dark:border-darkBorder shadow-sm flex flex-col justify-between">
+                    <div>
+                        <p class="text-sm font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-2">
+                            Prep Overhead</p>
+                        <p class="text-5xl font-extrabold text-slate-900 dark:text-white mb-1">-70%</p>
+                        <p class="text-xs font-medium text-emerald-500">Reduction in research latency</p>
+                    </div>
+                    <div class="mt-6 h-12 w-full">
+                        <svg viewBox="0 0 100 30" class="w-full h-full preserve-aspect-ratio-none">
+                            <polyline points="0,5 20,10 40,8 60,15 80,25 100,28" fill="none" stroke="currentColor"
+                                stroke-width="2" class="text-emerald-500" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div
+                    class="bg-white dark:bg-darkCard p-6 rounded-3xl border border-lightBorder dark:border-darkBorder shadow-sm flex flex-col justify-between">
+                    <div>
+                        <p class="text-sm font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-2">
+                            Execution Context</p>
+                        <p class="text-5xl font-extrabold text-slate-900 dark:text-white mb-1">100%</p>
+                        <p class="text-xs font-medium text-brandIndigo">Visibility into historic touchpoints</p>
+                    </div>
+                    <div class="mt-6 h-12 w-full">
+                        <svg viewBox="0 0 100 30" class="w-full h-full preserve-aspect-ratio-none">
+                            <polyline points="0,25 20,20 40,15 60,10 80,5 100,2" fill="none" stroke="currentColor"
+                                stroke-width="2" class="text-brandIndigo" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div
+                    class="bg-white dark:bg-darkCard p-6 rounded-3xl border border-lightBorder dark:border-darkBorder shadow-sm flex flex-col justify-between">
+                    <div>
+                        <p class="text-sm font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-2">
+                            Follow-Up Latency</p>
+                        <p class="text-5xl font-extrabold text-slate-900 dark:text-white mb-1">
+                            &lt;5m</p>
+                                <p class="text-xs font-medium text-amber-500">Average time to dispatch draft</p>
+                    </div>
+                    <div class="mt-6 h-12 w-full">
+                        <svg viewBox="0 0 100 30" class="w-full h-full preserve-aspect-ratio-none">
+                            <polyline points="0,5 20,25 40,22 60,28 80,25 100,29" fill="none" stroke="currentColor"
+                                stroke-width="2" class="text-amber-500" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                </div>
+                <!-- Card 4 -->
+                <div
+                    class="bg-white dark:bg-darkCard p-6 rounded-3xl border border-lightBorder dark:border-darkBorder shadow-sm flex flex-col justify-between">
+                    <div>
+                        <p class="text-sm font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-2">
+                            Win Rate Coefficient</p>
+                        <p class="text-5xl font-extrabold text-slate-900 dark:text-white mb-1">+40%</p>
+                        <p class="text-xs font-medium text-rose-500">Lift across competitive deals</p>
+                    </div>
+                    <div class="mt-6 h-12 w-full">
+                        <svg viewBox="0 0 100 30" class="w-full h-full preserve-aspect-ratio-none">
+                            <polyline points="0,28 20,25 40,18 60,15 80,8 100,2" fill="none" stroke="currentColor"
+                                stroke-width="2" class="text-rose-500" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 6: Verified Closed-Won Customer ROI Profile -->
+    <section class="py-24 bg-white dark:bg-darkCard border-y border-lightBorder dark:border-darkBorder relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div
+                class="bg-slate-50 dark:bg-zinc-900/50 rounded-[2.5rem] border border-lightBorder dark:border-darkBorder p-8 md:p-16 relative overflow-hidden">
+                <!-- Background Decoration -->
+                <div
+                    class="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-brandIndigo/5 to-transparent rounded-full blur-3xl pointer-events-none translate-x-1/2 -translate-y-1/2">
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 relative z-10">
+                    <div>
+                        <div
+                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 dark:border-darkBorder bg-white dark:bg-darkCard mb-6 shadow-sm">
+                            <span
+                                class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-zinc-400">Enterprise
+                                Case Study</span>
+                        </div>
+                        <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-6">How Sentinel
+                            Tech Scaled from $10M to $25M ARR</h2>
+                        <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed">"Before Sales Saathi,
+                            our AEs spent 40% of their week doing data entry and pre-call research. The platform gave us
+                            back 15 hours per rep per week, directly translating to a massive pipeline expansion without
+                            hiring additional headcount."</p>
+
+                        <div class="flex items-center gap-4">
+                            <img src="https://i.pravatar.cc/100?img=33" alt="Sarah Jenkins"
+                                class="w-14 h-14 rounded-full border-2 border-slate-200 dark:border-darkBorder">
+                            <div>
+                                <p class="text-base font-bold text-slate-900 dark:text-white">Sarah Jenkins</p>
+                                <p class="text-sm font-medium text-slate-500 dark:text-zinc-400">VP of Global Sales,
+                                    Sentinel Tech</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div
+                            class="bg-white dark:bg-darkCard p-6 rounded-2xl border border-lightBorder dark:border-darkBorder shadow-sm">
+                            <p
+                                class="text-sm font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-1">
+                                Team Size</p>
+                            <p class="text-2xl font-extrabold text-slate-900 dark:text-white">45 AEs</p>
+                        </div>
+                        <div
+                            class="bg-white dark:bg-darkCard p-6 rounded-2xl border border-lightBorder dark:border-darkBorder shadow-sm">
+                            <p
+                                class="text-sm font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-1">
+                                Time to Value</p>
+                            <p class="text-2xl font-extrabold text-slate-900 dark:text-white">14 Days</p>
+                        </div>
+                        <div
+                            class="bg-white dark:bg-darkCard p-6 rounded-2xl border border-brandIndigo shadow-[0_0_15px_rgba(79,70,229,0.1)] col-span-1 sm:col-span-2">
+                            <p class="text-sm font-bold text-brandIndigo uppercase tracking-widest mb-1">Investment
+                                Recovery Ratio</p>
+                            <p class="text-4xl font-extrabold text-slate-900 dark:text-white">12.5x <span
+                                    class="text-lg font-medium text-slate-500 dark:text-zinc-400">First Year ROI</span>
+                            </p>
+                        </div>
+                        <div class="col-span-1 sm:col-span-2 mt-4 flex items-center justify-between px-2">
+                            <span class="text-sm font-bold text-slate-500 dark:text-zinc-400">Tech Stack:</span>
+                            <div
+                                class="flex gap-4 text-slate-400 dark:text-zinc-600 font-bold tracking-widest uppercase text-sm">
+                                <span>Salesforce</span>
+                                <span>Outreach</span>
+                                <span>Gong</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 7: High-Impact Closing Conversion Block -->
+    <section class="py-32 relative overflow-hidden bg-slate-50 dark:bg-darkBg z-10">
+        <div
+            class="absolute inset-0 bg-gradient-to-b from-transparent to-brandIndigo/5 dark:to-brandIndigo/10 pointer-events-none">
+        </div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6">Stop
+                Doing Data Entry.<br />Start Closing.</h2>
+            <p class="text-xl text-slate-600 dark:text-zinc-400 mb-10 max-w-2xl mx-auto">Join the ranks of elite
+                quota-carriers who leverage AI to maintain absolute pipeline control.</p>
+
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
+                <a href="../auth.html"
+                    class="w-full sm:w-auto px-10 py-5 text-lg font-bold rounded-xl bg-brandIndigo text-white hover:bg-indigo-500 transition-all shadow-[0_4px_20px_rgba(79,70,229,0.4)] hover:shadow-[0_6px_25px_rgba(79,70,229,0.6)] transform hover:-translate-y-1">Start
+                    14-Day Free Trial</a>
+                <a href="../auth.html"
+                    class="w-full sm:w-auto px-10 py-5 text-lg font-bold rounded-xl border border-slate-300 dark:border-darkBorder bg-white dark:bg-[#121215] text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all shadow-sm">View
+                    Pricing</a>
+            </div>
+
+            <!-- Secondary Banner -->
+            <div
+                class="inline-flex items-center gap-3 bg-white dark:bg-darkCard px-6 py-3 rounded-full border border-lightBorder dark:border-darkBorder shadow-sm">
+                <div class="flex items-center gap-1">
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                </div>
+                <span class="text-sm font-bold text-slate-700 dark:text-zinc-300">Over 1,200+ 5-Star Reviews on
+                    G2</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 12: Directory Footer Layout -->
+    <footer class="bg-white dark:bg-[#0c0c0e] border-t border-lightBorder dark:border-darkBorder pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-8 mb-16">
+                <!-- Brand Col -->
+                <div class="col-span-2 md:col-span-2 flex flex-col">
+                    <a href="../index.html" class="flex items-center gap-2.5 mb-6">
+                        <img src="/assets/logo-Cwh9YEgE.png" alt="Sales Saathi Logo" class="h-10 w-auto object-contain" style="min-width:40px;" />
+                        <span class="font-bold text-lg tracking-tight text-slate-900 dark:text-white">Sales Saathi</span>
+                    </a>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium mb-6 max-w-sm">The world's first AI-powered sales co-pilot designed to automate research, guide live discovery, and enforce CRM hygiene.</p>
+                    <div class="flex gap-4">
+                        <a href="../index.html" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                        </a>
+                        <a href="../index.html" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        </a>
+                        <a href="../index.html" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <!-- Links 1 -->
+                <div class="col-span-1 flex flex-col gap-3">
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Product</h4>
+                    <a href="../index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Features</a>
+                    <a href="../index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Integrations</a>
+                    <a href="../index.html#pricing" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Pricing</a>
+                    <a href="../index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Changelog</a>
+                </div>
+                <!-- Links 2 -->
+                <div class="col-span-1 flex flex-col gap-3">
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Resources</h4>
+                    <a href="../index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Documentation</a>
+                    <a href="../index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Blog</a>
+                    <a href="../index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Community</a>
+                    <a href="../index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Help Center</a>
+                </div>
+                <!-- Links 3 -->
+                <div class="col-span-1 flex flex-col gap-3">
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Company</h4>
+                    <a href="../index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">About Us</a>
+                    <a href="../index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Careers</a>
+                    <a href="../index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Privacy Policy</a>
+                    <a href="../index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Terms of Service</a>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-lightBorder dark:border-darkBorder flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-xs text-slate-400 dark:text-zinc-500 font-medium">© 2026 Sales Saathi Inc. All rights reserved.</p>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-400 dark:text-zinc-500 font-medium">System Status:</span>
+                    <span class="flex items-center gap-1.5 text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-2 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-brandEmerald"></span> 100% Operational</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

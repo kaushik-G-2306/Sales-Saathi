@@ -1,0 +1,236 @@
+﻿<!DOCTYPE html>
+<html lang="en" x-data="{ darkMode: true, activeStep: 1 }" :class="{ 'dark': darkMode }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How It Works Workflow | Sales Saathi</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js CDN for State Management -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        darkBg: '#09090b',
+                        darkSurface: '#121215',
+                        darkBorder: '#18181b',
+                        lightBorder: '#e4e4e7',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .step-transition { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* Shimmer Animation for the CRM connection line */
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .animate-shimmer {
+            animation: shimmer 2s infinite linear;
+        }
+    </style>
+</head>
+<body class="bg-zinc-50 dark:bg-darkBg text-zinc-900 dark:text-zinc-100 font-sans antialiased transition-colors duration-300 min-h-screen flex flex-col items-center justify-center">
+
+    <!-- Theme Toggle Helper (For Preview) -->
+    <div class="fixed top-4 right-4 z-50">
+        <button @click="darkMode = !darkMode" class="p-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-full shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors">
+            <svg x-show="!darkMode" x-cloak class="w-5 h-5 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            <svg x-show="darkMode" x-cloak class="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+        </button>
+    </div>
+
+    <!-- MAIN COMPONENT WRAPPER -->
+    <section class="w-full py-20 lg:py-32 border-y border-lightBorder dark:border-darkBorder bg-white dark:bg-[#0c0c0e]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Header -->
+            <div class="text-center max-w-3xl mx-auto mb-20 md:mb-32">
+                <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-6">
+                    A seamless automated lifecycle loop.
+                </h2>
+                <p class="text-lg text-zinc-600 dark:text-zinc-400 font-medium">
+                    Sales Saathi operates silently in the background, transforming your raw prospect data into closed revenue across four distinct operational stages.
+                </p>
+            </div>
+
+            <!-- Workflow Container -->
+            <div class="relative">
+                
+                <!-- MOBILE RUNNERS (<1024px) -->
+                <!-- Base Vertical Line -->
+                <div class="absolute left-8 md:left-10 top-10 bottom-10 w-0.5 bg-zinc-200 dark:bg-zinc-800 lg:hidden rounded-full"></div>
+                <!-- Active Vertical Gradient Line -->
+                <div class="absolute left-8 md:left-10 top-10 w-0.5 bg-gradient-to-b from-emerald-500 to-cyan-500 lg:hidden rounded-full step-transition" 
+                     :style="'height: ' + ((activeStep - 1) * 33.33 + 16.66) + '%'"></div>
+
+                <!-- DESKTOP RUNNERS (>1024px) -->
+                <!-- Base Horizontal Line -->
+                <div class="hidden lg:block absolute top-10 left-10 right-10 h-0.5 bg-zinc-200 dark:bg-zinc-800 rounded-full"></div>
+                <!-- Active Horizontal Gradient Line -->
+                <div class="hidden lg:block absolute top-10 left-10 h-0.5 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full step-transition" 
+                     :style="'width: ' + ((activeStep - 1) * 33.33 + 16.66) + '%'"></div>
+
+                <!-- Grid Nodes -->
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-12 lg:gap-8 relative z-10">
+                    
+                    <!-- STEP 1: Connect CRM -->
+                    <div class="flex flex-row lg:flex-col gap-6 lg:gap-8 group cursor-pointer" @mouseenter="activeStep = 1" @click="activeStep = 1">
+                        <!-- Icon Node -->
+                        <div class="relative z-10 shrink-0">
+                            <div class="w-16 md:w-20 h-16 md:h-20 rounded-2xl flex items-center justify-center step-transition border border-transparent outline-none focus-visible:ring-2 focus-visible:ring-emerald-500" 
+                                 :class="activeStep >= 1 ? 'bg-emerald-500 text-white shadow-[0_0_30px_rgba(16,185,129,0.3)]' : 'bg-white dark:bg-darkSurface border-lightBorder dark:border-darkBorder text-zinc-400 group-hover:border-emerald-500/50'">
+                                <svg class="w-6 md:w-8 h-6 md:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </div>
+                        </div>
+                        <!-- Content Block -->
+                        <div class="flex flex-col gap-5 pt-1 lg:pt-0 w-full">
+                            <div>
+                                <span class="text-[11px] font-bold tracking-widest uppercase step-transition mb-2 block" 
+                                      :class="activeStep >= 1 ? 'text-emerald-500' : 'text-zinc-500'">Step 01</span>
+                                <h3 class="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white mb-2">Connect CRM</h3>
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">Instantly sync Salesforce or HubSpot via secure OAuth protocols.</p>
+                            </div>
+                            <!-- UI Skeleton Representation -->
+                            <div class="mt-auto rounded-xl border bg-white dark:bg-darkSurface p-5 step-transition overflow-hidden relative" 
+                                 :class="activeStep === 1 ? 'border-emerald-500/50 shadow-lg dark:shadow-[0_10px_30px_-10px_rgba(16,185,129,0.2)]' : 'border-lightBorder dark:border-darkBorder opacity-70 scale-95 origin-left lg:origin-top'">
+                                <div class="flex items-center justify-between relative z-10">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 shrink-0">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                                    </div>
+                                    <div class="flex-1 px-3 relative overflow-hidden">
+                                        <div class="h-px w-full bg-zinc-200 dark:bg-zinc-800"></div>
+                                        <div class="absolute top-1/2 -translate-y-1/2 left-0 h-px w-full bg-emerald-500" 
+                                             :class="activeStep === 1 ? 'animate-shimmer' : 'hidden'"></div>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: AI Researches Prospects -->
+                    <div class="flex flex-row lg:flex-col gap-6 lg:gap-8 group cursor-pointer" @mouseenter="activeStep = 2" @click="activeStep = 2">
+                        <div class="relative z-10 shrink-0">
+                            <div class="w-16 md:w-20 h-16 md:h-20 rounded-2xl flex items-center justify-center step-transition border border-transparent outline-none focus-visible:ring-2 focus-visible:ring-emerald-500" 
+                                 :class="activeStep >= 2 ? 'bg-emerald-500 text-white shadow-[0_0_30px_rgba(16,185,129,0.3)]' : 'bg-white dark:bg-darkSurface border-lightBorder dark:border-darkBorder text-zinc-400 group-hover:border-emerald-500/50'">
+                                <svg class="w-6 md:w-8 h-6 md:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-5 pt-1 lg:pt-0 w-full">
+                            <div>
+                                <span class="text-[11px] font-bold tracking-widest uppercase step-transition mb-2 block" 
+                                      :class="activeStep >= 2 ? 'text-emerald-500' : 'text-zinc-500'">Step 02</span>
+                                <h3 class="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white mb-2">Research Context</h3>
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">Dynamic context gathering via news, 10-K scraping, and LinkedIn profiling.</p>
+                            </div>
+                            <div class="mt-auto rounded-xl border bg-white dark:bg-darkSurface p-5 step-transition relative" 
+                                 :class="activeStep === 2 ? 'border-emerald-500/50 shadow-lg dark:shadow-[0_10px_30px_-10px_rgba(16,185,129,0.2)]' : 'border-lightBorder dark:border-darkBorder opacity-70 scale-95 origin-left lg:origin-top'">
+                                <div class="space-y-4 relative z-10">
+                                    <div class="h-9 w-full rounded-md border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-[#0c0c0e] flex items-center px-3 shadow-inner">
+                                        <div class="w-3.5 h-3.5 rounded-full bg-zinc-300 dark:bg-zinc-700 mr-2 shrink-0"></div>
+                                        <div class="h-2 w-1/2 bg-zinc-200 dark:bg-zinc-700 rounded" :class="activeStep === 2 ? 'w-2/3 bg-emerald-500/20 transition-all duration-700' : ''"></div>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2">
+                                        <div class="px-2.5 py-1 rounded bg-indigo-500/10 text-[10px] text-indigo-600 dark:text-indigo-400 font-bold border border-indigo-500/20 transition-colors" :class="activeStep === 2 ? 'bg-indigo-500/20' : ''">LinkedIn</div>
+                                        <div class="px-2.5 py-1 rounded bg-amber-500/10 text-[10px] text-amber-600 dark:text-amber-400 font-bold border border-amber-500/20 transition-colors" :class="activeStep === 2 ? 'bg-amber-500/20' : ''">10-K</div>
+                                        <div class="px-2.5 py-1 rounded bg-rose-500/10 text-[10px] text-rose-600 dark:text-rose-400 font-bold border border-rose-500/20 transition-colors" :class="activeStep === 2 ? 'bg-rose-500/20' : ''">News</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Attend Meeting with AI Support -->
+                    <div class="flex flex-row lg:flex-col gap-6 lg:gap-8 group cursor-pointer" @mouseenter="activeStep = 3" @click="activeStep = 3">
+                        <div class="relative z-10 shrink-0">
+                            <div class="w-16 md:w-20 h-16 md:h-20 rounded-2xl flex items-center justify-center step-transition border border-transparent outline-none focus-visible:ring-2 focus-visible:ring-emerald-500" 
+                                 :class="activeStep >= 3 ? 'bg-emerald-500 text-white shadow-[0_0_30px_rgba(16,185,129,0.3)]' : 'bg-white dark:bg-darkSurface border-lightBorder dark:border-darkBorder text-zinc-400 group-hover:border-emerald-500/50'">
+                                <svg class="w-6 md:w-8 h-6 md:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-5 pt-1 lg:pt-0 w-full">
+                            <div>
+                                <span class="text-[11px] font-bold tracking-widest uppercase step-transition mb-2 block" 
+                                      :class="activeStep >= 3 ? 'text-emerald-500' : 'text-zinc-500'">Step 03</span>
+                                <h3 class="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white mb-2">Live AI Support</h3>
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">Real-time meeting transcription mapping live objections to automated responses.</p>
+                            </div>
+                            <div class="mt-auto rounded-xl border bg-white dark:bg-darkSurface p-5 step-transition relative" 
+                                 :class="activeStep === 3 ? 'border-emerald-500/50 shadow-lg dark:shadow-[0_10px_30px_-10px_rgba(16,185,129,0.2)]' : 'border-lightBorder dark:border-darkBorder opacity-70 scale-95 origin-left lg:origin-top'">
+                                <div class="space-y-3 relative z-10">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-5 h-5 rounded-full bg-zinc-200 dark:bg-zinc-700 shrink-0"></div>
+                                        <div class="h-2 w-full bg-zinc-100 dark:bg-zinc-800 rounded"></div>
+                                    </div>
+                                    <div class="flex items-center gap-3 flex-row-reverse step-transition" :class="activeStep === 3 ? 'transform -translate-x-1' : ''">
+                                        <div class="w-5 h-5 rounded-full bg-cyan-500/20 shrink-0 border border-cyan-500/30 flex items-center justify-center"><div class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></div></div>
+                                        <div class="h-2 w-3/4 bg-cyan-50 dark:bg-cyan-900/30 rounded" :class="activeStep === 3 ? 'bg-cyan-100 dark:bg-cyan-900/50' : ''"></div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-5 h-5 rounded-full bg-zinc-200 dark:bg-zinc-700 shrink-0"></div>
+                                        <div class="h-2 w-4/6 bg-zinc-100 dark:bg-zinc-800 rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: AI Automates Follow-Ups -->
+                    <div class="flex flex-row lg:flex-col gap-6 lg:gap-8 group cursor-pointer" @mouseenter="activeStep = 4" @click="activeStep = 4">
+                        <div class="relative z-10 shrink-0">
+                            <div class="w-16 md:w-20 h-16 md:h-20 rounded-2xl flex items-center justify-center step-transition border border-transparent outline-none focus-visible:ring-2 focus-visible:ring-emerald-500" 
+                                 :class="activeStep >= 4 ? 'bg-emerald-500 text-white shadow-[0_0_30px_rgba(16,185,129,0.3)]' : 'bg-white dark:bg-darkSurface border-lightBorder dark:border-darkBorder text-zinc-400 group-hover:border-emerald-500/50'">
+                                <svg class="w-6 md:w-8 h-6 md:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-5 pt-1 lg:pt-0 w-full">
+                            <div>
+                                <span class="text-[11px] font-bold tracking-widest uppercase step-transition mb-2 block" 
+                                      :class="activeStep >= 4 ? 'text-emerald-500' : 'text-zinc-500'">Step 04</span>
+                                <h3 class="text-xl md:text-2xl font-bold text-zinc-900 dark:text-white mb-2">Automate Output</h3>
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">Generated email drafts and action-items instantly pushed back to CRM.</p>
+                            </div>
+                            <div class="mt-auto rounded-xl border bg-white dark:bg-darkSurface p-5 step-transition relative" 
+                                 :class="activeStep === 4 ? 'border-emerald-500/50 shadow-lg dark:shadow-[0_10px_30px_-10px_rgba(16,185,129,0.2)]' : 'border-lightBorder dark:border-darkBorder opacity-70 scale-95 origin-left lg:origin-top'">
+                                <div class="space-y-3 relative z-10">
+                                    <div class="flex items-center gap-3 border-b border-zinc-200 dark:border-zinc-800/80 pb-3">
+                                        <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">To:</span>
+                                        <div class="h-3 w-1/3 bg-zinc-200 dark:bg-zinc-700 rounded-sm"></div>
+                                    </div>
+                                    <div class="h-2 w-full bg-zinc-100 dark:bg-zinc-800 rounded mt-4"></div>
+                                    <div class="h-2 w-5/6 bg-zinc-100 dark:bg-zinc-800 rounded"></div>
+                                    <div class="h-2 w-2/3 bg-emerald-500/20 rounded mt-2 transition-all duration-700" :class="activeStep === 4 ? 'w-3/4 bg-emerald-500/30' : ''"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

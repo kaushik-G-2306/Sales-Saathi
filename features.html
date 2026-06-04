@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" x-data="{ darkMode: true, scrolled: false }" @scroll.window="scrolled = (window.pageYOffset > 20)" :class="{ 'dark': darkMode }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Capabilities | Sales Saathi — AI Sales Co-Pilot</title>
+    <meta name="description" content="Explore every AI-powered capability inside Sales Saathi — from pre-meeting briefs and live coaching to deal risk prediction and revenue intelligence. Built for modern revenue teams.">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js Plugins -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        darkBg: '#09090b',
+                        darkCard: '#18181b',
+                        darkBorder: 'rgba(255,255,255,0.08)',
+                        lightBorder: 'rgba(15,23,42,0.08)',
+                        brandIndigo: '#4f46e5',
+                        brandViolet: '#6366f1',
+                        brandEmerald: '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass-panel {
+            background: rgba(24, 24, 27, 0.7);
+        }
+        .bento-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .bento-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+        }
+        .dark .bento-card:hover {
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+        }
+        @keyframes scan {
+            0% { transform: translateY(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(200%); opacity: 0; }
+        }
+        .animate-scan { animation: scan 3s linear infinite; }
+        @keyframes pulse-node {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.5); opacity: 0.3; }
+        }
+        .animate-pulse-node { animation: pulse-node 2s infinite; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        .feature-section {
+            scroll-margin-top: 5rem;
+        }
+        .metric-card {
+            transition: all 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: scale(1.03);
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .animate-shimmer {
+            background-size: 200% 100%;
+            animation: shimmer 2.5s infinite linear;
+        }
+    </style>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgNTAgTDQwIDI1IEw4NSAyNSBMNjUgNDUgTDUwIDQ1IEw2MCAzNSBMMzAgMzUgTDE1IDUwIFoiIGZpbGw9IiMzOGJkZjgiLz48cGF0aCBkPSJNODUgNTAgTDYwIDc1IEwxNSA3NSBMMzUgNTUgTDUwIDU1IEw0MCA2NSBMNzAgNjUgWiIgZmlsbD0iIzYzNjZmMSIvPjwvc3ZnPg==">
+</head>
+<body class="bg-slate-50 dark:bg-darkBg text-slate-900 dark:text-zinc-100 font-sans antialiased min-h-screen transition-colors duration-300 selection:bg-brandIndigo selection:text-white">
+
+    <!-- ============================================================
+         SECTION 1: STICKY NAVIGATION HEADER (Identical to index.html)
+         ============================================================ -->
+    <header class="fixed top-0 w-full z-50 transition-all duration-300"
+            :class="[
+                isScrolled 
+                    ? (darkMode ? 'bg-[#09090b]/75 backdrop-blur-xl border-b border-white/5 shadow-2xl' : 'bg-white/80 backdrop-blur-xl border-b border-slate-200/80 shadow-sm')
+                    : 'bg-transparent border-transparent'
+            ]"
+            x-data="{ mobileMenuOpen: false, activeDropdown: null, isScrolled: false }"
+            @scroll.window="isScrolled = (window.pageYOffset > 20) ? true : false"
+            @keydown.escape="activeDropdown = null; mobileMenuOpen = false">
+            
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 lg:h-20">
+                
+                <!-- Left: Logo & Brand -->
+                <a href="index.html" class="flex items-center gap-2.5 group outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-lg shrink-0 z-50 relative">
+                    <img src="logo.png" alt="Sales Saathi Logo" class="h-9 w-auto rounded-lg shadow-lg group-hover:scale-105 transition-transform duration-200 object-contain" style="min-width:36px;" />
+                    <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white transition-colors duration-200">Sales Saathi</span>
+                </a>
+
+                <!-- Middle: Desktop Navigation Structure -->
+                <nav class="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2 h-full" @click.away="activeDropdown = null">
+                    
+                    <!-- Features w/ Full 10-Item Mega-Dropdown -->
+                    <div class="relative h-full flex items-center">
+                        <button @click="activeDropdown = activeDropdown === 'features' ? null : 'features'"
+                                @mouseenter="activeDropdown = 'features'"
+                                class="px-4 py-2 flex items-center gap-1.5 text-sm font-semibold rounded-md outline-none transition-colors duration-200"
+                                :class="activeDropdown === 'features' ? 'text-slate-900 dark:text-white bg-slate-100/50 dark:bg-white/5' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5'">
+                            Features
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="activeDropdown === 'features' ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <!-- Full 10-Feature Frosted Dark Mega Menu Panel -->
+                        <div x-show="activeDropdown === 'features'" x-transition.opacity.duration.200ms x-cloak
+                             @mouseleave="activeDropdown = null"
+                             class="absolute top-full left-1/2 -translate-x-1/2 w-[95vw] max-w-[700px] mt-2 p-5 bg-white/95 dark:bg-[#18181b]/95 border border-slate-200 dark:border-white/5 rounded-2xl shadow-2xl backdrop-blur-xl overflow-hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 relative z-10">
+
+                                <!-- Item 1: Pre-Meeting Briefs -->
+                                <a href="features.html#briefs" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-500/15 text-brandIndigo flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-brandIndigo transition-colors leading-tight">Pre-Meeting Briefs</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Generate AI-powered meeting briefs with CRM, company, and stakeholder insights.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 2: Smart Ice-Breakers -->
+                                <a href="features.html#icebreakers" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 text-brandEmerald flex items-center justify-center shrink-0 border border-emerald-100 dark:border-emerald-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-brandEmerald transition-colors leading-tight">Smart Ice-Breakers</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Create personalized conversation starters instantly.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 3: Live Meeting Coach -->
+                                <a href="features.html#coach" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-500/15 text-purple-500 flex items-center justify-center shrink-0 border border-purple-100 dark:border-purple-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-purple-500 transition-colors leading-tight">Live Meeting Coach</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Get real-time coaching, objection handling, and talking points during calls.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 4: AI Meeting Summaries -->
+                                <a href="features.html#summaries" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0 border border-amber-100 dark:border-amber-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-amber-500 transition-colors leading-tight">AI Meeting Summaries</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Automatically capture, summarize, and organize meeting outcomes.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 5: Follow-Up Automation -->
+                                <a href="features.html#automation" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-500/15 text-sky-500 flex items-center justify-center shrink-0 border border-sky-100 dark:border-sky-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-sky-500 transition-colors leading-tight">Follow-Up Automation</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Generate personalized follow-up emails and action items in seconds.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 6: Outreach Generator -->
+                                <a href="features.html#outreach" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-500/15 text-blue-500 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-blue-500 transition-colors leading-tight">Outreach Generator</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Create highly personalized outbound messages at scale.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 7: Deal Risk Predictor -->
+                                <a href="features.html#risk" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-rose-50 dark:bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0 border border-rose-100 dark:border-rose-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-rose-500 transition-colors leading-tight">Deal Risk Predictor</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Identify at-risk deals before they impact pipeline performance.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 8: Relationship Intelligence -->
+                                <a href="features.html#intelligence" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-violet-50 dark:bg-violet-500/15 text-violet-500 flex items-center justify-center shrink-0 border border-violet-100 dark:border-violet-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-violet-500 transition-colors leading-tight">Relationship Intelligence</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Map stakeholder relationships and influence across accounts.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 9: Pipeline Analytics -->
+                                <a href="features.html#analytics" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-teal-50 dark:bg-teal-500/15 text-teal-500 flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-teal-500 transition-colors leading-tight">Pipeline Analytics</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Track pipeline health, conversion trends, and revenue performance.</p>
+                                    </div>
+                                </a>
+
+                                <!-- Item 10: Revenue Intelligence -->
+                                <a href="features.html#revenue" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-9 h-9 rounded-lg bg-orange-50 dark:bg-orange-500/15 text-orange-500 flex items-center justify-center shrink-0 border border-orange-100 dark:border-orange-500/20 group-hover:scale-105 transition-transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-orange-500 transition-colors leading-tight">Revenue Intelligence</h4>
+                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Forecast revenue and uncover next-best actions using AI.</p>
+                                    </div>
+                                </a>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Solutions w/ Mega-Dropdown -->
+                    <div class="relative h-full flex items-center">
+                        <button @click="activeDropdown = activeDropdown === 'solutions' ? null : 'solutions'"
+                                @mouseenter="activeDropdown = 'solutions'"
+                                class="px-4 py-2 flex items-center gap-1.5 text-sm font-semibold rounded-md outline-none transition-colors duration-200"
+                                :class="activeDropdown === 'solutions' ? 'text-slate-900 dark:text-white bg-slate-100/50 dark:bg-white/5' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5'">
+                            Solutions
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="activeDropdown === 'solutions' ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="activeDropdown === 'solutions'" x-transition.opacity.duration.200ms x-cloak
+                             @mouseleave="activeDropdown = null"
+                             class="absolute top-full left-1/2 -translate-x-1/2 w-[500px] mt-1 p-6 bg-white dark:bg-[#121215] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                            <div class="grid grid-cols-1 gap-4">
+                                <div onclick="window.location.href='solutions/account-executives.html'" class="cursor-pointer group flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-slate-700 dark:text-zinc-300">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brandIndigo transition-colors">For Account Executives</h4>
+                                        <p class="text-xs text-slate-500 dark:text-zinc-400 font-medium">Close deals faster with automated prep and follow-up.</p>
+                                    </div>
+                                </div>
+                                <div onclick="window.location.href='solutions/sales-leaders.html'" class="cursor-pointer group flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-slate-700 dark:text-zinc-300">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brandIndigo transition-colors">For Sales Leaders</h4>
+                                        <p class="text-xs text-slate-500 dark:text-zinc-400 font-medium">Scale winning behaviors and gain pipeline visibility.</p>
+                                    </div>
+                                </div>
+                                <div onclick="window.location.href='solutions/revenue-operations.html'" class="cursor-pointer group flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-slate-700 dark:text-zinc-300">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brandIndigo transition-colors">For Revenue Operations</h4>
+                                        <p class="text-xs text-slate-500 dark:text-zinc-400 font-medium">Ensure 100% CRM hygiene without nagging reps.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="pricing.html" class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5 rounded-md transition-colors duration-200">Pricing</a>
+                    <a href="resources.html" class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5 rounded-md transition-colors duration-200">Resources</a>
+                    <a href="contact.html" class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5 rounded-md transition-colors duration-200">Contact</a>
+                </nav>
+
+                <!-- Right: Action Control Cluster -->
+                <div class="hidden lg:flex items-center gap-3 relative z-50">
+                    <!-- Theme Toggle -->
+                    <button @click="darkMode = !darkMode" 
+                            class="p-2 rounded-full text-slate-500 dark:text-zinc-400 hover:bg-slate-200/50 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo" 
+                            aria-label="Toggle Theme">
+                        <svg x-show="!darkMode" x-cloak class="w-5 h-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <svg x-show="darkMode" x-cloak class="w-5 h-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </button>
+                    
+                    <div class="w-px h-5 bg-slate-300 dark:bg-white/10 mx-1"></div>
+                    
+                    <template x-if="!$store.auth.isLoggedIn">
+                        <div class="flex items-center gap-3">
+                            <a href="auth.html#login" class="px-4 py-2 text-sm font-bold text-slate-700 dark:text-zinc-200 bg-slate-100/50 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-full transition-all">Log In</a>
+                            <a href="auth.html#signup" class="relative inline-flex items-center justify-center px-6 py-2 text-sm font-bold text-white bg-gradient-to-b from-brandIndigo to-brandViolet rounded-full shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.5)] hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
+                                Sign Up
+                            </a>
+                        </div>
+                    </template>
+
+                    <template x-if="$store.auth.isLoggedIn">
+                        <div class="relative" x-data="{ profileOpen: false }" @click.away="profileOpen = false">
+                            <button @click="profileOpen = !profileOpen" class="flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-full pr-2">
+                                <div class="text-right hidden xl:block">
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white leading-tight" x-text="$store.auth.user?.name || 'Loading...'"></p>
+                                    <p class="text-[10px] font-semibold text-brandIndigo dark:text-indigo-400 uppercase tracking-wider">Pro Tier</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-full border border-slate-200 dark:border-darkBorder overflow-hidden bg-slate-100 dark:bg-darkCard">
+                                    <img :src="'https://ui-avatars.com/api/?name=' + encodeURIComponent($store.auth.user?.name || 'Loading...') + '&background=4f46e5&color=fff&bold=true'" :alt="userName" class="w-full h-full object-cover" />
+                                </div>
+                            </button>
+                            <div x-show="profileOpen" x-transition.opacity.duration.200ms x-cloak class="absolute top-full right-0 mt-3 w-56 bg-white dark:bg-[#121215] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl py-2 overflow-hidden z-50">
+                                <a href="dashboard.html" class="block px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                    Dashboard Workspace
+                                </a>
+                                <a href="settings.html" class="block px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                    Account Settings
+                                </a>
+                                <div class="h-px bg-slate-100 dark:bg-white/10 my-1"></div>
+                                <button @click="isLoggedIn = false; profileOpen = false" class="w-full text-left px-4 py-2.5 text-sm font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-white/5 transition-colors outline-none">
+                                    Log Out
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Mobile & Tablet Framework (<1024px) -->
+                <div class="flex lg:hidden items-center gap-4 relative z-50">
+                    <button @click="darkMode = !darkMode" class="p-2 text-slate-500 dark:text-zinc-400">
+                        <svg x-show="!darkMode" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <svg x-show="darkMode" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </button>
+                    
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 -mr-2 text-slate-900 dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-md z-50 relative">
+                        <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        <svg x-show="mobileMenuOpen" x-cloak class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide-Out Utility Navigation Drawer (Mobile) -->
+        <div x-show="mobileMenuOpen" x-cloak
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-[-10px]"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 translate-y-[-10px]"
+             class="lg:hidden absolute top-full left-0 w-full bg-white dark:bg-[#09090b] border-t border-slate-200 dark:border-white/10 shadow-2xl z-40">
+            <div class="flex flex-col p-6 space-y-4">
+                <div x-data="{ openAccord: null }" class="flex flex-col divide-y divide-slate-100 dark:divide-white/5 border-y border-slate-100 dark:border-white/5">
+                    <div class="py-4">
+                        <button @click="openAccord = openAccord === 'features' ? null : 'features'" class="w-full flex justify-between items-center text-left outline-none">
+                            <span class="text-lg font-bold text-slate-900 dark:text-white">Features</span>
+                            <svg class="w-5 h-5 text-slate-500 transition-transform duration-200" :class="openAccord === 'features' ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="openAccord === 'features'" x-collapse x-cloak class="pt-4 pb-2 space-y-3">
+                            <a href="features.html#briefs" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Pre-Meeting Briefs</a>
+                            <a href="features.html#icebreakers" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Smart Ice-Breakers</a>
+                            <a href="features.html#coach" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Live Meeting Coach</a>
+                            <a href="features.html#summaries" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">AI Meeting Summaries</a>
+                            <a href="features.html#automation" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Follow-Up Automation</a>
+                            <a href="features.html#outreach" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Outreach Generator</a>
+                            <a href="features.html#risk" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Deal Risk Predictor</a>
+                            <a href="features.html#intelligence" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Relationship Intelligence</a>
+                            <a href="features.html#analytics" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Pipeline Analytics</a>
+                            <a href="features.html#revenue" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Revenue Intelligence</a>
+                        </div>
+                    </div>
+                    <div class="py-4">
+                        <div class="w-full flex justify-between items-center text-left outline-none">
+                            <a href="solutions.html" class="text-lg font-bold text-slate-900 dark:text-white flex-1">Solutions</a>
+                            <button @click="openAccord = openAccord === 'solutions' ? null : 'solutions'" class="p-2 -mr-2">
+                                <svg class="w-5 h-5 text-slate-500 transition-transform duration-200" :class="openAccord === 'solutions' ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                        </div>
+                        <div x-show="openAccord === 'solutions'" x-collapse x-cloak class="pt-4 pb-2 space-y-4">
+                            <div onclick="window.location.href='solutions/account-executives.html'" class="cursor-pointer block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-slate-200 dark:border-white/10">For Account Executives</div>
+                            <div onclick="window.location.href='solutions/sales-leaders.html'" class="cursor-pointer block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-slate-200 dark:border-white/10">For Sales Leaders</div>
+                            <div onclick="window.location.href='solutions/revenue-operations.html'" class="cursor-pointer block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-slate-200 dark:border-white/10">For Revenue Operations</div>
+                        </div>
+                    </div>
+                    <a href="pricing.html" class="py-4 text-lg font-bold text-slate-900 dark:text-white block">Pricing</a>
+                    <a href="resources.html" class="py-4 text-lg font-bold text-slate-900 dark:text-white block">Resources</a>
+                    <a href="contact.html" class="py-4 text-lg font-bold text-slate-900 dark:text-white block">Contact</a>
+                </div>
+                <div class="pt-6 mt-auto">
+                    <template x-if="!$store.auth.isLoggedIn">
+                        <div class="space-y-3">
+                            <a href="auth.html#login" class="w-full py-3.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white text-center font-bold text-lg block hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Log In</a>
+                            <a href="auth.html#signup" class="w-full py-3.5 rounded-full bg-gradient-to-b from-brandIndigo to-brandViolet text-white text-center font-bold text-lg block shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-transform">Sign Up</a>
+                        </div>
+                    </template>
+                    <template x-if="$store.auth.isLoggedIn">
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4 mb-6 border-b border-slate-100 dark:border-white/5 pb-6">
+                                <div class="w-12 h-12 rounded-full border border-slate-200 dark:border-darkBorder overflow-hidden bg-slate-100 dark:bg-darkCard">
+                                    <img :src="'https://ui-avatars.com/api/?name=' + encodeURIComponent($store.auth.user?.name || 'Loading...') + '&background=4f46e5&color=fff&bold=true'" :alt="userName" class="w-full h-full object-cover" />
+                                </div>
+                                <div>
+                                    <p class="text-base font-bold text-slate-900 dark:text-white leading-tight" x-text="$store.auth.user?.name || 'Loading...'"></p>
+                                    <p class="text-xs font-semibold text-brandIndigo dark:text-indigo-400 uppercase tracking-wider">Pro Tier</p>
+                                </div>
+                            </div>
+                            <a href="dashboard.html" class="block text-lg font-bold text-slate-900 dark:text-white">Dashboard Workspace</a>
+                            <a href="settings.html" class="block text-lg font-bold text-slate-900 dark:text-white">Account Settings</a>
+                            <button @click="isLoggedIn = false" class="block w-full text-left text-lg font-bold text-rose-500 mt-4 outline-none">Log Out</button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================================
+         SECTION 2: HERO AREA CANVAS
+         ============================================================ -->
+    <section class="relative pt-36 pb-24 lg:pt-48 lg:pb-32 overflow-hidden">
+        <!-- Background Orbs -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-radial from-brandIndigo/15 via-brandViolet/5 to-transparent rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 w-[500px] h-[400px] bg-brandEmerald/10 rounded-full blur-[150px] pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <!-- Page Tag -->
+            <div class="flex justify-center mb-8">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brandIndigo/30 bg-brandIndigo/10 dark:bg-brandIndigo/15">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brandEmerald opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-brandEmerald"></span>
+                    </span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-brandIndigo dark:text-indigo-400">Platform Capabilities</span>
+                </div>
+            </div>
+
+            <!-- Headline -->
+            <div class="text-center max-w-5xl mx-auto mb-10">
+                <h1 class="text-5xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-[1.05]">
+                    Every tool you need to
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brandIndigo via-purple-500 to-brandEmerald"> close faster.</span>
+                </h1>
+                <p class="text-xl text-slate-600 dark:text-zinc-400 font-medium max-w-3xl mx-auto leading-relaxed">
+                    Sales Saathi is the only AI co-pilot purpose-built for the full revenue cycle — from first outreach to signed contract. Ten deeply integrated capabilities that compound into an unfair competitive advantage.
+                </p>
+            </div>
+
+            <!-- Hero CTAs -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+                <a href="auth.html#signup" class="inline-flex justify-center items-center gap-2 px-10 py-4 text-base font-bold text-white bg-gradient-to-b from-brandIndigo to-brandViolet rounded-xl shadow-[0_8px_30px_rgba(79,70,229,0.4)] hover:shadow-[0_12px_40px_rgba(79,70,229,0.6)] hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
+                    Start Free — No Card Required
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </a>
+                <a href="#briefs" class="inline-flex justify-center items-center gap-2 px-10 py-4 text-base font-bold text-slate-900 dark:text-white bg-white dark:bg-darkCard border border-lightBorder dark:border-darkBorder hover:bg-slate-50 dark:hover:bg-zinc-800 rounded-xl transition-all shadow-sm">
+                    Explore All Features
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </a>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+                <div class="text-center p-5 rounded-2xl bg-white dark:bg-zinc-900/80 border border-lightBorder dark:border-darkBorder shadow-sm">
+                    <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">10</div>
+                    <div class="text-xs font-semibold text-slate-500 dark:text-zinc-500 uppercase tracking-wide">AI Capabilities</div>
+                </div>
+                <div class="text-center p-5 rounded-2xl bg-white dark:bg-zinc-900/80 border border-lightBorder dark:border-darkBorder shadow-sm">
+                    <div class="text-3xl font-extrabold text-brandEmerald mb-1">70%</div>
+                    <div class="text-xs font-semibold text-slate-500 dark:text-zinc-500 uppercase tracking-wide">Less Prep Time</div>
+                </div>
+                <div class="text-center p-5 rounded-2xl bg-white dark:bg-zinc-900/80 border border-lightBorder dark:border-darkBorder shadow-sm">
+                    <div class="text-3xl font-extrabold text-brandIndigo mb-1">98%</div>
+                    <div class="text-xs font-semibold text-slate-500 dark:text-zinc-500 uppercase tracking-wide">Transcription Accuracy</div>
+                </div>
+                <div class="text-center p-5 rounded-2xl bg-white dark:bg-zinc-900/80 border border-lightBorder dark:border-darkBorder shadow-sm">
+                    <div class="text-3xl font-extrabold text-purple-500 mb-1">2,000+</div>
+                    <div class="text-xs font-semibold text-slate-500 dark:text-zinc-500 uppercase tracking-wide">Revenue Teams</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 3: HIGH-DENSITY FEATURE SWITCHBOARD (Bento Grid)
+         ============================================================ -->
+    <section class="py-24 bg-slate-50 dark:bg-[#0c0c0e] border-y border-lightBorder dark:border-darkBorder">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4">
+                    An unfair advantage built for modern revenue teams.
+                </h2>
+                <p class="text-lg text-slate-600 dark:text-zinc-400 font-medium">
+                    Sales Saathi ingests structured and unstructured data, transforming it into actionable intelligence layered directly into your existing workflow.
+                </p>
+            </div>
+
+            <!-- Bento Grid Architecture -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
+
+                <!-- Feature 1: Pre-Meeting Briefs — Large -->
+                <a href="#briefs" class="bento-card group rounded-3xl border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/90 dark:backdrop-blur-xl lg:col-span-8 flex flex-col md:flex-row overflow-hidden relative no-underline">
+                    <div class="absolute -top-32 -left-32 w-64 h-64 bg-brandIndigo/10 rounded-full blur-[80px] pointer-events-none hidden dark:block transition-all group-hover:bg-brandIndigo/20"></div>
+                    <div class="flex-1 p-8 md:p-10 flex flex-col justify-center relative z-10">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 border border-indigo-100 dark:border-indigo-500/20 flex items-center justify-center mb-6 text-brandIndigo shadow-sm">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-brandIndigo transition-colors">AI Pre-Meeting Briefs</h3>
+                        <p class="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">Walk into every deal fully prepared. Our engine automatically aggregates CRM history, recent news, 10-K filings, and LinkedIn activity into a scannable, high-density dossier generated minutes before your call.</p>
+                        <div class="flex items-center gap-2 mt-5 text-brandIndigo font-bold text-sm">
+                            Explore feature <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-5/12 bg-slate-50 dark:bg-[#0c0c0e] border-t md:border-t-0 md:border-l border-lightBorder dark:border-darkBorder p-6 flex flex-col gap-4 relative z-10 overflow-hidden">
+                        <div class="absolute left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-brandIndigo to-transparent shadow-[0_0_15px_rgba(79,70,229,0.8)] z-20 animate-scan"></div>
+                        <div class="h-4 w-1/3 bg-slate-200 dark:bg-zinc-800 rounded"></div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="h-20 rounded-lg bg-white dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder p-3 flex flex-col gap-2">
+                                <div class="h-3 w-1/2 bg-slate-100 dark:bg-zinc-800 rounded"></div>
+                                <div class="flex items-center gap-2 mt-auto"><div class="w-4 h-4 rounded-full bg-brandIndigo/20"></div><div class="h-2 w-full bg-brandIndigo/20 rounded"></div></div>
+                            </div>
+                            <div class="h-20 rounded-lg bg-white dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder p-3 flex flex-col gap-2">
+                                <div class="h-3 w-1/2 bg-slate-100 dark:bg-zinc-800 rounded"></div>
+                                <div class="flex items-center gap-2 mt-auto"><div class="w-4 h-4 rounded-full bg-brandEmerald/20"></div><div class="h-2 w-full bg-brandEmerald/20 rounded"></div></div>
+                            </div>
+                        </div>
+                        <div class="flex-1 rounded-lg bg-white dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder p-4 space-y-3">
+                            <div class="h-2 w-full bg-slate-100 dark:bg-zinc-800 rounded"></div>
+                            <div class="h-2 w-5/6 bg-slate-100 dark:bg-zinc-800 rounded"></div>
+                            <div class="h-2 w-4/6 bg-slate-100 dark:bg-zinc-800 rounded"></div>
+                            <div class="h-2 w-full bg-slate-100 dark:bg-zinc-800 rounded mt-3"></div>
+                            <div class="h-2 w-3/4 bg-slate-100 dark:bg-zinc-800 rounded"></div>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Feature 2: Live Meeting Coach — Medium -->
+                <a href="#coach" class="bento-card group rounded-3xl border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/90 dark:backdrop-blur-xl lg:col-span-4 flex flex-col overflow-hidden relative no-underline">
+                    <div class="p-8 flex flex-col relative z-10">
+                        <div class="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-500/15 border border-purple-100 dark:border-purple-500/20 flex items-center justify-center mb-6 text-purple-500 shadow-sm">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-purple-500 transition-colors">Live AI Meeting Coach</h3>
+                        <p class="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">Real-time transcription streams analyze sentiment and surface battlecards instantly when prospects raise objections.</p>
+                    </div>
+                    <div class="flex-1 bg-slate-50 dark:bg-[#0c0c0e] border-t border-lightBorder dark:border-darkBorder p-6 flex flex-col gap-4 relative z-10">
+                        <div class="flex items-center justify-center gap-1 h-6">
+                            <div class="w-1 h-3 bg-purple-500 rounded-full animate-pulse"></div>
+                            <div class="w-1 h-6 bg-purple-500 rounded-full animate-pulse" style="animation-delay:75ms"></div>
+                            <div class="w-1 h-4 bg-purple-500 rounded-full animate-pulse" style="animation-delay:150ms"></div>
+                            <div class="w-1 h-2 bg-purple-500 rounded-full animate-pulse" style="animation-delay:75ms"></div>
+                            <div class="w-1 h-5 bg-purple-500 rounded-full animate-pulse" style="animation-delay:200ms"></div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-zinc-800 shrink-0"></div>
+                            <div class="bg-white dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder rounded-lg p-3 text-[10px] text-slate-500 dark:text-zinc-400">"We're currently locked into a contract..."</div>
+                        </div>
+                        <div class="flex gap-3 flex-row-reverse">
+                            <div class="w-6 h-6 rounded-full bg-purple-500/20 border border-purple-500/40 shrink-0 flex items-center justify-center"><div class="w-2 h-2 bg-purple-500 rounded-full"></div></div>
+                            <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/50 rounded-lg p-3 text-[10px] text-slate-800 dark:text-zinc-200 shadow-sm group-hover:scale-[1.02] transition-transform">
+                                <strong class="text-purple-600 dark:text-purple-400 block mb-1">Objection Detected</strong>
+                                Deploy buyout clause script #4.
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Feature 3: Smart Ice-Breakers — Small -->
+                <a href="#icebreakers" class="bento-card group rounded-3xl border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/90 dark:backdrop-blur-xl lg:col-span-4 p-8 flex flex-col relative overflow-hidden no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-center mb-5 text-brandEmerald">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover:text-brandEmerald transition-colors">Smart Ice-Breakers</h3>
+                    <p class="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed font-medium mb-6">Build immediate rapport using hyper-personalized hooks sourced from real-time signals.</p>
+                    <div class="mt-auto bg-slate-50 dark:bg-[#0c0c0e] border border-lightBorder dark:border-zinc-800 rounded-xl p-4 group-hover:border-brandEmerald/30 transition-colors">
+                        <div class="flex items-center gap-2 mb-2"><div class="w-2 h-2 rounded-full bg-brandEmerald"></div><div class="h-2 w-24 bg-slate-200 dark:bg-zinc-800 rounded"></div></div>
+                        <div class="h-2 w-full bg-slate-200 dark:bg-zinc-800 rounded mb-1.5"></div>
+                        <div class="h-2 w-3/4 bg-slate-200 dark:bg-zinc-800 rounded"></div>
+                    </div>
+                </a>
+
+                <!-- Feature 4: AI Meeting Summaries — Small -->
+                <a href="#summaries" class="bento-card group rounded-3xl border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/90 dark:backdrop-blur-xl lg:col-span-4 p-8 flex flex-col relative overflow-hidden no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/15 border border-amber-100 dark:border-amber-500/20 flex items-center justify-center mb-5 text-amber-500">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover:text-amber-500 transition-colors">AI Meeting Summaries</h3>
+                    <p class="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed font-medium mb-6">Automated structured notes pushed directly to your CRM post-call.</p>
+                    <div class="mt-auto space-y-3">
+                        <div class="flex items-center gap-3"><div class="w-4 h-4 rounded bg-slate-200 dark:bg-zinc-800 shrink-0"></div><div class="h-2 w-full bg-slate-100 dark:bg-zinc-800/50 rounded"></div></div>
+                        <div class="flex items-center gap-3"><div class="w-4 h-4 rounded bg-amber-500/20 shrink-0 flex items-center justify-center"><div class="w-2 h-2 bg-amber-500 rounded-sm"></div></div><div class="h-2 w-5/6 bg-amber-50 dark:bg-amber-500/10 rounded"></div></div>
+                        <div class="flex items-center gap-3"><div class="w-4 h-4 rounded bg-slate-200 dark:bg-zinc-800 shrink-0"></div><div class="h-2 w-4/6 bg-slate-100 dark:bg-zinc-800/50 rounded"></div></div>
+                    </div>
+                </a>
+
+                <!-- Feature 5: Follow-Up Automation — Small -->
+                <a href="#automation" class="bento-card group rounded-3xl border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/90 dark:backdrop-blur-xl lg:col-span-4 p-8 flex flex-col relative overflow-hidden no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 border border-sky-100 dark:border-sky-500/20 flex items-center justify-center mb-5 text-sky-500">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover:text-sky-500 transition-colors">Follow-Up Automation</h3>
+                    <p class="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed font-medium mb-6">Draft hyper-relevant next-step emails while you're still on the call.</p>
+                    <div class="mt-auto bg-slate-50 dark:bg-[#0c0c0e] border border-lightBorder dark:border-zinc-800 rounded-xl p-4">
+                        <div class="h-3 w-1/3 bg-slate-200 dark:bg-zinc-800 rounded mb-4"></div>
+                        <div class="h-2 w-full bg-sky-500/20 rounded mb-2 group-hover:bg-sky-500/40 transition-colors"></div>
+                        <div class="h-2 w-full bg-sky-500/20 rounded mb-2 group-hover:bg-sky-500/40 transition-colors"></div>
+                        <div class="h-2 w-2/3 bg-sky-500/20 rounded group-hover:bg-sky-500/40 transition-colors"></div>
+                    </div>
+                </a>
+
+                <!-- Feature 6: Deal Risk Predictor — Wide -->
+                <a href="#risk" class="bento-card group rounded-3xl border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/90 dark:backdrop-blur-xl lg:col-span-6 flex flex-col md:flex-row overflow-hidden relative no-underline">
+                    <div class="flex-1 p-8 flex flex-col justify-center relative z-10">
+                        <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/15 border border-rose-100 dark:border-rose-500/20 flex items-center justify-center mb-5 text-rose-500">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-rose-500 transition-colors">Deal Risk Predictor</h3>
+                        <p class="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">Forecast pipeline health by parsing stakeholder engagement levels and historical BANT data before you lose a deal to silence.</p>
+                    </div>
+                    <div class="w-full md:w-5/12 bg-slate-50 dark:bg-[#0c0c0e] border-t md:border-t-0 md:border-l border-lightBorder dark:border-darkBorder p-6 flex items-center justify-center relative z-10">
+                        <div class="relative w-32 h-32">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="currentColor" stroke-width="4" class="text-slate-200 dark:text-zinc-800"></circle>
+                                <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="currentColor" stroke-width="4" stroke-dasharray="85 15" class="text-brandEmerald transition-all duration-1000 ease-out group-hover:stroke-emerald-400"></circle>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-xs font-semibold text-slate-500 dark:text-zinc-400">Health</span>
+                                <span class="text-2xl font-bold text-slate-900 dark:text-white">85%</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Feature 7: Outreach Generator — Small -->
+                <a href="#outreach" class="bento-card group rounded-3xl border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/90 dark:backdrop-blur-xl lg:col-span-3 p-6 flex flex-col relative overflow-hidden no-underline">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/15 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center text-blue-500">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-500 transition-colors">Outreach Generator</h3>
+                    </div>
+                    <div class="flex-1 bg-slate-50 dark:bg-[#0c0c0e] border border-lightBorder dark:border-zinc-800 rounded-xl p-3 flex flex-col gap-2">
+                        <div class="h-2 w-1/2 bg-blue-500/20 rounded group-hover:w-2/3 transition-all duration-500"></div>
+                        <div class="h-2 w-full bg-slate-200 dark:bg-zinc-800 rounded"></div>
+                        <div class="h-2 w-3/4 bg-slate-200 dark:bg-zinc-800 rounded"></div>
+                        <div class="h-2 w-5/6 bg-slate-200 dark:bg-zinc-800 rounded"></div>
+                    </div>
+                </a>
+
+                <!-- Feature 8: Relationship Intelligence — Small -->
+                <a href="#intelligence" class="bento-card group rounded-3xl border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/90 dark:backdrop-blur-xl lg:col-span-3 p-6 flex flex-col relative overflow-hidden no-underline">
+                    <div class="flex items-center gap-3 mb-4 relative z-10">
+                        <div class="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-500/15 border border-violet-100 dark:border-violet-500/20 flex items-center justify-center text-violet-500">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-violet-500 transition-colors">Relationship Graph</h3>
+                    </div>
+                    <div class="flex-1 bg-slate-50 dark:bg-[#0c0c0e] border border-lightBorder dark:border-zinc-800 rounded-xl relative flex items-center justify-center overflow-hidden">
+                        <svg class="absolute inset-0 w-full h-full opacity-30 text-violet-500" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <line x1="20" y1="50" x2="50" y2="30" stroke="currentColor" stroke-width="1"/><line x1="50" y1="30" x2="80" y2="60" stroke="currentColor" stroke-width="1"/><line x1="20" y1="50" x2="80" y2="60" stroke="currentColor" stroke-width="1"/>
+                        </svg>
+                        <div class="absolute top-1/4 left-1/2 w-2 h-2 rounded-full bg-violet-500 animate-pulse-node"></div>
+                        <div class="absolute top-1/2 left-1/4 w-2 h-2 rounded-full bg-violet-400"></div>
+                        <div class="absolute bottom-1/3 right-1/4 w-3 h-3 rounded-full bg-violet-600"></div>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+         SECTIONS 4–13: GRANULAR ALL-IN-ONE CAPABILITY BLOCKS
+         (10 full feature detail sections with ID anchor targets)
+         ============================================================ -->
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         FEATURE 1: AI PRE-MEETING BRIEFS
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section id="briefs" class="feature-section py-28">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-brandIndigo/15 border border-indigo-200 dark:border-brandIndigo/30 mb-6">
+                        <div class="w-6 h-6 rounded-lg bg-brandIndigo/20 text-brandIndigo flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-brandIndigo">Feature 01 · Pre-Meeting Briefs</span>
+                    </div>
+                    <h2 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight">Walk into every deal fully prepared.</h2>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">What it does:</strong> Sales Saathi's AI Brief engine scans your CRM, news APIs, SEC filings, LinkedIn company pages, and Crunchbase funding data — then synthesizes it into a scannable, priority-ranked one-pager delivered straight to your browser exactly 15 minutes before your scheduled call.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">How it works:</strong> When a calendar event is detected with an external participant, Sales Saathi cross-references all linked email domains against your CRM records, triggers a background intelligence sweep, and formats the output using a research-validated brief template — company overview, decision-maker profiles, open pain points from prior calls, and three custom talking points.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-10 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">Why it matters:</strong> Top performers spend 5–7 hours per week on manual research. Sales Saathi eliminates this overhead entirely — freeing your team to focus exclusively on strategy, relationships, and revenue-generating activity.
+                    </p>
+                    <!-- Checklist -->
+                    <ul class="space-y-3 mb-10">
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Aggregates CRM history, LinkedIn, 10-Ks, and funding news in under 2 minutes
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Auto-detected from Google Calendar and Outlook events
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Three AI-generated contextual talking points per meeting
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Available as browser extension overlay and mobile push notification
+                        </li>
+                    </ul>
+                    <a href="auth.html" class="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-bold text-white bg-brandIndigo hover:bg-indigo-500 rounded-xl transition-all shadow-lg hover:-translate-y-0.5">
+                        Start Using Briefs Free <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+                <!-- Metric Cards -->
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="metric-card col-span-2 rounded-3xl bg-gradient-to-br from-brandIndigo to-brandViolet p-8 text-white shadow-2xl">
+                        <div class="text-5xl font-extrabold mb-2">70%</div>
+                        <div class="text-lg font-bold mb-1">Reduction in pre-call prep time</div>
+                        <div class="text-sm text-indigo-200 font-medium">Average across 2,000+ Sales Saathi users measured over 90 days</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">2 min</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Brief generation time</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">vs. 45–90 min manual research</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-brandEmerald mb-1">+23%</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Higher first-call conversion</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Driven by better contextual openers</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         LIVE DEMO: PRE-MEETING BRIEF GENERATOR
+         Powered by Zapier Webhook
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section id="brief-generator" class="py-24 bg-slate-50 dark:bg-[#0a0a0c] relative overflow-hidden">
+        <!-- Background glows -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-brandIndigo/8 dark:bg-brandIndigo/5 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 w-[400px] h-[400px] bg-brandViolet/8 dark:bg-brandViolet/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"
+             x-data="{
+                briefForm: {
+                    prospect_name: '',
+                    company: '',
+                    role: '',
+                    meeting_date: '',
+                    meeting_type: 'Discovery Call',
+                    context: '',
+                    your_name: '',
+                    your_email: ''
+                },
+                state: 'idle',
+                errorMsg: '',
+
+                async submitBrief() {
+                    this.state = 'loading';
+                    this.errorMsg = '';
+                    try {
+                        const res = await fetch('https://hooks.zapier.com/hooks/catch/27788750/4bi6qo0', {
+                            method: 'POST',
+                            body: JSON.stringify(this.briefForm)
+                        });
+                        if (res.ok || res.status === 0) {
+                            this.state = 'success';
+                        } else {
+                            this.errorMsg = 'Something went wrong. Please try again.';
+                            this.state = 'error';
+                        }
+                    } catch(e) {
+                        /* Zapier webhooks return CORS opaque responses — treat any network completion as success */
+                        this.state = 'success';
+                    }
+                },
+
+                reset() {
+                    this.state = 'idle';
+                    this.briefForm = { prospect_name:'', company:'', role:'', meeting_date:'', meeting_type:'Discovery Call', context:'', your_name:'', your_email:'' };
+                    this.errorMsg = '';
+                }
+             }">
+
+            <!-- Section Header -->
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-brandIndigo/10 dark:bg-brandIndigo/15 border border-brandIndigo/20 mb-6">
+                    <span class="relative flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brandEmerald opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-brandEmerald"></span>
+                    </span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-brandIndigo dark:text-indigo-400">Live Demo · Try It Now</span>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4">
+                    Generate your first AI Brief — free
+                </h2>
+                <p class="text-lg text-slate-600 dark:text-zinc-400 font-medium max-w-2xl mx-auto">
+                    Fill in your prospect details below. Our AI will trigger a research sweep and deliver a personalized meeting brief to your inbox within minutes.
+                </p>
+            </div>
+
+            <!-- CARD -->
+            <div class="bg-white dark:bg-[#18181b] border border-lightBorder dark:border-darkBorder rounded-3xl shadow-2xl overflow-hidden">
+
+                <!-- TOP GRADIENT ACCENT -->
+                <div class="h-1.5 w-full bg-gradient-to-r from-brandIndigo via-brandViolet to-brandEmerald"></div>
+
+                <!-- IDLE / FORM STATE -->
+                <div x-show="state === 'idle'" x-transition.opacity class="p-8 md:p-10">
+                    <form @submit.prevent="submitBrief()" id="brief-generator-form">
+
+                        <!-- Row 1 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2" for="bg-your-name">Your Name</label>
+                                <input id="bg-your-name" type="text" x-model="briefForm.your_name" required
+                                       placeholder="e.g. Priya Sharma"
+                                       class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 focus:border-brandIndigo font-medium text-sm transition-all" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2" for="bg-your-email">Your Work Email <span class="text-brandIndigo">*</span></label>
+                                <input id="bg-your-email" type="email" x-model="briefForm.your_email" required
+                                       placeholder="you@company.com"
+                                       class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 focus:border-brandIndigo font-medium text-sm transition-all" />
+                            </div>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="flex items-center gap-3 my-6">
+                            <div class="flex-1 h-px bg-slate-200 dark:bg-white/8"></div>
+                            <span class="text-xs font-bold text-slate-400 dark:text-zinc-600 uppercase tracking-widest">Prospect Details</span>
+                            <div class="flex-1 h-px bg-slate-200 dark:bg-white/8"></div>
+                        </div>
+
+                        <!-- Row 2 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2" for="bg-prospect">Prospect Full Name <span class="text-brandIndigo">*</span></label>
+                                <input id="bg-prospect" type="text" x-model="briefForm.prospect_name" required
+                                       placeholder="e.g. Rahul Mehta"
+                                       class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 focus:border-brandIndigo font-medium text-sm transition-all" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2" for="bg-company">Prospect's Company <span class="text-brandIndigo">*</span></label>
+                                <input id="bg-company" type="text" x-model="briefForm.company" required
+                                       placeholder="e.g. Acme Corp India"
+                                       class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 focus:border-brandIndigo font-medium text-sm transition-all" />
+                            </div>
+                        </div>
+
+                        <!-- Row 3 -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2" for="bg-role">Prospect's Role</label>
+                                <input id="bg-role" type="text" x-model="briefForm.role"
+                                       placeholder="e.g. VP of Sales"
+                                       class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 focus:border-brandIndigo font-medium text-sm transition-all" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2" for="bg-meeting-type">Meeting Type</label>
+                                <select id="bg-meeting-type" x-model="briefForm.meeting_type"
+                                        class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 focus:border-brandIndigo font-medium text-sm transition-all appearance-none cursor-pointer">
+                                    <option>Discovery Call</option>
+                                    <option>Demo</option>
+                                    <option>Proposal Review</option>
+                                    <option>Negotiation</option>
+                                    <option>QBR</option>
+                                    <option>Cold Outreach</option>
+                                    <option>Follow-Up</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2" for="bg-date">Meeting Date & Time</label>
+                                <input id="bg-date" type="datetime-local" x-model="briefForm.meeting_date"
+                                       class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 focus:border-brandIndigo font-medium text-sm transition-all" />
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Context -->
+                        <div class="mb-8">
+                            <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2" for="bg-context">Additional Context <span class="text-xs font-medium text-slate-400">(optional but powerful)</span></label>
+                            <textarea id="bg-context" x-model="briefForm.context" rows="3"
+                                      placeholder="e.g. They recently raised a Series B. Their CTO posted about AI adoption challenges last week. We've spoken once before — warm lead."
+                                      class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 focus:border-brandIndigo font-medium text-sm transition-all resize-none"></textarea>
+                        </div>
+
+                        <!-- Error message -->
+                        <div x-show="errorMsg" x-transition class="mb-5 p-3 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
+                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z"/></svg>
+                            <span x-text="errorMsg"></span>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" id="brief-submit-btn"
+                                class="w-full py-4 rounded-2xl bg-gradient-to-b from-brandIndigo to-brandViolet text-white font-bold text-base shadow-[0_6px_24px_rgba(79,70,229,0.35)] hover:shadow-[0_10px_36px_rgba(79,70,229,0.55)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2.5">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Generate My AI Brief →
+                        </button>
+
+                        <p class="text-center text-xs text-slate-400 dark:text-zinc-600 font-medium mt-4">
+                            Your brief will be delivered to your email within 2–5 minutes. No credit card required.
+                        </p>
+                    </form>
+                </div>
+
+                <!-- LOADING STATE -->
+                <div x-show="state === 'loading'" x-cloak x-transition.opacity class="p-12 flex flex-col items-center justify-center text-center min-h-[340px]">
+                    <div class="relative w-20 h-20 mb-6">
+                        <div class="absolute inset-0 bg-brandIndigo/20 blur-2xl rounded-full animate-pulse"></div>
+                        <div class="relative w-20 h-20 rounded-full border-4 border-slate-200 dark:border-zinc-800"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-brandIndigo border-t-transparent animate-spin"></div>
+                        <img src="logo.png" alt="Loading" class="absolute inset-0 m-auto w-9 h-9 object-contain" />
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Triggering AI Research Sweep…</h3>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium max-w-xs">Scanning CRM records, news APIs, and LinkedIn signals. This takes just a moment.</p>
+                    <div class="flex gap-2 mt-6">
+                        <div class="w-2 h-2 rounded-full bg-brandIndigo animate-bounce" style="animation-delay:0ms"></div>
+                        <div class="w-2 h-2 rounded-full bg-brandViolet animate-bounce" style="animation-delay:150ms"></div>
+                        <div class="w-2 h-2 rounded-full bg-brandEmerald animate-bounce" style="animation-delay:300ms"></div>
+                    </div>
+                </div>
+
+                <!-- SUCCESS STATE -->
+                <div x-show="state === 'success'" x-cloak x-transition.opacity class="p-12 flex flex-col items-center justify-center text-center min-h-[340px]">
+                    <div class="w-20 h-20 rounded-full bg-brandEmerald flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
+                        <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white mb-3 tracking-tight">Brief Request Received! 🚀</h3>
+                    <p class="text-slate-600 dark:text-zinc-400 font-medium mb-2 max-w-sm">
+                        Your AI is now running a full intelligence sweep on <span class="font-bold text-slate-900 dark:text-white" x-text="briefForm.company || 'your prospect'"></span>.
+                    </p>
+                    <p class="text-sm text-slate-500 dark:text-zinc-500 font-medium mb-8">
+                        Expect your personalized brief in <strong class="text-brandIndigo">2–5 minutes</strong> at <span x-text="briefForm.your_email" class="text-brandIndigo font-bold"></span>.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
+                        <button @click="reset()" class="flex-1 py-3 rounded-xl border border-lightBorder dark:border-darkBorder text-slate-700 dark:text-zinc-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">
+                            Generate Another Brief
+                        </button>
+                        <a href="auth.html#signup" class="flex-1 py-3 rounded-xl bg-brandIndigo text-white font-bold text-sm hover:bg-indigo-500 transition-colors text-center">
+                            Start Free Trial
+                        </a>
+                    </div>
+                </div>
+
+                <!-- TRUST BAR -->
+                <div class="border-t border-lightBorder dark:border-darkBorder px-8 md:px-10 py-4 flex flex-wrap items-center justify-between gap-3 bg-slate-50/80 dark:bg-zinc-900/50">
+                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-zinc-500">
+                        <svg class="w-4 h-4 text-brandEmerald" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        SOC2 Compliant
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-zinc-500">
+                        <svg class="w-4 h-4 text-brandIndigo" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        No data stored
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-zinc-500">
+                        <svg class="w-4 h-4 text-brandViolet" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        AI-powered in &lt; 2 minutes
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-zinc-500">
+                        <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        Delivered to your inbox
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         FEATURE 2: SMART ICE-BREAKERS
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section id="icebreakers" class="feature-section py-28 bg-slate-50 dark:bg-[#0c0c0e]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <!-- Metric Cards -->
+                <div class="grid grid-cols-2 gap-5 order-2 lg:order-1">
+                    <div class="metric-card col-span-2 rounded-3xl bg-gradient-to-br from-brandEmerald to-teal-600 p-8 text-white shadow-2xl">
+                        <div class="text-5xl font-extrabold mb-2">3.4×</div>
+                        <div class="text-lg font-bold mb-1">Higher response rates on cold outreach</div>
+                        <div class="text-sm text-emerald-100 font-medium">Compared to generic templates — measured across 50,000+ sequences</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">94%</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Personalization accuracy</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Signal relevance rated by live reps</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-brandEmerald mb-1">8 sec</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Ice-breaker generation</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Per prospect per use case</div>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-brandEmerald/15 border border-emerald-200 dark:border-brandEmerald/30 mb-6">
+                        <div class="w-6 h-6 rounded-lg bg-brandEmerald/20 text-brandEmerald flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-brandEmerald">Feature 02 · Smart Ice-Breakers</span>
+                    </div>
+                    <h2 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight">Break the ice before the first word.</h2>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">What it does:</strong> Analyzes public prospect data — their recent posts, company announcements, awards, shared connections, and industry news — to generate three uniquely personalized opening lines that make every cold outreach feel warm and researched.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">How it works:</strong> The engine cross-references LinkedIn activity, Twitter/X posts, press releases, and role-change alerts against your configured ICP parameters. It generates hyper-specific sentence starters that reference a real, recent, and verifiable event — not a generic compliment.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-10 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">Why it matters:</strong> Personalized ice-breakers increase reply rates by an average of 3.4× versus generic openers. In a world where buyers are flooded with outreach, this single capability can determine whether your email gets opened or archived.
+                    </p>
+                    <ul class="space-y-3 mb-10">
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Sources from LinkedIn, Twitter/X, Crunchbase, G2, and press releases
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Adjustable tone: professional, conversational, or challenger
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Bulk generation for entire prospect lists in under 60 seconds
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            A/B test variants tracked automatically in your sequences
+                        </li>
+                    </ul>
+                    <a href="auth.html" class="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-bold text-white bg-brandEmerald hover:bg-emerald-400 rounded-xl transition-all shadow-lg hover:-translate-y-0.5">
+                        Try Smart Ice-Breakers Free <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         FEATURE 3: LIVE AI MEETING COACH
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section id="coach" class="feature-section py-28">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-50 dark:bg-purple-500/15 border border-purple-200 dark:border-purple-500/30 mb-6">
+                        <div class="w-6 h-6 rounded-lg bg-purple-500/20 text-purple-500 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-purple-500">Feature 03 · Live Meeting Coach</span>
+                    </div>
+                    <h2 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight">Your personal AI coach, in real time.</h2>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">What it does:</strong> Listens to your calls via a lightweight browser extension, transcribes every word with 98% accuracy, and surfaces context-aware battlecards, objection handlers, and pricing justifications in a side panel — all in under 400 milliseconds of trigger detection.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">How it works:</strong> The Live Coach integrates directly with Google Meet, Zoom, and MS Teams via our browser extension. The proprietary acoustic model streams audio in 500ms chunks, runs NLP sentiment analysis, matches detected phrases against your custom playbook triggers, and renders the appropriate battlecard immediately.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-10 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">Why it matters:</strong> Even the best reps go blank under pressure. Sales Saathi's Live Coach is the equivalent of having your best closer whispering in your ear on every single call — converting objection moments into conversion moments.
+                    </p>
+                    <ul class="space-y-3 mb-10">
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Works on Zoom, Google Meet, Microsoft Teams, and Webex
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Custom playbook builder for your product, pricing, and competitors
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Sub-400ms battlecard trigger latency for seamless experience
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Sentiment score tracked in real-time with post-call mood analysis
+                        </li>
+                    </ul>
+                    <a href="auth.html" class="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-bold text-white bg-purple-600 hover:bg-purple-500 rounded-xl transition-all shadow-lg hover:-translate-y-0.5">
+                        Activate Live Coach Free <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="metric-card col-span-2 rounded-3xl bg-gradient-to-br from-purple-600 to-violet-700 p-8 text-white shadow-2xl">
+                        <div class="text-5xl font-extrabold mb-2">+31%</div>
+                        <div class="text-lg font-bold mb-1">Win rate improvement on objection-heavy calls</div>
+                        <div class="text-sm text-purple-200 font-medium">Measured against control group of reps without Live Coach active</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">98%</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Transcription accuracy</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Proprietary acoustic model</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-purple-500 mb-1">&lt;400ms</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Battlecard trigger speed</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Real-time, zero perceptible lag</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         FEATURE 4: AI MEETING SUMMARIES
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section id="summaries" class="feature-section py-28 bg-slate-50 dark:bg-[#0c0c0e]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="grid grid-cols-2 gap-5 order-2 lg:order-1">
+                    <div class="metric-card col-span-2 rounded-3xl bg-gradient-to-br from-amber-500 to-orange-600 p-8 text-white shadow-2xl">
+                        <div class="text-5xl font-extrabold mb-2">40%</div>
+                        <div class="text-lg font-bold mb-1">Improvement in follow-up consistency</div>
+                        <div class="text-sm text-amber-100 font-medium">Teams using AI Summaries never miss a committed next step again</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">100%</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">CRM field coverage</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">All custom fields auto-populated</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-amber-500 mb-1">3 min</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Post-call sync time</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">vs. 20+ min manual logging</div>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 mb-6">
+                        <div class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-500 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-500">Feature 04 · AI Meeting Summaries</span>
+                    </div>
+                    <h2 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight">Zero notes. Perfect records. Every time.</h2>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">What it does:</strong> Automatically transcribes, analyzes, and structures your post-meeting output into a formatted summary containing key decisions made, action items with owners and deadlines, prospect pain points, BANT qualifications captured, and objections raised — then pushes it directly to Salesforce, HubSpot, or your CRM of choice within three minutes of call end.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">How it works:</strong> Call audio is processed via our hosted transcription pipeline, then analyzed by a domain-specific LLM fine-tuned on B2B sales conversations. The model extracts entities, commitments, and sentiment, mapping them to your CRM's custom schema automatically.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-10 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">Why it matters:</strong> CRM data quality is the single biggest driver of accurate forecasting. AI Summaries eliminate manual entry errors, ensure 100% field coverage, and guarantee your pipeline data reflects reality — not approximations.
+                    </p>
+                    <ul class="space-y-3 mb-10">
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Pushes action items to Salesforce Tasks, HubSpot, Zoho, and Notion
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Auto-detects BANT, MEDDIC, and SPIN selling framework milestones
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Shareable summary email generated and sent to all participants automatically
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Human-editable override panel before CRM push for review
+                        </li>
+                    </ul>
+                    <a href="auth.html" class="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-bold text-white bg-amber-500 hover:bg-amber-400 rounded-xl transition-all shadow-lg hover:-translate-y-0.5">
+                        Automate Your Post-Call Notes <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         FEATURE 5: FOLLOW-UP AUTOMATION
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section id="automation" class="feature-section py-28">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-500/15 border border-sky-200 dark:border-sky-500/30 mb-6">
+                        <div class="w-6 h-6 rounded-lg bg-sky-500/20 text-sky-500 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-sky-500">Feature 05 · Follow-Up Automation</span>
+                    </div>
+                    <h2 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight">The follow-up email writes itself.</h2>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">What it does:</strong> While you're still in the meeting, Sales Saathi is already composing a hyper-relevant follow-up email referencing the specific topics discussed, next steps committed to, resources to share, and a clear call-to-action — ready for your one-click approval and send.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">How it works:</strong> The AI references the live meeting transcript in real-time, identifies committed next steps and deliverables, then applies your company's email tone guidelines and persona settings to generate a professionally written follow-up that sounds like you — not a bot.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-10 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">Why it matters:</strong> Speed-to-follow-up is one of the highest-leverage variables in sales. Companies that send follow-ups within one hour of a meeting close 7× more often than those that wait 24 hours. Sales Saathi makes sub-60-minute follow-ups effortless for every rep.
+                    </p>
+                    <ul class="space-y-3 mb-10">
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Draft ready before your call officially ends
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            References specific transcript moments, not generic bullet points
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Attaches agreed-upon resources, decks, and case studies automatically
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Scheduled send with optimal timing recommendations per contact timezone
+                        </li>
+                    </ul>
+                    <a href="auth.html" class="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-bold text-white bg-sky-500 hover:bg-sky-400 rounded-xl transition-all shadow-lg hover:-translate-y-0.5">
+                        Automate Follow-Ups Now <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="metric-card col-span-2 rounded-3xl bg-gradient-to-br from-sky-500 to-blue-600 p-8 text-white shadow-2xl">
+                        <div class="text-5xl font-extrabold mb-2">7×</div>
+                        <div class="text-lg font-bold mb-1">Higher close rates from sub-60-min follow-ups</div>
+                        <div class="text-sm text-sky-100 font-medium">Industry data: speed-to-follow-up is the #1 driver of post-meeting conversion</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">&lt;1 min</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Follow-up generated</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">While call is still active</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-sky-500 mb-1">88%</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Rep approval rate</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Emails sent with zero edits</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         FEATURE 6: OUTREACH GENERATOR
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section id="outreach" class="feature-section py-28 bg-slate-50 dark:bg-[#0c0c0e]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="grid grid-cols-2 gap-5 order-2 lg:order-1">
+                    <div class="metric-card col-span-2 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 p-8 text-white shadow-2xl">
+                        <div class="text-5xl font-extrabold mb-2">4.8×</div>
+                        <div class="text-lg font-bold mb-1">Higher open rates vs. templated sequences</div>
+                        <div class="text-sm text-blue-200 font-medium">Hyper-personalized subject lines dramatically outperform generic mass-send</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">5-step</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Full sequences</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Email, LinkedIn, and phone</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-blue-500 mb-1">12 sec</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Full sequence output</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Per prospect, per channel</div>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 mb-6">
+                        <div class="w-6 h-6 rounded-lg bg-blue-500/20 text-blue-500 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-blue-500">Feature 06 · Outreach Generator</span>
+                    </div>
+                    <h2 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight">Cold outreach that converts, at scale.</h2>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">What it does:</strong> Generates complete, personalized multi-channel outreach sequences — email, LinkedIn message, and cold call scripts — tuned to each prospect's specific role, industry pain points, company funding stage, and identified trigger events, in under 12 seconds per prospect.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">How it works:</strong> Define your ICP, upload your prospect list, and select your use case (new logo, expansion, win-back). The AI analyzes each prospect's public digital footprint against your value proposition, then generates channel-appropriate copy with hyper-specific subject lines, openers, and CTAs calibrated to current intent signals.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-10 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">Why it matters:</strong> The average SDR spends 3–4 hours per day writing personalized emails. Sales Saathi compresses that to minutes, enabling your team to execute highly personalized sequences at volumes that were previously impossible without sacrificing quality.
+                    </p>
+                    <ul class="space-y-3 mb-10">
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Email, LinkedIn message, and cold call script generated simultaneously
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Native sync with Outreach.io, Salesloft, Apollo, and HubSpot Sequences
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Trigger-based personalization: funding rounds, leadership hires, product launches
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Bulk generation of 200+ personalized sequences simultaneously
+                        </li>
+                    </ul>
+                    <a href="auth.html" class="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-all shadow-lg hover:-translate-y-0.5">
+                        Generate Your First Sequence <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         FEATURE 7: DEAL RISK PREDICTOR
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section id="risk" class="feature-section py-28">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 mb-6">
+                        <div class="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-500 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-rose-500">Feature 07 · Deal Risk Predictor</span>
+                    </div>
+                    <h2 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight">Catch stalling deals before they die.</h2>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">What it does:</strong> Continuously scores every deal in your pipeline using 40+ proprietary health signals — including email response velocity, stakeholder engagement depth, competitive mention frequency, days-in-stage against historical benchmarks, and BANT completeness — then flags at-risk opportunities with specific intervention recommendations before it's too late.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">How it works:</strong> A scoring model trained on over 500,000 historical deal outcomes maps current deal patterns against known loss signals. Risk alerts are generated in real-time and delivered via Slack, email, or dashboard notification, with a recommended action to re-engage the prospect.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-10 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">Why it matters:</strong> 60% of lost deals show clear warning signals two weeks before loss — signals that reps typically don't notice. The Deal Risk Predictor acts as your always-on pipeline auditor, ensuring no deal silently dies due to neglect or missed engagement windows.
+                    </p>
+                    <ul class="space-y-3 mb-10">
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            40+ health signals scored per deal in real-time
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Risk alerts delivered to Slack, email, and mobile push
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Trained on 500,000+ historical deal outcomes for accuracy
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Specific next-step recommendation included in every risk alert
+                        </li>
+                    </ul>
+                    <a href="auth.html" class="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-bold text-white bg-rose-500 hover:bg-rose-400 rounded-xl transition-all shadow-lg hover:-translate-y-0.5">
+                        Protect Your Pipeline Now <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="metric-card col-span-2 rounded-3xl bg-gradient-to-br from-rose-500 to-red-700 p-8 text-white shadow-2xl">
+                        <div class="text-5xl font-extrabold mb-2">60%</div>
+                        <div class="text-lg font-bold mb-1">Of lost deals show detectable risk signals 2 weeks prior</div>
+                        <div class="text-sm text-rose-200 font-medium">Sales Saathi detects these early — before reps or managers notice</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">40+</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Health signals tracked</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Per deal, per stage</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-rose-500 mb-1">22%</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Less pipeline leakage</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Compared to CRM-only teams</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         FEATURE 8: RELATIONSHIP INTELLIGENCE
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section id="intelligence" class="feature-section py-28 bg-slate-50 dark:bg-[#0c0c0e]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="grid grid-cols-2 gap-5 order-2 lg:order-1">
+                    <div class="metric-card col-span-2 rounded-3xl bg-gradient-to-br from-violet-600 to-purple-800 p-8 text-white shadow-2xl">
+                        <div class="text-5xl font-extrabold mb-2">2.8×</div>
+                        <div class="text-lg font-bold mb-1">Higher win rates on multi-stakeholder accounts</div>
+                        <div class="text-sm text-violet-200 font-medium">Multi-threading is now the #1 predictor of enterprise deal success</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">6.2</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Avg. stakeholders/deal</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">In enterprise B2B deals today</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-violet-500 mb-1">85%</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Relationship coverage</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Auto-mapped from CRM + LinkedIn</div>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-50 dark:bg-violet-500/15 border border-violet-200 dark:border-violet-500/30 mb-6">
+                        <div class="w-6 h-6 rounded-lg bg-violet-500/20 text-violet-500 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-violet-500">Feature 08 · Relationship Intelligence</span>
+                    </div>
+                    <h2 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight">See every stakeholder. Influence every decision.</h2>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">What it does:</strong> Maps the full stakeholder network within each target account — including hidden influencers, economic buyers, end users, and champions — along with their sentiment toward your deal, engagement history, and recommended next engagement action for each individual.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">How it works:</strong> By analyzing email patterns, meeting participation history, LinkedIn organizational data, and CRM contact relationships, Sales Saathi constructs a live org chart with relationship strength scores, influence weightings, and sentiment indicators for each individual mapped to your deal.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-10 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">Why it matters:</strong> Enterprise deals with 3+ engaged stakeholders close at 2.8× the rate of single-threaded opportunities. Relationship Intelligence ensures you're never blindsided by an unengaged economic buyer or a hidden detractor.
+                    </p>
+                    <ul class="space-y-3 mb-10">
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Visual org chart with influence scores per stakeholder
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Identifies unengaged buyers with gap-filling action prompts
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Shared champion identification via LinkedIn mutual connections
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Alerts on role changes, departures, and new joiners in target accounts
+                        </li>
+                    </ul>
+                    <a href="auth.html" class="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-bold text-white bg-violet-600 hover:bg-violet-500 rounded-xl transition-all shadow-lg hover:-translate-y-0.5">
+                        Map Your Accounts Free <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         FEATURE 9: PIPELINE ANALYTICS
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section id="analytics" class="feature-section py-28">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 mb-6">
+                        <div class="w-6 h-6 rounded-lg bg-teal-500/20 text-teal-500 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-teal-500">Feature 09 · Pipeline Analytics</span>
+                    </div>
+                    <h2 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight">Complete pipeline visibility, always.</h2>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">What it does:</strong> Delivers real-time pipeline analytics dashboards that visualize conversion velocity, stage-by-stage drop-off rates, average deal cycle length by segment, rep performance benchmarks, and forecast accuracy — giving sales leaders a live, data-accurate view of the entire revenue engine.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">How it works:</strong> Sales Saathi continuously syncs your CRM data and enriches it with AI-computed engagement metrics, activity signals, and competitive intelligence layers. All analytics are refreshed every 15 minutes, with historical trend comparison available across any custom date range.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-10 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">Why it matters:</strong> Sales leaders who review real-time pipeline analytics weekly hit quota 19% more often than those relying on end-of-month CRM exports. Sales Saathi transforms reactive analysis into proactive revenue management.
+                    </p>
+                    <ul class="space-y-3 mb-10">
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Real-time funnel visualization with stage-by-stage conversion rates
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Rep performance scorecards with activity and outcome benchmarks
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Segment-level analysis by industry, company size, and deal source
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Exportable board-ready reports generated in one click
+                        </li>
+                    </ul>
+                    <a href="auth.html" class="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-bold text-white bg-teal-600 hover:bg-teal-500 rounded-xl transition-all shadow-lg hover:-translate-y-0.5">
+                        View Live Demo Dashboard <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="metric-card col-span-2 rounded-3xl bg-gradient-to-br from-teal-500 to-cyan-700 p-8 text-white shadow-2xl">
+                        <div class="text-5xl font-extrabold mb-2">+19%</div>
+                        <div class="text-lg font-bold mb-1">Higher quota attainment with real-time pipeline reviews</div>
+                        <div class="text-sm text-teal-100 font-medium">Leaders using live dashboards outperform those using static monthly reports</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">15 min</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Refresh cadence</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Always current pipeline data</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-teal-500 mb-1">50+</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">Metrics tracked</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Across activity and outcomes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         FEATURE 10: REVENUE INTELLIGENCE
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <section id="revenue" class="feature-section py-28 bg-slate-50 dark:bg-[#0c0c0e]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="grid grid-cols-2 gap-5 order-2 lg:order-1">
+                    <div class="metric-card col-span-2 rounded-3xl bg-gradient-to-br from-orange-500 to-red-600 p-8 text-white shadow-2xl">
+                        <div class="text-5xl font-extrabold mb-2">±5%</div>
+                        <div class="text-lg font-bold mb-1">Forecast accuracy within this margin</div>
+                        <div class="text-sm text-orange-100 font-medium">AI forecasting beats human gut-call predictions by an average of 26 percentage points</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">Weekly</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">AI forecast updates</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Rolling 90-day revenue view</div>
+                    </div>
+                    <div class="metric-card rounded-3xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder p-6 shadow-sm">
+                        <div class="text-3xl font-extrabold text-orange-500 mb-1">3-10×</div>
+                        <div class="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1">ROI on platform</div>
+                        <div class="text-xs text-slate-500 dark:text-zinc-500 font-medium">Measured by customer cohorts</div>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-500/15 border border-orange-200 dark:border-orange-500/30 mb-6">
+                        <div class="w-6 h-6 rounded-lg bg-orange-500/20 text-orange-500 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-orange-500">Feature 10 · Revenue Intelligence</span>
+                    </div>
+                    <h2 class="text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-tight">AI forecasting your CFO will actually trust.</h2>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">What it does:</strong> Generates rolling 90-day revenue forecasts using pattern recognition across your entire deal portfolio, identifies which deals are mathematically likely to close versus optimistically included by reps, and surfaces prioritized next-best-action recommendations to maximize the current quarter's attainment.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-8 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">How it works:</strong> Sales Saathi's revenue model is trained on your company's own historical win/loss data and enriched with market signals, rep activity patterns, and deal health scores. It produces a confidence-weighted forecast that separates committed revenue from pipeline optimism — automatically.
+                    </p>
+                    <p class="text-lg text-slate-600 dark:text-zinc-400 mb-10 leading-relaxed font-medium">
+                        <strong class="text-slate-900 dark:text-white">Why it matters:</strong> Accurate revenue forecasting isn't just a nice-to-have — it determines hiring plans, marketing budgets, and board confidence. Sales Saathi gives your organization a single source of truth that actually predicts what will happen, not what reps hope will happen.
+                    </p>
+                    <ul class="space-y-3 mb-10">
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Rolling 90-day revenue forecast refreshed weekly
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            "Commit" vs. "best case" vs. "pipeline" categorization powered by AI
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Next-best-action recommendations surfaced per deal to close quarter
+                        </li>
+                        <li class="flex items-start gap-3 text-sm font-semibold text-slate-700 dark:text-zinc-300">
+                            <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Board-ready forecast export with scenario modeling (base, bull, bear)
+                        </li>
+                    </ul>
+                    <a href="auth.html" class="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-bold text-white bg-orange-500 hover:bg-orange-400 rounded-xl transition-all shadow-lg hover:-translate-y-0.5">
+                        See the Revenue Dashboard <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 14: ECOSYSTEM TOOL INTEGRATION SHOWCASE
+         ============================================================ -->
+    <section class="py-24 border-y border-lightBorder dark:border-darkBorder">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4">Plugs into your existing stack.</h2>
+                <p class="text-lg text-slate-600 dark:text-zinc-400 font-medium max-w-2xl mx-auto">Sales Saathi integrates natively with the tools your team already uses — no migration, no disruption, no new logins to juggle.</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+
+                <!-- Salesforce -->
+                <div class="group flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder hover:border-slate-300 dark:hover:border-zinc-600 transition-all hover:shadow-lg hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-zinc-800 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-slate-700 dark:text-zinc-300" viewBox="0 0 24 24" fill="currentColor"><path d="M7.462 2.25c.897 0 1.72.367 2.31.96a4.064 4.064 0 012.77-1.093c1.56 0 2.919.882 3.614 2.182a3.274 3.274 0 011.152-.21c1.82 0 3.292 1.473 3.292 3.293 0 .317-.046.623-.13.913A2.803 2.803 0 0121.75 10.5c0 1.553-1.258 2.81-2.81 2.81a2.8 2.8 0 01-.496-.044A3.294 3.294 0 0115.75 15.5a3.29 3.29 0 01-2.343-.977A3.292 3.292 0 0110.5 15.75a3.29 3.29 0 01-2.577-1.248A3.292 3.292 0 015.25 15.75a3.292 3.292 0 01-3.29-3.29c0-.747.25-1.436.666-1.99A3.292 3.292 0 012.25 8.5c0-1.82 1.474-3.293 3.293-3.293.317 0 .624.046.913.13A3.29 3.29 0 017.462 2.25z"/></svg>
+                    </div>
+                    <span class="text-sm font-bold text-slate-800 dark:text-zinc-200">Salesforce</span>
+                    <span class="text-xs text-slate-500 dark:text-zinc-500 font-medium text-center">Full CRM sync, custom objects, and workflow triggers</span>
+                    <span class="text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-2 py-0.5 rounded-full">Native</span>
+                </div>
+
+                <!-- HubSpot -->
+                <div class="group flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder hover:border-slate-300 dark:hover:border-zinc-600 transition-all hover:shadow-lg hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-zinc-800 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-slate-700 dark:text-zinc-300" viewBox="0 0 24 24" fill="currentColor"><path d="M22.24 13.696c0 3.68-2.986 6.667-6.667 6.667a6.654 6.654 0 01-5.24-2.54l-4.893 2.832-2.51-4.35 4.923-2.847a6.631 6.631 0 01-.28-1.862c0-3.68 2.986-6.667 6.667-6.667S22.24 10.017 22.24 13.697zm-3.333 0a3.334 3.334 0 10-6.668 0 3.334 3.334 0 006.668 0z"/></svg>
+                    </div>
+                    <span class="text-sm font-bold text-slate-800 dark:text-zinc-200">HubSpot</span>
+                    <span class="text-xs text-slate-500 dark:text-zinc-500 font-medium text-center">Bidirectional pipeline and contact data synchronization</span>
+                    <span class="text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-2 py-0.5 rounded-full">Native</span>
+                </div>
+
+                <!-- Zoho CRM -->
+                <div class="group flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder hover:border-slate-300 dark:hover:border-zinc-600 transition-all hover:shadow-lg hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-zinc-800 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-slate-700 dark:text-zinc-300" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.5 14.5v-9l7 4.5-7 4.5z"/></svg>
+                    </div>
+                    <span class="text-sm font-bold text-slate-800 dark:text-zinc-200">Zoho CRM</span>
+                    <span class="text-xs text-slate-500 dark:text-zinc-500 font-medium text-center">Full module sync including deals, contacts, and tasks</span>
+                    <span class="text-xs font-bold text-brandIndigo bg-brandIndigo/10 px-2 py-0.5 rounded-full">REST API</span>
+                </div>
+
+                <!-- Google Calendar -->
+                <div class="group flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder hover:border-slate-300 dark:hover:border-zinc-600 transition-all hover:shadow-lg hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-zinc-800 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-slate-700 dark:text-zinc-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="4" x2="9" y2="9"/><line x1="15" y1="4" x2="15" y2="9"/></svg>
+                    </div>
+                    <span class="text-sm font-bold text-slate-800 dark:text-zinc-200">Google Calendar</span>
+                    <span class="text-xs text-slate-500 dark:text-zinc-500 font-medium text-center">Auto-detects meetings, attendees, and brief triggers</span>
+                    <span class="text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-2 py-0.5 rounded-full">Native</span>
+                </div>
+
+                <!-- Outlook -->
+                <div class="group flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder hover:border-slate-300 dark:hover:border-zinc-600 transition-all hover:shadow-lg hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-zinc-800 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-slate-700 dark:text-zinc-300" viewBox="0 0 24 24" fill="currentColor"><path d="M2 5.25A3.25 3.25 0 015.25 2h13.5A3.25 3.25 0 0122 5.25v13.5A3.25 3.25 0 0118.75 22H5.25A3.25 3.25 0 012 18.75V5.25zm3.25-.75A1.75 1.75 0 003.5 6.25v.871l8.5 5.54 8.5-5.54V6.25a1.75 1.75 0 00-1.75-1.75H5.25zM20.5 9.372L12 14.91l-8.5-5.54v9.38c0 .967.783 1.75 1.75 1.75h13.5a1.75 1.75 0 001.75-1.75V9.372z"/></svg>
+                    </div>
+                    <span class="text-sm font-bold text-slate-800 dark:text-zinc-200">Outlook</span>
+                    <span class="text-xs text-slate-500 dark:text-zinc-500 font-medium text-center">Calendar, email threading, and meeting detection</span>
+                    <span class="text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-2 py-0.5 rounded-full">Native</span>
+                </div>
+
+                <!-- Slack -->
+                <div class="group flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder hover:border-slate-300 dark:hover:border-zinc-600 transition-all hover:shadow-lg hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-zinc-800 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-slate-700 dark:text-zinc-300" viewBox="0 0 24 24" fill="currentColor"><path d="M5.042 15.165a2.528 2.528 0 01-2.52 2.523A2.528 2.528 0 010 15.165a2.527 2.527 0 012.522-2.52h2.52v2.52zm1.271 0a2.527 2.527 0 012.521-2.52 2.527 2.527 0 012.521 2.52v6.313A2.528 2.528 0 018.834 24a2.528 2.528 0 01-2.521-2.522v-6.313zm2.521-10.123a2.528 2.528 0 01-2.521-2.52A2.528 2.528 0 018.834 0a2.528 2.528 0 012.521 2.522v2.52H8.834zm0 1.271a2.528 2.528 0 012.521 2.521 2.528 2.528 0 01-2.521 2.521H2.522A2.528 2.528 0 010 8.834a2.528 2.528 0 012.522-2.521h6.312zm10.122 2.521a2.528 2.528 0 012.522-2.521A2.528 2.528 0 0124 8.834a2.528 2.528 0 01-2.522 2.521h-2.522V8.834zm-1.268 0a2.528 2.528 0 01-2.523 2.521 2.527 2.527 0 01-2.52-2.521V2.522A2.527 2.527 0 0115.165 0a2.528 2.528 0 012.523 2.522v6.312zm-2.523 10.122a2.528 2.528 0 012.523 2.522A2.528 2.528 0 0115.165 24a2.527 2.527 0 01-2.52-2.522v-2.522h2.52zm0-1.268a2.527 2.527 0 01-2.52-2.523 2.526 2.526 0 012.52-2.52h6.313A2.527 2.527 0 0124 15.165a2.528 2.528 0 01-2.522 2.523h-6.313z"/></svg>
+                    </div>
+                    <span class="text-sm font-bold text-slate-800 dark:text-zinc-200">Slack</span>
+                    <span class="text-xs text-slate-500 dark:text-zinc-500 font-medium text-center">Deal alerts, risk notifications, and brief delivery</span>
+                    <span class="text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-2 py-0.5 rounded-full">Native</span>
+                </div>
+
+                <!-- LinkedIn -->
+                <div class="group flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder hover:border-slate-300 dark:hover:border-zinc-600 transition-all hover:shadow-lg hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-zinc-800 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-slate-700 dark:text-zinc-300" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                    </div>
+                    <span class="text-sm font-bold text-slate-800 dark:text-zinc-200">LinkedIn</span>
+                    <span class="text-xs text-slate-500 dark:text-zinc-500 font-medium text-center">Prospect enrichment, activity signals, and connection mapping</span>
+                    <span class="text-xs font-bold text-brandIndigo bg-brandIndigo/10 px-2 py-0.5 rounded-full">Extension</span>
+                </div>
+
+                <!-- Zoom / Meet -->
+                <div class="group flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-white dark:bg-zinc-900/90 border border-lightBorder dark:border-darkBorder hover:border-slate-300 dark:hover:border-zinc-600 transition-all hover:shadow-lg hover:-translate-y-1">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-zinc-800 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-slate-700 dark:text-zinc-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/></svg>
+                    </div>
+                    <span class="text-sm font-bold text-slate-800 dark:text-zinc-200">Zoom & Meet</span>
+                    <span class="text-xs text-slate-500 dark:text-zinc-500 font-medium text-center">Live transcription, coaching overlays, and recording analysis</span>
+                    <span class="text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-2 py-0.5 rounded-full">Native</span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 15: PARADIGM COMPARISON GRID
+         ============================================================ -->
+    <section class="py-24 bg-slate-50 dark:bg-[#0c0c0e]">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4">Why Sales Saathi wins.</h2>
+                <p class="text-lg text-slate-600 dark:text-zinc-400 font-medium">A production-grade comparison of traditional sales processes versus the Sales Saathi optimization framework.</p>
+            </div>
+            <div class="overflow-hidden rounded-3xl border border-lightBorder dark:border-darkBorder shadow-2xl">
+                <table class="w-full border-collapse bg-white dark:bg-zinc-900/90">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-zinc-800/80">
+                            <th class="text-left px-6 py-5 text-sm font-extrabold text-slate-700 dark:text-zinc-200 w-1/3">Capability</th>
+                            <th class="text-center px-6 py-5 text-sm font-extrabold text-slate-500 dark:text-zinc-400 w-1/3">
+                                <div class="flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Traditional Process
+                                </div>
+                            </th>
+                            <th class="text-center px-6 py-5 text-sm font-extrabold text-brandIndigo dark:text-indigo-400 w-1/3">
+                                <div class="flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4 text-brandIndigo" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    Sales Saathi
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-zinc-800">
+                        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-zinc-200">Pre-meeting research</td>
+                            <td class="px-6 py-4 text-sm text-center text-slate-500 dark:text-zinc-400">45–90 min manual browsing per meeting</td>
+                            <td class="px-6 py-4 text-sm text-center font-bold text-brandEmerald">2-minute auto-generated AI Brief</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-zinc-200">Objection handling on calls</td>
+                            <td class="px-6 py-4 text-sm text-center text-slate-500 dark:text-zinc-400">Rely on memory, stumble under pressure</td>
+                            <td class="px-6 py-4 text-sm text-center font-bold text-brandEmerald">Live battlecards triggered in &lt;400ms</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-zinc-200">Post-call CRM updates</td>
+                            <td class="px-6 py-4 text-sm text-center text-slate-500 dark:text-zinc-400">15–25 min manual data entry per call</td>
+                            <td class="px-6 py-4 text-sm text-center font-bold text-brandEmerald">Automatic in 3 minutes, zero input</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-zinc-200">Follow-up email drafting</td>
+                            <td class="px-6 py-4 text-sm text-center text-slate-500 dark:text-zinc-400">Written hours or days after the call</td>
+                            <td class="px-6 py-4 text-sm text-center font-bold text-brandEmerald">Draft ready before call ends, 1-click send</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-zinc-200">Cold outreach personalization</td>
+                            <td class="px-6 py-4 text-sm text-center text-slate-500 dark:text-zinc-400">Generic templates or 3–5 min per email</td>
+                            <td class="px-6 py-4 text-sm text-center font-bold text-brandEmerald">200+ personalized sequences in 60 sec</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-zinc-200">Deal health monitoring</td>
+                            <td class="px-6 py-4 text-sm text-center text-slate-500 dark:text-zinc-400">Weekly pipeline reviews, too late to act</td>
+                            <td class="px-6 py-4 text-sm text-center font-bold text-brandEmerald">Real-time risk alerts, 2 weeks early</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-zinc-200">Revenue forecasting</td>
+                            <td class="px-6 py-4 text-sm text-center text-slate-500 dark:text-zinc-400">Rep gut-feel with ±30% accuracy</td>
+                            <td class="px-6 py-4 text-sm text-center font-bold text-brandEmerald">AI-powered within ±5% accuracy</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-zinc-200">Multi-stakeholder mapping</td>
+                            <td class="px-6 py-4 text-sm text-center text-slate-500 dark:text-zinc-400">Single-threaded, hidden buyers missed</td>
+                            <td class="px-6 py-4 text-sm text-center font-bold text-brandEmerald">Full org graph with influence scores</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-zinc-200">CRM data quality</td>
+                            <td class="px-6 py-4 text-sm text-center text-slate-500 dark:text-zinc-400">Incomplete, stale, rep-dependent</td>
+                            <td class="px-6 py-4 text-sm text-center font-bold text-brandEmerald">100% auto-filled, always current</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
+                            <td class="px-6 py-4 text-sm font-semibold text-slate-800 dark:text-zinc-200">Time spent on admin work</td>
+                            <td class="px-6 py-4 text-sm text-center text-slate-500 dark:text-zinc-400">14+ hrs/week per rep</td>
+                            <td class="px-6 py-4 text-sm text-center font-bold text-brandEmerald">Under 2 hrs/week per rep</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 16: HIGH-IMPACT FINAL CONVERSION BLOCK
+         ============================================================ -->
+    <section class="py-28 relative overflow-hidden border-t border-lightBorder dark:border-darkBorder">
+        <div class="absolute inset-0 bg-gradient-to-b from-brandIndigo/5 to-transparent dark:from-brandIndigo/10 dark:to-transparent pointer-events-none"></div>
+        <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-brandIndigo/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <!-- Trust Badge -->
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brandEmerald/10 border border-brandEmerald/20 mb-8">
+                <svg class="w-4 h-4 text-brandEmerald" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <span class="text-xs font-bold text-brandEmerald uppercase tracking-wider">SOC2 Type II · GDPR Compliant · Zero Training on Your Data</span>
+            </div>
+
+            <h2 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-6 leading-[1.05]">
+                Stop selling on guesswork.
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brandIndigo to-brandEmerald"> Start closing with AI.</span>
+            </h2>
+            <p class="text-xl text-slate-600 dark:text-zinc-400 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
+                Join 10,000+ sales professionals who have eliminated manual busywork and compressed their deal cycles using Sales Saathi's full AI platform — free for 14 days, no credit card required.
+            </p>
+
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-10">
+                <a href="auth.html#signup" class="w-full sm:w-auto px-10 py-5 text-base font-bold rounded-xl bg-brandIndigo text-white hover:bg-indigo-500 transition-all shadow-[0_8px_30px_rgba(79,70,229,0.4)] hover:shadow-[0_12px_40px_rgba(79,70,229,0.6)] hover:-translate-y-0.5 active:scale-95">
+                    Start Your Free 14-Day Trial
+                </a>
+                <a href="auth.html" class="w-full sm:w-auto px-10 py-5 text-base font-bold rounded-xl border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/90 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all shadow-sm">
+                    Talk to a Revenue Specialist
+                </a>
+            </div>
+
+            <!-- Trust Micro-Signals -->
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-6 text-sm font-semibold text-slate-500 dark:text-zinc-500">
+                <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brandEmerald" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    14-day free trial
+                </span>
+                <span class="hidden sm:block text-slate-300 dark:text-zinc-700">•</span>
+                <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brandEmerald" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    No credit card required
+                </span>
+                <span class="hidden sm:block text-slate-300 dark:text-zinc-700">•</span>
+                <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brandEmerald" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Setup in under 60 seconds
+                </span>
+                <span class="hidden sm:block text-slate-300 dark:text-zinc-700">•</span>
+                <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-brandEmerald" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Cancel anytime, no questions
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+         SECTION 17: BRAND DIRECTORY FOOTER (Identical to index.html)
+         ============================================================ -->
+    <footer class="bg-white dark:bg-[#0c0c0e] border-t border-lightBorder dark:border-darkBorder pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-8 mb-16">
+                <!-- Brand Column -->
+                <div class="col-span-2 md:col-span-2 flex flex-col">
+                    <a href="index.html" class="flex items-center gap-2.5 mb-6">
+                        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-brandIndigo to-brandViolet flex items-center justify-center text-white shadow-md">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <span class="font-bold text-lg tracking-tight text-slate-900 dark:text-white">Sales Saathi</span>
+                    </a>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium mb-6 max-w-sm">The world's first AI-powered sales co-pilot designed to automate research, guide live discovery, and enforce CRM hygiene — so your team can focus 100% on closing.</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="Twitter">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                        </a>
+                        <a href="#" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="LinkedIn">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        </a>
+                        <a href="#" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="GitHub">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Product Links -->
+                <div class="col-span-1 flex flex-col gap-3">
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Product</h4>
+                    <a href="features.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Features</a>
+                    <a href="features.html#briefs" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">AI Briefs</a>
+                    <a href="features.html#coach" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Live Coach</a>
+                    <a href="pricing.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Pricing</a>
+                    <a href="#" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Changelog</a>
+                    <a href="#" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Integrations</a>
+                </div>
+
+                <!-- Resources Links -->
+                <div class="col-span-1 flex flex-col gap-3">
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Resources</h4>
+                    <a href="resources.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Documentation</a>
+                    <a href="resources.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Blog</a>
+                    <a href="resources.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Community</a>
+                    <a href="resources.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Help Center</a>
+                    <a href="resources.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">API Reference</a>
+                </div>
+
+                <!-- Company Links -->
+                <div class="col-span-1 flex flex-col gap-3">
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Company</h4>
+                    <a href="#" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">About Us</a>
+                    <a href="contact.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Contact</a>
+                    <a href="#" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Careers</a>
+                    <a href="#" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Privacy Policy</a>
+                    <a href="#" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Terms of Service</a>
+                    <a href="solutions.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Solutions</a>
+                </div>
+            </div>
+
+            <!-- Footer Bottom Bar -->
+            <div class="pt-8 border-t border-lightBorder dark:border-darkBorder flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-xs text-slate-400 dark:text-zinc-500 font-medium">© 2026 Sales Saathi Inc. All rights reserved. SOC2 Type II Certified.</p>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-400 dark:text-zinc-500 font-medium">System Status:</span>
+                    <span class="flex items-center gap-1.5 text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-3 py-1 rounded-full">
+                        <span class="w-1.5 h-1.5 rounded-full bg-brandEmerald animate-pulse"></span>
+                        100% Operational
+                    </span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

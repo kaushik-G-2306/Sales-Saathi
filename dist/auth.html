@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{ 
+    activeScreen: window.location.hash === '#signup' ? 'signup' : 'login', 
+    darkMode: true,
+    loading: false,
+    firstName: '',
+    lastName: '',
+    email: '',
+    signupEmail: '',
+    registeredEmail: $persist(''),
+    loginError: '',
+    company: '',
+    password: '',
+    confirmPassword: '',
+    
+    // Recovery State
+    recoverySent: false,
+    
+    // OTP State
+    otpSent: false,
+    otpEmail: '',
+    
+    // Verification State
+    isVerified: false,
+    countdown: 60,
+    
+    get passwordStrength() {
+        if (!this.password) return 0;
+        let score = 0;
+        if (this.password.length > 7) score += 1;
+        if (this.password.match(/[A-Z]/)) score += 1;
+        if (this.password.match(/[0-9]/)) score += 1;
+        if (this.password.match(/[^A-Za-z0-9]/)) score += 1;
+        return score; // 0 to 4
+    },
+    
+    get strengthColor() {
+        if (this.passwordStrength <= 1) return 'bg-rose-500';
+        if (this.passwordStrength === 2) return 'bg-amber-500';
+        if (this.passwordStrength >= 3) return 'bg-brandEmerald';
+        return 'bg-slate-200 dark:bg-white/10';
+    },
+
+    startCountdown() {
+        this.countdown = 60;
+        let interval = setInterval(() => {
+            if(this.countdown > 0) {
+                this.countdown--;
+            } else {
+                clearInterval(interval);
+            }
+        }, 1000);
+    },
+
+    async handleLogin() {
+        this.loading = true;
+        this.loginError = '';
+        try {
+            await this.$store.auth.signInEmail(this.email, this.password);
+            window.location.href = 'dashboard.html';
+        } catch (error) {
+            this.loginError = error.message;
+        } finally {
+            this.loading = false;
+        }
+    },
+
+    async handleSignup() {
+        this.loading = true;
+        this.loginError = '';
+        try {
+            const data = await this.$store.auth.signUpEmail((this.firstName + ' ' + this.lastName).trim(), this.signupEmail, this.password);
+            
+            // If email confirmation is enabled, session will be null.
+            if (data && !data.session) {
+                alert('Account created! Please check your email to verify your account.');
+                this.activeScreen = 'login';
+                this.email = this.signupEmail;
+            } else {
+                // Email confirmation is disabled or mock flow, session exists.
+                window.location.href = 'onboarding.html';
+            }
+        } catch (error) {
+            alert('Signup Error: ' + error.message);
+        } finally {
+            this.loading = false;
+        }
+    },
+
+    async handleGoogle() {
+        try {
+            await this.$store.auth.signInGoogle();
+        } catch (error) {
+            alert(error.message);
+        }
+    },
+
+    async handleOTP() {
+        this.loading = true;
+        this.loginError = '';
+        try {
+            await this.$store.auth.signInOTP(this.otpEmail);
+            this.otpSent = true;
+        } catch (error) {
+            this.loginError = error.message;
+        } finally {
+            this.loading = false;
+        }
+    }
+}" :class="{ 'dark': darkMode }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication | Sales Saathi</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        darkBg: '#09090b',
+                        darkPanel: '#141416',
+                        darkInput: '#1e1e24',
+                        darkBorder: 'rgba(255,255,255,0.12)',
+                        lightBorder: 'rgba(15,23,42,0.08)',
+                        brandIndigo: '#4f46e5',
+                        brandViolet: '#6366f1',
+                        brandEmerald: '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .glass {
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 10px; }
+
+        /* ── Dark Mode Form Contrast Fix ── */
+        .dark input,
+        .dark textarea,
+        .dark select {
+            color: #f1f5f9;
+            background-color: #1e1e24;
+            border-color: rgba(255,255,255,0.14);
+        }
+        .dark input::placeholder,
+        .dark textarea::placeholder {
+            color: rgba(161,161,170,0.65);
+        }
+
+        /* ── Password Toggle Wrapper ── */
+        .pw-wrap { position: relative; }
+        .pw-wrap input { padding-right: 3rem; }
+        .pw-toggle {
+            position: absolute;
+            right: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #94a3b8;
+            padding: 0;
+            line-height: 1;
+            transition: color 0.15s;
+        }
+        .pw-toggle:hover { color: #4f46e5; }
+        .dark .pw-toggle { color: #71717a; }
+        .dark .pw-toggle:hover { color: #818cf8; }
+    </style>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgNTAgTDQwIDI1IEw4NSAyNSBMNjUgNDUgTDUwIDQ1IEw2MCAzNSBMMzAgMzUgTDE1IDUwIFoiIGZpbGw9IiMzOGJkZjgiLz48cGF0aCBkPSJNODUgNTAgTDYwIDc1IEwxNSA3NSBMMzUgNTUgTDUwIDU1IEw0MCA2NSBMNzAgNjUgWiIgZmlsbD0iIzYzNjZmMSIvPjwvc3ZnPg==">
+  <script type="module" crossorigin src="/assets/main-qNJIMltT.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-R81dcRFx.css">
+</head>
+<body class="bg-white dark:bg-darkBg text-slate-900 dark:text-zinc-100 font-sans antialiased min-h-screen flex transition-colors duration-300 selection:bg-brandIndigo selection:text-white">
+
+    <!-- Global Preloader Engine -->
+    <div x-data="{ pageLoaded: false }" 
+         x-init="window.addEventListener('load', () => { setTimeout(() => pageLoaded = true, 300) })"
+         x-show="!pageLoaded"
+         x-transition:leave="transition ease-in duration-400"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-50 dark:bg-darkBg"
+         x-cloak>
+        <div class="relative w-16 h-16 animate-pulse">
+            <div class="absolute inset-0 bg-brandIndigo/40 blur-2xl rounded-full"></div>
+            <img src="/assets/logo-Cwh9YEgE.png" alt="Sales Saathi Loading" class="relative z-10 w-full h-full drop-shadow-2xl object-contain" />
+        </div>
+    </div>
+
+    <!-- THEME TOGGLE (Absolute Top Right) -->
+    <div class="fixed top-6 right-6 z-50">
+        <button @click="darkMode = !darkMode" class="p-2 rounded-full border border-lightBorder dark:border-darkBorder bg-white/50 dark:bg-darkInput/50 glass hover:bg-slate-100 dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo shadow-sm text-slate-500 dark:text-zinc-400">
+            <svg x-show="!darkMode" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <svg x-show="darkMode" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+    </div>
+
+    <!-- LEFT PANEL: BRANDING & VISUAL CONTEXT (Hidden on Mobile) -->
+    <div class="hidden lg:flex flex-col w-1/2 bg-slate-50 dark:bg-darkPanel border-r border-lightBorder dark:border-darkBorder relative overflow-hidden">
+        
+        <!-- Persistent Logo -->
+        <div class="absolute top-8 left-12 z-20">
+            <a href="index.html" class="flex items-center gap-2.5 outline-none">
+                <img src="/assets/logo-Cwh9YEgE.png" alt="Sales Saathi Logo" class="h-9 w-auto rounded-lg shadow-lg group-hover:scale-105 transition-transform duration-200 object-contain" style="min-width:36px;" />
+                <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white">Sales Saathi</span>
+            </a>
+        </div>
+
+        <!-- STATE A: Dashboard Preview (For Login, Recovery, Verification, Welcome) -->
+        <div x-show="['login', 'forgot', 'reset', 'verify', 'welcome'].includes(activeScreen)" x-transition.opacity.duration.500ms class="relative flex-1 flex flex-col items-center justify-center p-12 w-full h-full">
+            <!-- Abstract Glows -->
+            <div class="absolute w-[500px] h-[500px] bg-brandIndigo/20 dark:bg-brandIndigo/10 rounded-full blur-[100px] top-1/4 -right-24 pointer-events-none"></div>
+            <div class="absolute w-[400px] h-[400px] bg-brandEmerald/20 dark:bg-brandEmerald/10 rounded-full blur-[100px] bottom-1/4 -left-24 pointer-events-none"></div>
+            
+            <div class="relative w-full max-w-lg aspect-square bg-white/70 dark:bg-darkInput/70 glass border border-slate-200 dark:border-darkBorder rounded-3xl shadow-2xl p-6 flex flex-col gap-6 transform -rotate-2 hover:rotate-0 transition-transform duration-700 mt-12">
+                <!-- Dashboard Header Mock -->
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-darkBorder pb-4">
+                    <div class="h-6 w-32 bg-slate-200 dark:bg-white/10 rounded-md"></div>
+                    <div class="h-8 w-8 bg-brandIndigo/20 rounded-full"></div>
+                </div>
+                <!-- Macro Cards -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white dark:bg-darkPanel border border-lightBorder dark:border-darkBorder rounded-2xl p-5 shadow-sm">
+                        <div class="w-10 h-10 rounded-full bg-emerald-50 dark:bg-brandEmerald/10 flex items-center justify-center text-brandEmerald mb-4 border border-brandEmerald/20">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1">Live Prospect Intelligence</h4>
+                        <p class="text-[10px] text-slate-500 font-medium">Acme Corp Discovery Call</p>
+                    </div>
+                    <div class="bg-white dark:bg-darkPanel border border-lightBorder dark:border-darkBorder rounded-2xl p-5 shadow-sm">
+                        <div class="relative w-12 h-12 flex items-center justify-center mb-3">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="16" fill="transparent" stroke="currentColor" stroke-width="3" class="text-slate-100 dark:text-white/5"></circle>
+                                <circle cx="18" cy="18" r="16" fill="transparent" stroke="currentColor" stroke-width="3" stroke-dasharray="94 6" class="text-brandIndigo"></circle>
+                            </svg>
+                            <span class="absolute text-xs font-bold text-slate-900 dark:text-white">94%</span>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1">Match</h4>
+                        <p class="text-[10px] text-slate-500 font-medium">Pipeline probability score</p>
+                    </div>
+                </div>
+                <!-- Lower Chart Mock -->
+                <div class="flex-1 bg-white dark:bg-darkPanel border border-lightBorder dark:border-darkBorder rounded-2xl p-5 mt-2 flex flex-col gap-3">
+                    <div class="h-4 w-1/3 bg-slate-200 dark:bg-white/10 rounded mb-2"></div>
+                    <div class="flex-1 flex items-end gap-2">
+                        <div class="w-full bg-slate-200 dark:bg-white/10 rounded-t h-[30%]"></div>
+                        <div class="w-full bg-slate-200 dark:bg-white/10 rounded-t h-[40%]"></div>
+                        <div class="w-full bg-brandIndigo/40 rounded-t h-[60%]"></div>
+                        <div class="w-full bg-brandIndigo rounded-t h-[90%] relative">
+                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-brandEmerald ring-4 ring-brandEmerald/30"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATE B: Social Proof (For Signup) -->
+        <div x-show="activeScreen === 'signup'" x-cloak x-transition.opacity.duration.500ms class="relative flex-1 flex flex-col items-center justify-center p-12 w-full h-full">
+            <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0); background-size: 32px 32px;"></div>
+            <div class="max-w-md relative z-10">
+                <svg class="w-12 h-12 text-brandIndigo opacity-50 mb-6" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+                <p class="text-3xl font-extrabold text-slate-900 dark:text-white leading-tight mb-8">
+                    "We've seen a <span class="text-brandIndigo">32% close-rate lift</span> since implementing Sales Saathi. The AI pre-meeting briefs fundamentally changed how our reps prepare."
+                </p>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-slate-300 dark:bg-white/10 border-2 border-white dark:border-darkPanel shadow-lg overflow-hidden flex items-center justify-center">
+                        <svg class="w-6 h-6 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-base font-bold text-slate-900 dark:text-white">Sarah Jenkins</p>
+                        <p class="text-sm font-medium text-slate-500">Director of Sales, TechFlow Enterprise</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: FORMS & ROUTING ENGINE -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 relative overflow-y-auto">
+        
+        <!-- Mobile Logo (Shows only on small screens) -->
+        <div class="absolute top-8 left-8 z-20 lg:hidden">
+            <a href="index.html" class="flex items-center gap-2.5 outline-none">
+                <img src="/assets/logo-Cwh9YEgE.png" alt="Sales Saathi Logo" class="h-9 w-auto rounded-lg shadow-lg group-hover:scale-105 transition-transform duration-200 object-contain" style="min-width:36px;" />
+            </a>
+        </div>
+
+        <div class="w-full max-w-sm xl:max-w-md relative z-10 pt-12 lg:pt-0">
+            
+            <!-- VIEW 1: SIGN-IN GATEWAY -->
+            <div x-show="activeScreen === 'login'" x-transition:enter="transition ease-out duration-300 delay-100" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-4" class="absolute inset-x-0 top-0" x-cloak>
+                <div class="mb-10">
+                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Welcome back</h2>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium">Please enter your credentials to access your workspace.</p>
+                </div>
+
+                <!-- OAuth Options -->
+                <div class="flex flex-col gap-3 mb-8">
+                    <button @click="handleGoogle()" type="button" class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-lightBorder dark:border-darkBorder rounded-xl bg-white dark:bg-darkInput text-sm font-bold text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-brandIndigo/50">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                        Continue with Google
+                    </button>
+                    <button type="button" class="w-full flex items-center justify-center gap-3 px-4 py-3 border border-lightBorder dark:border-darkBorder rounded-xl bg-white dark:bg-darkInput text-sm font-bold text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 opacity-50 cursor-not-allowed">
+                        <svg class="w-5 h-5" viewBox="0 0 21 21"><path fill="#f25022" d="M0 0h10v10H0z"/><path fill="#7fba00" d="M11 0h10v10H11z"/><path fill="#00a4ef" d="M0 11h10v10H0z"/><path fill="#ffb900" d="M11 11h10v10H11z"/></svg>
+                        Continue with Microsoft
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="h-px bg-slate-200 dark:bg-darkBorder flex-1"></div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Or</span>
+                    <div class="h-px bg-slate-200 dark:bg-darkBorder flex-1"></div>
+                </div>
+
+                <form @submit.prevent="handleLogin()" class="space-y-5">
+                    <template x-if="loginError">
+                        <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-sm font-bold text-rose-600 dark:text-rose-400" x-text="loginError"></div>
+                    </template>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">Work Email</label>
+                        <input type="email" x-model="email" required placeholder="name@company.com" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-darkInput border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 focus:border-brandIndigo placeholder-slate-400 dark:placeholder-zinc-600 transition-all font-medium">
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300">Password</label>
+                            <button type="button" @click="activeScreen = 'forgot'" class="text-xs font-bold text-brandIndigo hover:text-indigo-500 outline-none">Forgot password?</button>
+                        </div>
+                        <div class="pw-wrap" x-data="{ showPw: false }">
+                            <input :type="showPw ? 'text' : 'password'" x-model="password" required placeholder="••••••••" autocomplete="current-password" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-darkInput border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 focus:border-brandIndigo placeholder-slate-400 dark:placeholder-zinc-600 transition-all font-medium tracking-widest" />
+                            <button type="button" class="pw-toggle" @click="showPw = !showPw" :aria-label="showPw ? 'Hide password' : 'Show password'">
+                                <svg x-show="!showPw" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                <svg x-show="showPw" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" class="w-4 h-4 rounded border-slate-300 dark:border-darkBorder text-brandIndigo focus:ring-brandIndigo/50 bg-white dark:bg-darkInput cursor-pointer">
+                        <label for="remember" class="ml-2 text-sm font-medium text-slate-600 dark:text-zinc-400 cursor-pointer">Remember for 30 days</label>
+                    </div>
+
+                    <button type="submit" :disabled="loading" class="relative w-full py-3.5 rounded-xl bg-gradient-to-b from-brandIndigo to-brandViolet text-white font-bold text-base shadow-[0_2px_10px_rgba(79,70,229,0.3)] hover:shadow-[0_4px_15px_rgba(79,70,229,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 outline-none focus:ring-2 focus:ring-brandIndigo focus:ring-offset-2 dark:focus:ring-offset-darkBg disabled:opacity-70 disabled:scale-100 flex justify-center items-center overflow-hidden">
+                        <span x-show="!loading">Log In</span>
+                        <svg x-show="loading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </button>
+                </form>
+
+                <div class="mt-5 text-center">
+                    <button @click="activeScreen = 'otp'; otpSent = false" type="button" class="text-sm font-bold text-slate-600 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-brandIndigo outline-none transition-colors">
+                        Or sign in with Magic Link / OTP
+                    </button>
+                </div>
+
+                <p class="mt-6 text-center text-sm font-medium text-slate-600 dark:text-zinc-400">
+                    Don't have an account? <button @click="activeScreen = 'signup'; password = '';" class="font-bold text-brandIndigo hover:text-indigo-500 outline-none">Start free trial</button>
+                </p>
+            </div>
+
+            <!-- VIEW 2: ACCOUNT REGISTRATION -->
+            <div x-show="activeScreen === 'signup'" x-transition:enter="transition ease-out duration-300 delay-100" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-4" class="absolute inset-x-0 top-0" x-cloak>
+                <div class="mb-8">
+                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Start your 14-day free trial</h2>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium">Join 10,000+ top revenue teams closing more deals.</p>
+                </div>
+
+                <form @submit.prevent="handleSignup()" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1.5">First Name</label>
+                            <input type="text" x-model="firstName" required class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-darkInput border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1.5">Last Name</label>
+                            <input type="text" x-model="lastName" required class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-darkInput border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 font-medium">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1.5">Work Email</label>
+                        <input type="email" x-model="signupEmail" required placeholder="name@company.com" class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-darkInput border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1.5">Company Name</label>
+                        <input type="text" required class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-darkInput border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-1.5">Master Password</label>
+                        <div class="pw-wrap" x-data="{ showPw: false }">
+                            <input :type="showPw ? 'text' : 'password'" x-model="password" required autocomplete="new-password" class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-darkInput border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 font-medium tracking-widest mb-2" />
+                            <button type="button" class="pw-toggle" @click="showPw = !showPw" :aria-label="showPw ? 'Hide password' : 'Show password'">
+                                <svg x-show="!showPw" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                <svg x-show="showPw" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Visual Strength Bar -->
+                        <div class="flex gap-1 h-1 w-full rounded overflow-hidden">
+                            <div class="flex-1 transition-colors duration-300" :class="passwordStrength >= 1 ? strengthColor : 'bg-slate-200 dark:bg-white/10'"></div>
+                            <div class="flex-1 transition-colors duration-300" :class="passwordStrength >= 2 ? strengthColor : 'bg-slate-200 dark:bg-white/10'"></div>
+                            <div class="flex-1 transition-colors duration-300" :class="passwordStrength >= 3 ? strengthColor : 'bg-slate-200 dark:bg-white/10'"></div>
+                            <div class="flex-1 transition-colors duration-300" :class="passwordStrength >= 4 ? strengthColor : 'bg-slate-200 dark:bg-white/10'"></div>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1 font-medium text-right" x-text="passwordStrength === 0 ? '' : (passwordStrength < 3 ? 'Weak' : (passwordStrength === 3 ? 'Good' : 'Strong'))"></p>
+                    </div>
+
+                    <div class="flex items-start mt-2">
+                        <input type="checkbox" required id="tos" class="mt-1 w-4 h-4 rounded border-slate-300 dark:border-darkBorder text-brandIndigo focus:ring-brandIndigo/50 bg-white dark:bg-darkInput cursor-pointer">
+                        <label for="tos" class="ml-2 text-xs font-medium text-slate-600 dark:text-zinc-400 leading-relaxed cursor-pointer">
+                            I agree to the <a href="index.html" class="text-brandIndigo hover:underline">Terms of Service</a> and <a href="index.html" class="text-brandIndigo hover:underline">Privacy Policy</a>.
+                        </label>
+                    </div>
+
+                    <button type="submit" :disabled="loading || passwordStrength < 2" class="relative w-full py-3.5 mt-2 rounded-xl bg-gradient-to-b from-brandIndigo to-brandViolet text-white font-bold text-base shadow-[0_2px_10px_rgba(79,70,229,0.3)] hover:shadow-[0_4px_15px_rgba(79,70,229,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 outline-none focus:ring-2 focus:ring-brandIndigo disabled:opacity-50 disabled:scale-100 flex justify-center items-center">
+                        <span x-show="!loading">Start your 14-day free trial</span>
+                        <svg x-show="loading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </button>
+                </form>
+
+                <p class="mt-6 text-center text-sm font-medium text-slate-600 dark:text-zinc-400">
+                    Already have an account? <button @click="activeScreen = 'login'; password = '';" class="font-bold text-brandIndigo hover:text-indigo-500 outline-none">Log In</button>
+                </p>
+            </div>
+
+            <!-- VIEW 3: CREDENTIAL RECOVERY -->
+            <div x-show="activeScreen === 'forgot'" x-transition:enter="transition ease-out duration-300 delay-100" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-4" class="absolute inset-x-0 top-0" x-cloak>
+                
+                <button @click="activeScreen = 'login'; recoverySent = false" class="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white mb-8 outline-none transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    Back to login
+                </button>
+
+                <div x-show="!recoverySent">
+                    <div class="mb-8">
+                        <div class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-darkInput border border-lightBorder dark:border-darkBorder flex items-center justify-center text-slate-900 dark:text-white mb-6">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                        </div>
+                        <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Forgot password?</h2>
+                        <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium">No worries, we'll send you reset instructions.</p>
+                    </div>
+
+                    <form @submit.prevent="loading = true; setTimeout(() => { loading = false; recoverySent = true; }, 1000)" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">Email address</label>
+                            <input type="email" required placeholder="name@company.com" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-darkInput border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 font-medium">
+                        </div>
+                        <button type="submit" :disabled="loading" class="relative w-full py-3.5 rounded-xl bg-gradient-to-b from-brandIndigo to-brandViolet text-white font-bold text-base shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all flex justify-center items-center">
+                            <span x-show="!loading">Reset Password</span>
+                            <svg x-show="loading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Success State -->
+                <div x-show="recoverySent" x-cloak class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-emerald-50 dark:bg-brandEmerald/10 border-4 border-emerald-100 dark:border-brandEmerald/20 flex items-center justify-center text-brandEmerald mx-auto mb-6 mt-12">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">Check your email</h2>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium mb-8 leading-relaxed">We've sent a password reset link to your inbox. The link will expire in 30 minutes.</p>
+                    <button @click="activeScreen = 'login'; recoverySent = false" class="font-bold text-brandIndigo hover:text-indigo-500 w-full py-3.5 rounded-xl bg-slate-100 dark:bg-darkInput transition-colors">Return to login</button>
+                </div>
+            </div>
+
+            <!-- VIEW 4: PASSWORD RESET (For demonstration purposes routing here directly isn't wired, but view exists) -->
+            <div x-show="activeScreen === 'reset'" x-transition:enter="transition ease-out duration-300 delay-100" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-4" class="absolute inset-x-0 top-0" x-cloak>
+                <div class="mb-8">
+                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Set new password</h2>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium">Your new password must be different from previous used passwords.</p>
+                </div>
+
+                <form @submit.prevent="simulateAction('login')" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">New Password</label>
+                        <div class="pw-wrap" x-data="{ showPw: false }">
+                            <input :type="showPw ? 'text' : 'password'" x-model="password" required autocomplete="new-password" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-darkInput border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 tracking-widest mb-2" />
+                            <button type="button" class="pw-toggle" @click="showPw = !showPw" :aria-label="showPw ? 'Hide password' : 'Show password'">
+                                <svg x-show="!showPw" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                <svg x-show="showPw" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                            </button>
+                        </div>
+                        <!-- Visual Strength Bar -->
+                        <div class="flex gap-1 h-1 w-full rounded overflow-hidden mt-2">
+                            <div class="flex-1 transition-colors duration-300" :class="passwordStrength >= 1 ? strengthColor : 'bg-slate-200 dark:bg-white/10'"></div>
+                            <div class="flex-1 transition-colors duration-300" :class="passwordStrength >= 2 ? strengthColor : 'bg-slate-200 dark:bg-white/10'"></div>
+                            <div class="flex-1 transition-colors duration-300" :class="passwordStrength >= 3 ? strengthColor : 'bg-slate-200 dark:bg-white/10'"></div>
+                            <div class="flex-1 transition-colors duration-300" :class="passwordStrength >= 4 ? strengthColor : 'bg-slate-200 dark:bg-white/10'"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">Confirm Password</label>
+                        <div class="pw-wrap" x-data="{ showPw2: false }">
+                            <input :type="showPw2 ? 'text' : 'password'" x-model="confirmPassword" required autocomplete="new-password" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-darkInput border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 tracking-widest" />
+                            <button type="button" class="pw-toggle" @click="showPw2 = !showPw2" :aria-label="showPw2 ? 'Hide password' : 'Show password'">
+                                <svg x-show="!showPw2" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                <svg x-show="showPw2" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" :disabled="loading || passwordStrength < 2 || password !== confirmPassword" class="relative w-full py-3.5 rounded-xl bg-gradient-to-b from-brandIndigo to-brandViolet text-white font-bold text-base shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 flex justify-center items-center mt-4">
+                        <span x-show="!loading">Reset Password</span>
+                        <svg x-show="loading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- VIEW 5: OTP REQUEST -->
+            <div x-show="activeScreen === 'otp'" x-transition:enter="transition ease-out duration-300 delay-100" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-4" class="absolute inset-x-0 top-0" x-cloak>
+                <button @click="activeScreen = 'login'" class="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white mb-8 outline-none transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    Back to login
+                </button>
+
+                <div x-show="!otpSent">
+                    <div class="mb-8">
+                        <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Magic Link Login</h2>
+                        <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium">Enter your email and we'll send you a passwordless login link.</p>
+                    </div>
+
+                    <form @submit.prevent="handleOTP()" class="space-y-5">
+                        <template x-if="loginError">
+                            <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-sm font-bold text-rose-600 dark:text-rose-400" x-text="loginError"></div>
+                        </template>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">Work Email</label>
+                            <input type="email" x-model="otpEmail" required placeholder="name@company.com" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-darkInput border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 font-medium">
+                        </div>
+                        <button type="submit" :disabled="loading" class="relative w-full py-3.5 rounded-xl bg-gradient-to-b from-brandIndigo to-brandViolet text-white font-bold text-base shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all flex justify-center items-center">
+                            <span x-show="!loading">Send Magic Link</span>
+                            <svg x-show="loading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </button>
+                    </form>
+                </div>
+
+                <div x-show="otpSent" x-cloak class="text-center">
+                    <div class="w-16 h-16 rounded-full bg-emerald-50 dark:bg-brandEmerald/10 border-4 border-emerald-100 dark:border-brandEmerald/20 flex items-center justify-center text-brandEmerald mx-auto mb-6 mt-12">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">Check your email</h2>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium mb-8 leading-relaxed">We've sent a magic link to your inbox. Click the link or enter the code to log in.</p>
+                    
+                    <form @submit.prevent="verifyOTPCode" x-data="{ otpCode: '', async verifyOTPCode() {
+                        loading = true; loginError = '';
+                        try { await $store.auth.verifyOTP(otpEmail, otpCode); window.location.href = 'dashboard.html'; }
+                        catch (e) { loginError = e.message; }
+                        finally { loading = false; }
+                    } }">
+                        <template x-if="loginError">
+                            <div class="p-3 mb-4 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-sm font-bold text-rose-600 dark:text-rose-400" x-text="loginError"></div>
+                        </template>
+                        <input type="text" x-model="otpCode" required placeholder="Enter 6-digit OTP" class="w-full text-center tracking-[0.5em] px-4 py-3 rounded-xl bg-white dark:bg-darkInput border border-lightBorder dark:border-darkBorder text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brandIndigo/50 font-bold mb-4">
+                        <button type="submit" :disabled="loading" class="relative w-full py-3.5 rounded-xl bg-gradient-to-b from-brandIndigo to-brandViolet text-white font-bold text-base shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all flex justify-center items-center">
+                            <span x-show="!loading">Verify Code</span>
+                            <svg x-show="loading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- VIEW 5: VERIFICATION COMPLIANCE -->
+            <div x-show="activeScreen === 'verify'" x-transition:enter="transition ease-out duration-300 delay-100" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 -translate-x-4" class="absolute inset-x-0 top-0 text-center" x-cloak>
+                
+                <div x-show="!isVerified">
+                    <div class="relative w-20 h-20 mx-auto mb-8">
+                        <div class="absolute inset-0 border-4 border-slate-200 dark:border-darkBorder rounded-full"></div>
+                        <div class="absolute inset-0 border-4 border-brandIndigo rounded-full border-t-transparent animate-spin"></div>
+                        <div class="absolute inset-0 flex items-center justify-center text-brandIndigo">
+                            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        </div>
+                    </div>
+                    
+                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">Verify your email</h2>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium mb-8 leading-relaxed max-w-sm mx-auto">We've sent a verification link to your email. Please click the link to activate your Sales Saathi workspace.</p>
+                    
+                    <!-- Dummy trigger to simulate user clicking link in email -->
+                    <button @click="isVerified = true; setTimeout(() => activeScreen = 'welcome', 2000)" class="w-full py-3.5 mb-4 rounded-xl border border-brandIndigo text-brandIndigo font-bold text-sm hover:bg-brandIndigo/5 transition-colors">Simulate Verification Click</button>
+
+                    <div class="text-sm font-medium text-slate-500 dark:text-zinc-400">
+                        Didn't receive the email? <br>
+                        <button @click="if(countdown === 0) startCountdown()" :class="countdown > 0 ? 'text-slate-400 cursor-not-allowed' : 'text-brandIndigo hover:text-indigo-500'" class="font-bold mt-1 outline-none">
+                            <span x-text="countdown > 0 ? 'Resend in ' + countdown + 's' : 'Click to resend'"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <div x-show="isVerified" x-cloak x-transition.opacity class="flex flex-col items-center justify-center py-8">
+                    <div class="w-20 h-20 rounded-full bg-brandEmerald text-white flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                        <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Email Verified</h2>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium">Preparing your workspace...</p>
+                </div>
+
+            </div>
+
+            <!-- VIEW 6: ONBOARDING SUCCESS CANVAS -->
+            <div x-show="activeScreen === 'welcome'" x-transition:enter="transition ease-out duration-500 delay-200" x-transition:enter-start="opacity-0 translate-y-8" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-8" class="absolute inset-x-0 top-0" x-cloak>
+                <div class="text-center mb-10">
+                    <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-brandIndigo to-brandViolet flex items-center justify-center text-white shadow-lg mb-6">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Welcome to Sales Saathi</h2>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium">Let's connect your systems to unleash the AI.</p>
+                </div>
+
+                <div class="space-y-4 mb-8">
+                    <!-- Connect CRM -->
+                    <div class="flex items-center justify-between p-4 rounded-2xl border border-lightBorder dark:border-darkBorder bg-white dark:bg-darkInput group cursor-pointer hover:border-brandIndigo/50 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-darkPanel flex items-center justify-center shrink-0 border border-slate-200 dark:border-darkBorder">
+                                <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-0.5">Connect CRM Infrastructure</h4>
+                                <p class="text-[10px] text-slate-500 font-medium">Salesforce, HubSpot, Pipedrive</p>
+                            </div>
+                        </div>
+                        <button class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Connect</button>
+                    </div>
+                    <!-- Sync Calendar -->
+                    <div class="flex items-center justify-between p-4 rounded-2xl border border-lightBorder dark:border-darkBorder bg-white dark:bg-darkInput group cursor-pointer hover:border-brandIndigo/50 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-darkPanel flex items-center justify-center shrink-0 border border-slate-200 dark:border-darkBorder">
+                                <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-0.5">Synchronize Calendar Systems</h4>
+                                <p class="text-[10px] text-slate-500 font-medium">Google Workspace, Outlook</p>
+                            </div>
+                        </div>
+                        <button class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Connect</button>
+                    </div>
+                </div>
+
+                <a href="dashboard.html" @click="isLoggedIn = true" class="w-full py-4 rounded-xl bg-gradient-to-b from-brandIndigo to-brandViolet text-white font-bold text-base shadow-[0_2px_10px_rgba(79,70,229,0.3)] hover:shadow-[0_4px_15px_rgba(79,70,229,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all flex justify-center items-center gap-2">
+                    Launch Operational Dashboard <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+                <a href="dashboard.html" @click="isLoggedIn = true" class="w-full mt-4 py-2 block text-center text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors uppercase tracking-widest outline-none">Skip for now</a>
+
+            </div>
+            
+        </div>
+    </div>
+
+</body>
+</html>

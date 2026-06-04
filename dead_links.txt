@@ -1,0 +1,193 @@
+﻿
+Filename          LineNumber Line                                                                                      
+--------          ---------- ----                                                                                      
+contact.html             107                 <a href="#" class="flex items-center gap-2.5 group outline-none           
+                             focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-lg shrink-0 z-50 relative">   
+contact.html             421                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Dashboard Workspace</a>                                                  
+contact.html             422                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Account Settings</a>                                                     
+contact.html             522                         <a href="#" class="text-slate-400 hover:text-slate-900            
+                             dark:hover:text-white transition-colors">                                                 
+contact.html             525                         <a href="#" class="text-slate-400 hover:text-slate-900            
+                             dark:hover:text-white transition-colors">                                                 
+contact.html             528                         <a href="#" class="text-slate-400 hover:text-slate-900            
+                             dark:hover:text-white transition-colors">                                                 
+contact.html             536                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Features</a>  
+contact.html             537                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium                                  
+                             transition-colors">Integrations</a>                                                       
+contact.html             538                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Pricing</a>   
+contact.html             539                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Changelog</a> 
+contact.html             544                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium                                  
+                             transition-colors">Documentation</a>                                                      
+contact.html             545                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Blog</a>      
+contact.html             546                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Community</a> 
+contact.html             547                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Help          
+                             Center</a>                                                                                
+contact.html             552                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">About Us</a>  
+contact.html             553                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Careers</a>   
+contact.html             554                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Privacy       
+                             Policy</a>                                                                                
+contact.html             555                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Terms of      
+                             Service</a>                                                                               
+dashboard.html           126                 <a href="#" class="flex items-center gap-2.5 group outline-none           
+                             focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-lg shrink-0 z-50 relative">   
+features.html            119                 <a href="#" class="flex items-center gap-2.5 group outline-none           
+                             focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-lg shrink-0 z-50 relative">   
+features.html            433                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Dashboard Workspace</a>                                                  
+features.html            434                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Account Settings</a>                                                     
+features.html           1850                         <a href="#" class="text-slate-400 hover:text-slate-900            
+                             dark:hover:text-white transition-colors" aria-label="Twitter">                            
+features.html           1853                         <a href="#" class="text-slate-400 hover:text-slate-900            
+                             dark:hover:text-white transition-colors" aria-label="LinkedIn">                           
+features.html           1856                         <a href="#" class="text-slate-400 hover:text-slate-900            
+                             dark:hover:text-white transition-colors" aria-label="GitHub">                             
+features.html           1869                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Changelog</a> 
+features.html           1870                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium                                  
+                             transition-colors">Integrations</a>                                                       
+features.html           1886                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">About Us</a>  
+features.html           1888                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Careers</a>   
+features.html           1889                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Privacy       
+                             Policy</a>                                                                                
+features.html           1890                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Terms of      
+                             Service</a>                                                                               
+header.html               58                 <a href="#" class="flex items-center gap-2.5 group outline-none           
+                             focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-lg shrink-0 z-50 relative">   
+header.html              372                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Dashboard Workspace</a>                                                  
+header.html              373                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Account Settings</a>                                                     
+index.html               109                 <a href="#" class="flex items-center gap-2.5 group outline-none           
+                             focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-lg shrink-0 z-50 relative">   
+index.html               423                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Dashboard Workspace</a>                                                  
+index.html               424                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Account Settings</a>                                                     
+index.html              1286                     <a href="#" class="flex items-center gap-2.5 mb-6">                   
+index.html              1292                         <a href="#" class="text-slate-400 hover:text-slate-900            
+                             dark:hover:text-white transition-colors">                                                 
+index.html              1295                         <a href="#" class="text-slate-400 hover:text-slate-900            
+                             dark:hover:text-white transition-colors">                                                 
+index.html              1298                         <a href="#" class="text-slate-400 hover:text-slate-900            
+                             dark:hover:text-white transition-colors">                                                 
+index.html              1306                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Features</a>  
+index.html              1307                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium                                  
+                             transition-colors">Integrations</a>                                                       
+index.html              1309                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Changelog</a> 
+index.html              1314                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium                                  
+                             transition-colors">Documentation</a>                                                      
+index.html              1315                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Blog</a>      
+index.html              1316                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Community</a> 
+index.html              1317                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Help          
+                             Center</a>                                                                                
+index.html              1322                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">About Us</a>  
+index.html              1323                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Careers</a>   
+index.html              1324                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Privacy       
+                             Policy</a>                                                                                
+index.html              1325                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Terms of      
+                             Service</a>                                                                               
+pricing.html             121                 <a href="#" class="flex items-center gap-2.5 group outline-none           
+                             focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-lg shrink-0 z-50 relative">   
+pricing.html             435                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Dashboard Workspace</a>                                                  
+pricing.html             436                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Account Settings</a>                                                     
+resources.html           116                 <a href="#" class="flex items-center gap-2.5 group outline-none           
+                             focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-lg shrink-0 z-50 relative">   
+resources.html           430                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Dashboard Workspace</a>                                                  
+resources.html           431                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Account Settings</a>                                                     
+resources.html           571                 <a href="#" class="hidden sm:flex items-center gap-2 text-sm font-bold    
+                             text-brandIndigo hover:text-brandViolet transition-colors">                               
+resources.html           729                         <a href="#" class="text-sm font-bold text-slate-900               
+                             dark:text-white hover:text-brandIndigo transition-colors flex items-center gap-1">Review  
+                             Module <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path   
+                             stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7             
+                             7"></path></svg></a>                                                                      
+resources.html           739                         <a href="#" class="text-sm font-bold text-brandIndigo             
+                             hover:text-brandViolet transition-colors flex items-center gap-1">Resume Module <svg      
+                             class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path               
+                             stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7             
+                             7"></path></svg></a>                                                                      
+resources.html           763                         <a href="#" class="text-sm font-bold text-brandIndigo             
+                             hover:text-brandViolet transition-colors flex items-center gap-1">Start Module <svg       
+                             class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path               
+                             stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7             
+                             7"></path></svg></a>                                                                      
+resources.html           850                 <a href="#" class="hidden sm:flex items-center gap-2 text-sm font-bold    
+                             text-brandIndigo hover:text-brandViolet transition-colors">                               
+resources.html          1053                 <a href="#" class="inline-flex items-center gap-2 text-sm font-bold       
+                             text-slate-600 dark:text-zinc-400 hover:text-brandIndigo transition-colors">              
+resources.html          1182                         <a href="#" class="text-slate-400 hover:text-slate-900            
+                             dark:hover:text-white transition-colors">                                                 
+resources.html          1185                         <a href="#" class="text-slate-400 hover:text-slate-900            
+                             dark:hover:text-white transition-colors">                                                 
+resources.html          1188                         <a href="#" class="text-slate-400 hover:text-slate-900            
+                             dark:hover:text-white transition-colors">                                                 
+resources.html          1214                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Privacy       
+                             Policy</a>                                                                                
+resources.html          1215                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Terms of      
+                             Service</a>                                                                               
+social-proof.html         78                     <a href="#" class="block text-zinc-900 dark:text-white opacity-40     
+                             hover:opacity-100 transition-opacity duration-200 ease-custom-cubic outline-none          
+                             focus-visible:ring-2 focus-visible:ring-emerald-500 rounded p-1">                         
+social-proof.html         82                     <a href="#" class="block text-zinc-900 dark:text-white opacity-40     
+                             hover:opacity-100 transition-opacity duration-200 ease-custom-cubic outline-none          
+                             focus-visible:ring-2 focus-visible:ring-emerald-500 rounded p-1">                         
+social-proof.html         86                     <a href="#" class="block text-zinc-900 dark:text-white opacity-40     
+                             hover:opacity-100 transition-opacity duration-200 ease-custom-cubic outline-none          
+                             focus-visible:ring-2 focus-visible:ring-emerald-500 rounded p-1">                         
+social-proof.html         90                     <a href="#" class="block text-zinc-900 dark:text-white opacity-40     
+                             hover:opacity-100 transition-opacity duration-200 ease-custom-cubic outline-none          
+                             focus-visible:ring-2 focus-visible:ring-emerald-500 rounded p-1">                         
+social-proof.html         94                     <a href="#" class="hidden sm:block text-zinc-900 dark:text-white      
+                             opacity-40 hover:opacity-100 transition-opacity duration-200 ease-custom-cubic            
+                             outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded p-1">            
+solutions.html            80                 <a href="#" class="flex items-center gap-2.5 group outline-none           
+                             focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-lg shrink-0 z-50 relative">   
+solutions.html           394                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Dashboard Workspace</a>                                                  
+solutions.html           395                             <a href="#" class="block text-lg font-bold text-slate-900     
+                             dark:text-white">Account Settings</a>                                                     
+solutions.html          1008                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors outline-none   
+                             focus-visible:text-brandIndigo">Privacy Policy</a>                                        
+solutions.html          1009                     <a href="#" class="text-sm text-slate-500 dark:text-zinc-400          
+                             hover:text-brandIndigo dark:hover:text-white font-medium transition-colors outline-none   
+                             focus-visible:text-brandIndigo">Terms of Service</a>                                      
+
+

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" x-data="settings()" :class="{ 'dark': darkMode }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Sales Saathi</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        darkBg: '#09090b',
+                        darkCard: '#18181b',
+                        darkBorder: 'rgba(255,255,255,0.08)',
+                        brandIndigo: '#4f46e5',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+  <script type="module" crossorigin src="/assets/main-qNJIMltT.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-R81dcRFx.css">
+</head>
+<body class="bg-slate-50 dark:bg-darkBg text-slate-900 dark:text-slate-200 font-sans antialiased min-h-screen pt-20">
+
+    <!-- Global Loading -->
+    <div x-show="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-50 dark:bg-darkBg">
+        <svg class="animate-spin w-8 h-8 text-brandIndigo" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+    </div>
+
+    <!-- Navbar -->
+    <header class="fixed top-0 w-full z-40 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl border-b border-slate-200 dark:border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="dashboard.html" class="flex items-center gap-2 outline-none group text-sm font-bold text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white transition-colors">
+                <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Back to Dashboard
+            </a>
+            
+            <div class="flex items-center gap-4">
+                <button @click="darkMode = !darkMode" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                    <svg x-show="!darkMode" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    <svg x-show="darkMode" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-show="!loading" x-cloak>
+        <div class="mb-10">
+            <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Settings</h1>
+            <p class="text-slate-500 dark:text-zinc-400 font-medium">Manage your profile, preferences, and integrations.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+            
+            <!-- Sidebar Navigation -->
+            <div class="md:col-span-1 flex flex-col gap-2 sticky top-24">
+                <button @click="activeTab = 'profile'" :class="activeTab === 'profile' ? 'bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white' : 'text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-white/5'" class="text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors">Profile</button>
+                <button @click="activeTab = 'integrations'" :class="activeTab === 'integrations' ? 'bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white' : 'text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-white/5'" class="text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-colors">Integrations</button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="md:col-span-3 space-y-6">
+                
+                <!-- PROFILE TAB -->
+                <div x-show="activeTab === 'profile'" x-transition.opacity class="space-y-6">
+                    
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Personal Information</h2>
+                        <form @submit.prevent="saveProfile()" class="space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wider mb-2">Full Name</label>
+                                    <input type="text" x-model="profile.name" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[#111113] border border-slate-200 dark:border-darkBorder text-slate-900 dark:text-white focus:ring-2 focus:ring-brandIndigo outline-none font-medium transition-all" />
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wider mb-2">Email Address</label>
+                                    <input type="email" disabled x-model="profile.email" class="w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-zinc-500 cursor-not-allowed font-medium transition-all" />
+                                    <p class="text-[10px] text-slate-400 dark:text-zinc-500 mt-1">Email cannot be changed.</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wider mb-2">Role</label>
+                                    <select x-model="profile.role" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[#111113] border border-slate-200 dark:border-darkBorder text-slate-900 dark:text-white focus:ring-2 focus:ring-brandIndigo font-medium outline-none transition-all">
+                                        <option>Account Executive</option>
+                                        <option>Sales Development Rep (SDR)</option>
+                                        <option>Sales Leader / Manager</option>
+                                        <option>Revenue Operations</option>
+                                        <option>Founder / CEO</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wider mb-2">CRM</label>
+                                    <select x-model="profile.crm" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[#111113] border border-slate-200 dark:border-darkBorder text-slate-900 dark:text-white focus:ring-2 focus:ring-brandIndigo font-medium outline-none transition-all">
+                                        <option>Salesforce</option>
+                                        <option>HubSpot</option>
+                                        <option>Pipedrive</option>
+                                        <option>Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div x-show="msg" class="p-3 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 text-sm font-bold" x-text="msg"></div>
+
+                            <div class="flex justify-end pt-4 border-t border-slate-100 dark:border-white/10">
+                                <button type="submit" class="px-6 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:opacity-90 transition-opacity">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Subscription Details -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 md:p-8 shadow-sm">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-slate-900 dark:text-white">Subscription</h2>
+                            <span class="px-3 py-1 rounded-full bg-brandIndigo/10 text-brandIndigo text-xs font-bold uppercase tracking-wider" x-text="profile.plan + ' Plan'"></span>
+                        </div>
+                        <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium mb-6">You are currently on the <span class="font-bold text-slate-700 dark:text-zinc-300" x-text="profile.plan"></span> plan. Upgrade to unlock bulk brief generations and CRM sync.</p>
+                        <button class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-darkBg text-slate-700 dark:text-zinc-300 font-bold hover:bg-slate-200 dark:hover:bg-white/5 transition-colors">Manage Billing</button>
+                    </div>
+                </div>
+
+                <!-- INTEGRATIONS TAB -->
+                <div x-show="activeTab === 'integrations'" x-transition.opacity class="space-y-6" x-cloak>
+                    
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Connected Apps</h2>
+                        <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium mb-8">Connect your tools to allow Sales Saathi to automate your research automatically before meetings.</p>
+
+                        <div class="space-y-4">
+                            <!-- Google Calendar -->
+                            <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-[#111113]">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center p-2">
+                                        <svg class="w-full h-full text-blue-500" viewBox="0 0 24 24" fill="currentColor"><path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" /></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Google Calendar</h4>
+                                        <p class="text-xs text-slate-500 dark:text-zinc-400">Sync meetings for auto-briefs.</p>
+                                    </div>
+                                </div>
+                                <button class="px-4 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90">Connect</button>
+                            </div>
+
+                            <!-- HubSpot -->
+                            <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-[#111113]">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg bg-[#ff7a59] flex items-center justify-center text-white font-black text-xl">H</div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">HubSpot</h4>
+                                        <p class="text-xs text-slate-500 dark:text-zinc-400">Pull CRM context into briefs.</p>
+                                    </div>
+                                </div>
+                                <button class="px-4 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90">Connect</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('settings', () => ({
+                darkMode: true,
+                loading: true,
+                activeTab: 'profile',
+                profile: {
+                    name: '',
+                    email: '',
+                    role: '',
+                    crm: '',
+                    plan: ''
+                },
+                msg: '',
+                
+                init() {
+                    setTimeout(() => {
+                        if (!this.$store.auth.isLoggedIn) {
+                            window.location.href = 'auth.html';
+                            return;
+                        }
+                        const u = this.$store.auth.user;
+                        this.profile = {
+                            name: u.name || '',
+                            email: u.email || '',
+                            role: u.role || 'Account Executive',
+                            crm: u.crm || 'HubSpot',
+                            plan: u.plan || 'Free'
+                        };
+                        this.loading = false;
+                    }, 600);
+                },
+
+                async saveProfile() {
+                    this.msg = '';
+                    try {
+                 /assets/db-BRwKL1zQ.jst { db } = await import('./src/db.js');
+                        await db.updateUser(this.$store.auth.user.id, {
+                            name: this.profile.name,
+                            role: this.profile.role,
+                            crm: this.profile.crm
+                        });
+                        
+                        // Update local store
+                        this.$store.auth.user = { ...this.$store.auth.user, ...this.profile };
+                        if(localStorage.getItem('sales_saathi_mock_session')) {
+                            localStorage.setItem('sales_saathi_mock_session', JSON.stringify(this.$store.auth.user));
+                        }
+                        this.msg = 'Profile updated successfully.';
+                        setTimeout(() => this.msg = '', 3000);
+                    } catch(e) {
+                        alert("Error saving profile: " + e.message);
+                    }
+                }
+            }));
+        });
+    </script>
+</body>
+</html>

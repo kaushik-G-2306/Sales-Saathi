@@ -1,0 +1,68 @@
+/* Shared Global Styles System */
+
+/* 
+ * Dark Mode Form Visibility Fixes
+ * Resolves invisible/low-contrast typed text caused by missing Tailwind config colors
+ * and Chrome's light-mode autofill behaviors.
+ */
+
+.dark input, 
+.dark textarea, 
+.dark select {
+    color: #f8fafc !important; /* Ensures typed text is clearly visible (white) */
+    background-color: #18181b !important; /* Enforces dark background, overriding invalid dark:bg-darkInput */
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.dark input::placeholder, 
+.dark textarea::placeholder {
+    color: #71717a !important; /* Distinguishable placeholder text */
+    opacity: 1 !important;
+}
+
+.dark select option {
+    background-color: #18181b !important;
+    color: #f8fafc !important;
+}
+
+/* Fix WebKit Autofill in Dark Mode (Chrome/Safari) */
+/* Chrome uses !important in its UA stylesheet, so we must override it with !important */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover, 
+.dark input:-webkit-autofill:focus, 
+.dark input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #18181b inset !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Accessible Focus States */
+.dark input:focus, 
+.dark textarea:focus, 
+.dark select:focus {
+    outline: none !important;
+    border-color: #4f46e5 !important; /* brandIndigo */
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.5) !important;
+}
+
+/* Password Toggle Wrapper */
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 3rem !important; }
+.pw-toggle {
+    position: absolute;
+    right: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s;
+    z-index: 10;
+}
+.pw-toggle:hover { color: #4f46e5; }
+.dark .pw-toggle { color: #71717a; }
+.dark .pw-toggle:hover { color: #818cf8; }
+
