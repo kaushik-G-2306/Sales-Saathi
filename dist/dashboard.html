@@ -620,6 +620,146 @@
                             </div>
                         </section>
 
+                        <!-- Section 5.6: Smart Ice Breakers -->
+                        <section x-data="{ 
+                            loading: true, 
+                            brief: null, 
+                            error: null,
+                            copiedIndex: null,
+                            async init() { 
+                                // Wait for Alpine auth to initialize or Supabase session
+                                let attempts = 0;
+                                let userId = null;
+                                
+                                while (attempts < 30) { // 3 seconds timeout
+                                    if (this.$store.auth?.user?.id) {
+                                        userId = this.$store.auth.user.id;
+                                        break;
+                                    }
+                                    if (window.supabase) {
+                                        const { data: { user } } = await window.supabase.auth.getUser();
+                                        if (user?.id) {
+                                            userId = user.id;
+                                            break;
+                                        }
+                                    }
+                                    await new Promise(r => setTimeout(r, 100));
+                                    attempts++;
+                                }
+
+                                if (!userId) {
+                                    console.warn('[IceBreakers] User NOT logged in - widget will not load. Exiting init().');
+                                    this.loading = false;
+                                    return;
+                                }
+
+                                console.log('[IceBreakers] Auth ready');
+                                console.log('[IceBreakers] User ID:', userId);
+
+                                // Wait for window.db to be available (assigned by src/main.js module)
+                                attempts = 0;
+                                while (!window.db && attempts < 20) {
+                                    await new Promise(r => setTimeout(r, 100));
+                                    attempts++;
+                                }
+
+                                if (!window.db) {
+                                    this.error = 'Database client not ready. Please refresh.';
+                                    console.error('[IceBreakers] FAIL: window.db is undefined after 2s - module load failed.');
+                                    this.loading = false;
+                                    return;
+                                }
+
+                                try {
+                                    const briefs = await window.db.getUserBriefs(userId);
+
+                                    console.log('[IceBreakers] ROW COUNT returned:', briefs ? briefs.length : 'null/undefined');
+
+                                    if (!briefs || briefs.length === 0) {
+                                        this.brief = null;
+                                    } else {
+                                        this.brief = briefs[0];
+                                    }
+                                } catch (e) {
+                                    console.error('[IceBreakers] getUserBriefs() error:', e);
+                                    this.error = e.message;
+                                } finally {
+                                    this.loading = false;
+                                }
+                            },
+                            copyToClipboard(text, index) {
+                                navigator.clipboard.writeText(text);
+                                this.copiedIndex = index;
+                                setTimeout(() => this.copiedIndex = null, 2000);
+                            }
+                        }">
+
+                            <h2 class="text-lg font-extrabold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Smart Ice Breakers
+                            </h2>
+                            
+                            <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-sm mb-8">
+                                <template x-if="loading">
+                                    <div class="animate-pulse space-y-4">
+                                        <div class="h-4 bg-slate-200 dark:bg-white/10 rounded w-3/4"></div>
+                                        <div class="h-4 bg-slate-200 dark:bg-white/10 rounded w-1/2"></div>
+                                    </div>
+                                </template>
+
+                                <!-- Error state — shows the real error instead of silently failing -->
+                                <template x-if="!loading && error">
+                                    <div class="text-center py-6">
+                                        <p class="text-sm font-semibold text-rose-500" x-text="'Error: ' + error"></p>
+                                    </div>
+                                </template>
+
+                                <template x-if="!loading && !brief">
+                                    <div class="text-center py-6">
+                                        <p class="text-sm font-semibold text-slate-500 dark:text-zinc-400">No meeting briefs found. Generate your first brief to see Smart Ice Breakers here.</p>
+                                    </div>
+                                </template>
+                                
+                                <template x-if="!loading && brief && (!brief.generated_brief?.smart_icebreakers || brief.generated_brief.smart_icebreakers.length === 0)">
+                                    <div class="text-center py-8">
+                                        <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-3">
+                                            <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                        </div>
+                                        <p class="text-sm font-bold text-slate-600 dark:text-zinc-300 mb-1">No smart ice breakers available</p>
+                                        <p class="text-xs text-slate-400 dark:text-zinc-500">This brief was generated before Smart Ice Breakers were added. Generate a new brief to see them here.</p>
+                                    </div>
+                                </template>
+                                
+                                <template x-if="!loading && brief && brief.generated_brief?.smart_icebreakers?.length > 0">
+                                    <div class="space-y-4">
+                                        <div class="mb-4">
+                                            <span class="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Latest Prospect</span>
+                                            <p class="text-sm font-bold text-slate-900 dark:text-white" x-text="brief.prospect_name + ' @ ' + brief.company"></p>
+                                        </div>
+                                        
+                                        <div class="space-y-3">
+                                            <template x-for="(ib, index) in brief.generated_brief.smart_icebreakers" :key="index">
+                                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 relative group hover:border-emerald-500/30 transition-colors">
+                                                    <div class="flex justify-between items-start gap-4">
+                                                        <div>
+                                                            <p class="text-sm font-semibold text-slate-900 dark:text-white mb-2" x-text="ib.text"></p>
+                                                            <p class="text-[10px] font-medium text-slate-500 dark:text-zinc-400 border-t border-slate-200 dark:border-white/5 pt-2 mt-2">
+                                                                <span class="font-bold text-emerald-500">Why it works:</span> <span x-text="ib.reason"></span>
+                                                            </p>
+                                                        </div>
+                                                        <button @click="copyToClipboard(ib.text, index)" class="shrink-0 p-2 rounded-lg bg-white dark:bg-darkCard border border-slate-200 dark:border-white/10 text-slate-500 hover:text-emerald-500 transition-colors" :title="copiedIndex === index ? 'Copied!' : 'Copy Ice Breaker'">
+                                                            <svg x-show="copiedIndex !== index" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                                            <svg x-show="copiedIndex === index" x-cloak class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </section>
+
                         <!-- Section 5: Follow-Up Pipeline -->
                         <section>
                             <h2 class="text-lg font-extrabold text-slate-900 dark:text-white mb-4 flex items-center gap-2">

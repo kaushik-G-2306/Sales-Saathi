@@ -101,7 +101,7 @@ serve(async (req) => {
     }
 
     // Prepare Gemini Request
-    const systemInstruction = "You are Sales Saathi – Enterprise Sales Coach. Generate actionable pre-meeting intelligence, not generic summaries. Prioritize: buying signals, pain points, stakeholder analysis, discovery questions, meeting strategy. You must output valid JSON matching the exact schema provided.";
+    const systemInstruction = "You are Sales Saathi – Enterprise Sales Coach. Generate actionable pre-meeting intelligence, not generic summaries. Prioritize: buying signals, pain points, stakeholder analysis, discovery questions, meeting strategy, and smart ice breakers. You must output valid JSON matching the exact schema provided.\n\nGenerate 5 highly personalized B2B sales ice breakers. For each:\n- text: actual ice breaker\n- reason: explain why it is effective\nRules: Company-specific, Role-specific, Professional, Under 25 words, Avoid generic greetings.";
     const userPrompt = `
 Prospect: ${prospect_name}
 Company: ${company}
@@ -135,13 +135,23 @@ Context: ${additional_context || 'N/A'}
         },
         recommended_pitch_angle: { type: "STRING" },
         meeting_strategy: { type: "STRING" },
-        recommended_next_steps: { type: "ARRAY", items: { type: "STRING" } }
+        recommended_next_steps: { type: "ARRAY", items: { type: "STRING" } },
+        smart_icebreakers: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              text: { type: "STRING" },
+              reason: { type: "STRING" }
+            }
+          }
+        }
       },
       required: [
         "executive_summary", "company_overview", "recent_news", "likely_pain_points",
         "buying_signals", "stakeholder_analysis", "recent_business_context",
         "discovery_questions", "conversation_starters", "objection_handling",
-        "recommended_pitch_angle", "meeting_strategy", "recommended_next_steps"
+        "recommended_pitch_angle", "meeting_strategy", "recommended_next_steps", "smart_icebreakers"
       ]
     };
 
