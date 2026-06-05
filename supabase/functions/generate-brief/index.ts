@@ -164,24 +164,58 @@ Context: ${additional_context || 'N/A'}
       }
     };
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
+    const modelName = 'gemini-2.5-flash-lite';
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
 
+    console.log(`[GEMINI LOG] geminiUrl: ${geminiUrl.replace(geminiApiKey, 'REDACTED')}`);
+    console.log(`[GEMINI LOG] modelName: ${modelName}`);
+    console.log(`[GEMINI LOG] Exact model name: ${modelName}`);
+    console.log(`[GEMINI LOG] SDK Version: Using raw fetch API, no SDK`);
+    console.log(`[GEMINI LOG] Request payload:`, JSON.stringify(geminiPayload));
+
+    let geminiRes;
+    let geminiData;
+    let generatedText;
+    const retryDelays = [2000, 5000, 10000];
+    let attempts = 0;
+    
     const startTime = performance.now();
-    const geminiRes = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(geminiPayload)
-    });
+
+    while (attempts <= retryDelays.length) {
+      geminiRes = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(geminiPayload)
+      });
+      
+      if (geminiRes.ok) {
+        break;
+      }
+      
+      const errorText = await geminiRes.text();
+      console.log(`[GEMINI LOG] Error on attempt ${attempts + 1}: ${geminiRes.status} - ${errorText}`);
+      
+      if (geminiRes.status === 503 && attempts < retryDelays.length) {
+        console.log(`[GEMINI LOG] Retrying after ${retryDelays[attempts]}ms...`);
+        await new Promise(res => setTimeout(res, retryDelays[attempts]));
+        attempts++;
+      } else if (geminiRes.status === 503 && attempts === retryDelays.length) {
+        return new Response(JSON.stringify({ error: 'Gemini is currently experiencing high demand. Please try again later.' }), {
+          status: 503,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } else {
+        throw new Error(`Gemini API Error: ${geminiRes.status} - ${errorText}`);
+      }
+    }
+
     const endTime = performance.now();
     const generationTimeMs = Math.round(endTime - startTime);
 
-    if (!geminiRes.ok) {
-      const errorText = await geminiRes.text();
-      throw new Error(`Gemini API Error: ${geminiRes.status} - ${errorText}`);
-    }
-
-    const geminiData = await geminiRes.json();
-    const generatedText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    geminiData = await geminiRes.json();
+    console.log(`[GEMINI LOG] Response body:`, JSON.stringify(geminiData));
+    
+    generatedText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!generatedText) {
       throw new Error("Failed to extract content from Gemini response.");
@@ -205,7 +239,8 @@ Context: ${additional_context || 'N/A'}
         additional_context: additional_context || null,
         generated_brief: responsePayload,
         status: 'completed',
-        generation_time_ms: generationTimeMs
+        generation_time_ms: generationTimeMs,
+        model_used: modelName
       }).select('id').single();
 
       if (insertError) {

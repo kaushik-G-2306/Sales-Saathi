@@ -956,11 +956,15 @@
                     currentLoadingMsgIndex: 0,
 
                     async submitBrief() {
+                      try {
+                        console.log('[Diagnostics] Generate button clicked');
                         this.state = 'loading';
                         this.errorMsg = '';
                         this.loadingProgress = 0;
                         this.currentLoadingMsgIndex = 0;
                         
+                        let invokeCalled = false;
+
                         // Fake progress bar that crawls to 95% while waiting for Gemini API (~5-10 seconds)
                         const timer = setInterval(() => {
                             this.loadingProgress = Math.min(this.loadingProgress + 1, 95);
@@ -970,48 +974,136 @@
                         }, 100);
                         
                         try {
+                            console.log('[Diagnostics] Form validation start');
+                            const prospectName = this.briefForm.prospect_name ? this.briefForm.prospect_name.trim() : '';
+                            const company = this.briefForm.company ? this.briefForm.company.trim() : '';
+                            if (!prospectName || !company) {
+                                const msg = 'Validation failed: Prospect Name and Company are required.';
+                                console.log('[Diagnostics] Form validation end - Result: FAILED, Error:', msg);
+                                throw new Error(msg);
+                            }
+                            console.log('[Diagnostics] Form validation end - Result: SUCCESS');
+
                             const payload = {
-                                prospect_name: this.briefForm.prospect_name,
-                                company: this.briefForm.company,
+                                prospect_name: prospectName,
+                                company: company,
                                 role: this.briefForm.role,
                                 meeting_type: this.briefForm.meeting_type,
                                 meeting_datetime: this.briefForm.meeting_date || new Date().toISOString(),
                                 additional_context: this.briefForm.context
                             };
                             
+                            console.log('[Diagnostics] Auth state check start');
+                            console.log('[STEP 1] checking window.supabase');
+                            let supabaseAttempts = 0;
+                            while (!window.supabase && supabaseAttempts < 50) {
+                                await new Promise(r => setTimeout(r, 100));
+                                supabaseAttempts++;
+                            }
+                            console.log('[STEP 2] window.supabase check complete', !!window.supabase);
+
                             if (!window.supabase) {
+                                console.log('[Diagnostics] Auth state check end - Result: FAILED (Supabase not initialized)');
                                 throw new Error('Supabase client not initialized. Check your .env configuration.');
                             }
-                            const { data: sessionData } = await window.supabase.auth.getSession();
-                            if (!sessionData?.session?.access_token) {
+
+                            console.log('[STEP 3] auth state inspection');
+                            let user = Alpine.store('auth')?.user;
+                            
+                            if (!user) {
+                                console.log('[STEP 3.1] fallback to supabase.auth.getUser()');
+                                const { data } = await window.supabase.auth.getUser();
+                                user = data?.user;
+                            }
+
+                            console.log('[STEP 4] user resolved', !!user);
+                            
+                            if (!user) {
                                 throw new Error('You must be logged in to generate a brief. Please sign in and try again.');
                             }
-                            const jwt = sessionData.session.access_token;
+                            
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => {
+                                controller.abort();
+                            }, 120000); // 120-second timeout
 
-                            const response = await fetch('https://tpmnbglgmfqiiqxdjrwa.supabase.co/functions/v1/generate-brief', {
-                                method: 'POST',
-                                headers: {
+                            console.log('[STEP 5] invoke started');
+                            invokeCalled = true;
+
+                            console.log('[STEP 5A] function name', 'generate-brief');
+                            console.log('[STEP 5B] payload', payload);
+                            console.log('[STEP 5C] supabase.functions object', window.supabase.functions);
+
+                            console.log('[DEBUG FETCH]', window.fetch);
+                            console.log('[DEBUG FUNCTIONS]', window.supabase.functions);
+
+                            console.log('[STEP 5D] invoking edge function');
+                            let response;
+                            try {
+                                console.log('[RAW FETCH START]');
+                                const { data: { session } } = await window.supabase.auth.getSession();
+                                console.log('[AUTH TOKEN EXISTS]', !!session?.access_token);
+                                console.log('[AUTH TOKEN LENGTH]', session?.access_token?.length);
+
+                                const functionUrl = `${window.supabase.supabaseUrl}/functions/v1/generate-brief`;
+                                const headers = {
                                     'Content-Type': 'application/json',
-                                    'Authorization': 'Bearer ' + jwt
-                                },
-                                body: JSON.stringify(payload)
-                            });
+                                    'apikey': window.supabase.supabaseKey,
+                                    'Authorization': `Bearer ${session?.access_token}`
+                                };
+                                const options = {
+                                    method: 'POST',
+                                    headers: headers,
+                                    body: JSON.stringify(payload),
+                                    signal: controller.signal
+                                };
 
+                                console.log('[FETCH URL]', functionUrl);
+                                console.log('[FETCH HEADERS]', headers);
+                                console.log('[FETCH BODY]', JSON.stringify(payload));
+                                
+                                let rawResponse;
+                                try {
+                                    console.log('[FETCH EXECUTE]');
+                                    rawResponse = await fetch(functionUrl, options);
+                                    console.log('[FETCH RETURNED]', rawResponse.status);
+                                } catch (e) {
+                                    console.error('[FETCH THREW]', e);
+                                }
+                                
+                                if (rawResponse) {
+                                    const rawBody = await rawResponse.json();
+                                    response = {
+                                        data: rawResponse.ok ? rawBody : null,
+                                        error: rawResponse.ok ? null : { message: 'Fetch failed: ' + rawResponse.statusText }
+                                    };
+                                }
+                            } finally {
+                                clearTimeout(timeoutId);
+                            }
+
+                            console.log('[STEP 5E] invoke returned');
+                            console.log('[STEP 5F] response data', response);
+                            
                             clearInterval(timer);
                             this.loadingProgress = 100;
                             
-                            // Check for network/server errors
-                            if (!response.ok) {
-                                const errText = await response.text();
-                                throw new Error(`API Error ${response.status}: ${errText}`);
+                            if (response.error) {
+                                console.log('[PMB] invoke returned an error object:', response.error);
+                                throw new Error(response.error.message || JSON.stringify(response.error));
                             }
                             
-                            const result = await response.json();
+                            console.log('[PMB] response received', response);
+                            
+                            const result = response.data;
                             
                             // Check for empty or invalid JSON structure from Edge Function
                             if (!result) {
+                                console.log('[PMB] result is empty');
                                 throw new Error('Empty response received from server.');
                             }
+                            
+                            console.log('[PMB] parsed result data', result);
                             
                             // Check for explicit error fields
                             if (result.error) {
@@ -1023,20 +1115,36 @@
                                 throw new Error('Database save failed (Check RLS Policies): ' + result.db_error);
                             }
                             
+                            console.log('[PMB] brief id', result.brief_id);
+
                             if (!result.brief_id) {
                                 throw new Error('Unexpected response format: Missing brief_id.');
                             }
 
+                            console.log('[PMB] redirecting');
                             // The Edge Function already saved it to PreMeetingBriefs, so we just redirect.
                             window.location.href = 'brief-result.html?id=' + result.brief_id;
+                            console.log('[PMB] redirect call completed');
                             
                         } catch(e) {
                             clearInterval(timer);
                             this.loadingProgress = 0;
-                            this.errorMsg = 'Generation failed: ' + e.message;
+                            console.log('[Diagnostics] Catch block triggered with error:', e);
+                            
+                            if (e.name === 'AbortError' || e.message?.includes('aborted') || e.message?.includes('timeout') || e.message?.includes('AbortError')) {
+                                this.errorMsg = 'Generation failed: The request timed out after 120 seconds.';
+                            } else if (!invokeCalled) {
+                                this.errorMsg = 'Generation failed (Invoke never called): ' + e.message;
+                            } else {
+                                this.errorMsg = 'Generation failed: ' + e.message;
+                            }
+                            
                             this.state = 'error';
                             console.error('Brief Generation Error:', e);
                         }
+                      } catch(err) {
+                        console.error('[SUBMIT BRIEF CRASH]', err);
+                      }
                     },
 
                     reset() {
