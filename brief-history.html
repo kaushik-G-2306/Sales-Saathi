@@ -79,7 +79,7 @@
                 <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full">
                     <div class="flex items-start justify-between mb-4">
                         <div class="w-12 h-12 rounded-xl bg-slate-50 dark:bg-darkBg border border-slate-200 dark:border-white/5 flex items-center justify-center font-bold text-brandIndigo text-lg uppercase" x-text="brief.company.substring(0,2)"></div>
-                        <span class="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-zinc-300 text-xs font-bold uppercase tracking-wider" x-text="new Date(brief.created_at).toLocaleDateString()"></span>
+                        <span class="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-zinc-300 text-xs font-bold uppercase tracking-wider" x-text="window.formatIST(brief.meeting_datetime || brief.created_at)"></span>
                     </div>
                     
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1" x-text="brief.company"></h3>

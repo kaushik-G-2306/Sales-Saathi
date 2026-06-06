@@ -92,7 +92,7 @@
                             class="px-2.5 py-1 rounded-md bg-brandIndigo/10 text-brandIndigo text-xs font-bold uppercase tracking-wider"
                             x-text="brief?.meeting_type || 'Meeting Brief'"></span>
                         <span class="text-sm font-medium text-slate-500 dark:text-zinc-400"
-                            x-text="brief?.meeting_datetime ? new Date(brief.meeting_datetime).toLocaleString() : ''"></span>
+                            x-text="brief?.meeting_datetime ? window.formatIST(brief.meeting_datetime) : ''"></span>
                     </div>
                     <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-1"
                         x-text="brief?.prospect_name || '—'"></h1>
@@ -349,11 +349,34 @@
                         <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Recent
                             News</h3>
                     </div>
-                    <div class="p-6 text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">
-                        <template x-if="brief?.generated_brief?.recent_news">
-                            <p x-text="brief.generated_brief.recent_news"></p>
+                    <div class="p-6">
+                        <!-- Enriched Structured News -->
+                        <template x-if="brief?.enrichment_data?.recent_news?.length">
+                            <div class="space-y-4">
+                                <template x-for="(news, i) in brief.enrichment_data.recent_news" :key="i">
+                                    <div class="p-4 rounded-xl border border-slate-100 dark:border-darkBorder bg-slate-50/50 dark:bg-[#151518]">
+                                        <div class="flex justify-between items-start gap-4 mb-2">
+                                            <h4 class="font-bold text-slate-900 dark:text-white leading-snug" x-text="news.title"></h4>
+                                            <a :href="news.url" target="_blank" class="shrink-0 text-xs font-bold text-brandIndigo bg-brandIndigo/10 px-3 py-1.5 rounded-md hover:bg-brandIndigo/20 transition-colors">
+                                                View Source
+                                            </a>
+                                        </div>
+                                        <p class="text-sm text-slate-600 dark:text-zinc-400 mb-3" x-text="news.summary"></p>
+                                        <div class="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-zinc-500">
+                                            <span class="px-2 py-0.5 rounded bg-slate-200 dark:bg-zinc-800" x-text="news.source"></span>
+                                            <span>•</span>
+                                            <span x-text="window.formatDateIST(news.published_at)"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
                         </template>
-                        <template x-if="!brief?.generated_brief?.recent_news">
+
+                        <!-- Fallback to original text if no enrichment data -->
+                        <template x-if="!brief?.enrichment_data?.recent_news?.length && brief?.generated_brief?.recent_news">
+                            <p class="text-slate-600 dark:text-zinc-400 leading-relaxed font-medium" x-text="brief.generated_brief.recent_news"></p>
+                        </template>
+                        <template x-if="!brief?.enrichment_data?.recent_news?.length && !brief?.generated_brief?.recent_news">
                             <p class="text-slate-400 dark:text-zinc-600 italic text-sm">No recent news available.</p>
                         </template>
                     </div>

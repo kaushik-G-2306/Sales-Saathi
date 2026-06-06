@@ -82,7 +82,7 @@ serve(async (req) => {
       });
     }
 
-    const { prospect_name, company, role, meeting_type, meeting_datetime, additional_context } = requestData;
+    const { prospect_name, company, role, meeting_type, meeting_datetime, additional_context, enrichment_data } = requestData;
 
     // Basic validation matching the required dashboard form fields
     if (!prospect_name || !company) {
@@ -102,13 +102,14 @@ serve(async (req) => {
 
     // Prepare Gemini Request
     const systemInstruction = "You are Sales Saathi – Enterprise Sales Coach. Generate actionable pre-meeting intelligence, not generic summaries. Prioritize: buying signals, pain points, stakeholder analysis, discovery questions, meeting strategy, and smart ice breakers. You must output valid JSON matching the exact schema provided.\n\nGenerate 5 highly personalized B2B sales ice breakers. For each:\n- text: actual ice breaker\n- reason: explain why it is effective\nRules: Company-specific, Role-specific, Professional, Under 25 words, Avoid generic greetings.";
-    const userPrompt = `
+const userPrompt = `
 Prospect: ${prospect_name}
 Company: ${company}
 Role: ${role || 'N/A'}
 Meeting Type: ${meeting_type || 'Discovery Call'}
 Meeting Date: ${meeting_datetime || 'N/A'}
 Context: ${additional_context || 'N/A'}
+${enrichment_data ? `\n--- ENRICHMENT DATA ---\n(Strictly use this as the true source for company overview and recent news! Do not invent URLs or external sources!)\nCompany Overview: ${enrichment_data.company_overview}\nBuying Signals: ${(enrichment_data.buying_signals||[]).join(', ')}\nBusiness Events: ${(enrichment_data.business_events||[]).join(', ')}\nRecent News: ${(enrichment_data.recent_news||[]).map((n:any) => `- ${n.title} (Source: ${n.source}, Date: ${n.published_at})`).join('\n')}\n-----------------------` : ''}
 `;
 
     const schema = {
@@ -238,6 +239,7 @@ Context: ${additional_context || 'N/A'}
         meeting_datetime: meeting_datetime || null,
         additional_context: additional_context || null,
         generated_brief: responsePayload,
+        enrichment_data: enrichment_data || null,
         status: 'completed',
         generation_time_ms: generationTimeMs,
         model_used: modelName

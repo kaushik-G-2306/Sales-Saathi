@@ -1044,12 +1044,47 @@
                                 console.log('[AUTH TOKEN EXISTS]', !!session?.access_token);
                                 console.log('[AUTH TOKEN LENGTH]', session?.access_token?.length);
 
-                                const functionUrl = `${window.supabase.supabaseUrl}/functions/v1/generate-brief`;
                                 const headers = {
                                     'Content-Type': 'application/json',
                                     'apikey': window.supabase.supabaseKey,
                                     'Authorization': `Bearer ${session?.access_token}`
                                 };
+
+                                // STEP 1: Fetch Prospect Enrichment
+                                console.log('[ENRICHMENT START]');
+                                let enrichment_data = null;
+                                try {
+                                    const enrichUrl = `${window.supabase.supabaseUrl}/functions/v1/enrich-prospect`;
+                                    const enrichRes = await fetch(enrichUrl, {
+                                        method: 'POST',
+                                        headers: headers,
+                                        body: JSON.stringify({
+                                            prospect_name: payload.prospect_name,
+                                            company: payload.company,
+                                            role: payload.role,
+                                            linkedin_url: '' // optional
+                                        }),
+                                        signal: controller.signal
+                                    });
+
+                                    if (enrichRes.ok) {
+                                        const enrichBody = await enrichRes.json();
+                                        enrichment_data = enrichBody.enrichment_data;
+                                        console.log('[ENRICHMENT SUCCESS]', enrichment_data);
+                                    } else {
+                                        console.warn('[ENRICHMENT FAILED]', await enrichRes.text());
+                                    }
+                                } catch (enrichErr) {
+                                    console.error('[ENRICHMENT THREW]', enrichErr);
+                                }
+
+                                // Attach enrichment data to original payload
+                                if (enrichment_data) {
+                                    payload.enrichment_data = enrichment_data;
+                                }
+
+                                // STEP 2: Generate Brief
+                                const functionUrl = `${window.supabase.supabaseUrl}/functions/v1/generate-brief`;
                                 const options = {
                                     method: 'POST',
                                     headers: headers,
@@ -1352,27 +1387,135 @@
             </div>
 
             <!-- Section 9: Outreach Quick Launcher (Outreach View) -->
-            <div x-show="activeView === 'outreach'" x-cloak class="w-full max-w-7xl mx-auto animate-[fadeIn_0.3s_ease-out]">
-                <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">Outreach Generator</h1>
-                <p class="text-sm text-slate-500 mb-8">Generate hyper-personalized outbound sequences.</p>
-                
-                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden flex flex-col md:flex-row h-[500px]">
-                    <div class="w-full md:w-64 bg-slate-50 dark:bg-white/[0.02] border-r border-slate-200 dark:border-white/10 p-4">
-                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Medium</p>
-                        <div class="space-y-2">
-                            <button @click="activeOutreachMode = 'cold-email'" :class="activeOutreachMode === 'cold-email' ? 'bg-brandIndigo text-white shadow' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-white/5'" class="w-full text-left px-4 py-2 rounded-lg text-sm font-bold transition-all">Cold Email</button>
-                            <button @click="activeOutreachMode = 'linkedin'" :class="activeOutreachMode === 'linkedin' ? 'bg-[#0a66c2] text-white shadow' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-white/5'" class="w-full text-left px-4 py-2 rounded-lg text-sm font-bold transition-all">LinkedIn Message</button>
-                            <button @click="activeOutreachMode = 'proposal'" :class="activeOutreachMode === 'proposal' ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-white/5'" class="w-full text-left px-4 py-2 rounded-lg text-sm font-bold transition-all">Proposal Template</button>
-                        </div>
-                    </div>
-                    <div class="flex-1 p-6 flex flex-col">
-                        <textarea class="w-full flex-1 bg-transparent border-0 text-sm font-medium text-slate-700 dark:text-zinc-300 focus:ring-0 resize-none outline-none leading-relaxed" x-model="templateBody"></textarea>
-                        <div class="mt-4 flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-white/10">
-                            <button class="px-5 py-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white font-bold text-sm hover:bg-slate-200 dark:hover:bg-white/10">Copy to Clipboard</button>
-                            <button class="px-5 py-2 rounded-xl bg-brandIndigo text-white font-bold text-sm hover:bg-indigo-500">Dispatch Now</button>
-                        </div>
+            <div x-show="activeView === 'outreach'" x-cloak class="w-full max-w-7xl mx-auto animate-[fadeIn_0.3s_ease-out]" x-data="outreachApp()">
+                <!-- Header -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">Outreach Generator</h1>
+                        <p class="text-sm text-slate-500">Generate hyper-personalized outbound sequences.</p>
                     </div>
                 </div>
+
+                <!-- Tabs -->
+                <div class="flex gap-4 border-b border-slate-200 dark:border-darkBorder mb-6">
+                    <button @click="outreachTab = 'generator'" class="px-4 py-3 font-bold text-sm border-b-2 outline-none transition-colors"
+                        :class="outreachTab === 'generator' ? 'border-brandIndigo text-brandIndigo' : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-white'">
+                        Generator
+                    </button>
+                    <button @click="outreachTab = 'history'" class="px-4 py-3 font-bold text-sm border-b-2 outline-none transition-colors"
+                        :class="outreachTab === 'history' ? 'border-brandIndigo text-brandIndigo' : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-white'">
+                        History <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300" x-text="history.length"></span>
+                    </button>
+                </div>
+
+                <!-- View: Generator -->
+                <div x-show="outreachTab === 'generator'" x-transition.opacity class="space-y-6">
+                    
+                    <!-- Selection Card -->
+                    <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-darkBorder shadow-sm p-6">
+                        <label class="block text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">Select Target Account / Brief</label>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <select x-model="selectedBriefId" class="flex-1 p-3 rounded-xl border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-darkInput focus:ring-2 focus:ring-brandIndigo outline-none text-sm font-medium">
+                                <option value="" disabled selected>-- Select an existing Pre-Meeting Brief --</option>
+                                <template x-for="brief in briefs" :key="brief.id">
+                                    <option :value="brief.id" x-text="`${brief.prospect_name} at ${brief.company} (${brief.role || 'No role'})`"></option>
+                                </template>
+                            </select>
+                            
+                            <!-- Personalization Level Selector -->
+                            <select x-model="personalizationLevel" class="p-3 rounded-xl border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-darkInput focus:ring-2 focus:ring-brandIndigo outline-none text-sm font-medium">
+                                <option value="High">High Personalization</option>
+                                <option value="Medium">Medium Personalization</option>
+                                <option value="Low">Low Personalization</option>
+                            </select>
+
+                            <button @click="generateOutreach()" :disabled="!selectedBriefId || generating" 
+                                    class="shrink-0 px-6 py-3 bg-gradient-to-r from-brandIndigo to-brandViolet text-white font-bold text-sm rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:pointer-events-none transition-all flex items-center justify-center gap-2 min-w-[160px]">
+                                <template x-if="generating">
+                                    <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                </template>
+                                <span x-text="generating ? 'Generating...' : (currentOutreach ? 'Regenerate' : 'Generate Assets')"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Results Area -->
+                    <template x-if="currentOutreach">
+                        <div class="space-y-6 animate-fade-in-up">
+                            
+                            <!-- Cold Email Card -->
+                            <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-darkBorder shadow-sm overflow-hidden group">
+                                <div class="px-6 py-4 bg-slate-50 dark:bg-[#111113] border-b border-slate-100 dark:border-darkBorder flex justify-between items-center">
+                                    <h4 class="font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                        Cold Email
+                                    </h4>
+                                    <button @click="copyText(currentOutreach.cold_email)" class="text-xs font-bold text-brandIndigo bg-brandIndigo/10 px-3 py-1.5 rounded-md hover:bg-brandIndigo/20 transition-colors">Copy</button>
+                                </div>
+                                <div class="p-6">
+                                    <div class="text-sm font-bold text-slate-500 mb-2">Subject: <span class="text-slate-800 dark:text-white" x-text="currentOutreach.subject_line"></span></div>
+                                    <textarea readonly class="w-full h-40 bg-transparent border-0 outline-none resize-none text-sm text-slate-700 dark:text-zinc-300 leading-relaxed font-medium" x-text="currentOutreach.cold_email"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- LinkedIn Request -->
+                                <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-darkBorder shadow-sm overflow-hidden group">
+                                    <div class="px-6 py-4 bg-slate-50 dark:bg-[#111113] border-b border-slate-100 dark:border-darkBorder flex justify-between items-center">
+                                        <h4 class="font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                            LinkedIn Request
+                                        </h4>
+                                        <button @click="copyText(currentOutreach.linkedin_request)" class="text-xs font-bold text-brandIndigo bg-brandIndigo/10 px-3 py-1.5 rounded-md hover:bg-brandIndigo/20 transition-colors">Copy</button>
+                                    </div>
+                                    <div class="p-6">
+                                        <textarea readonly class="w-full h-24 bg-transparent border-0 outline-none resize-none text-sm text-slate-700 dark:text-zinc-300 leading-relaxed font-medium" x-text="currentOutreach.linkedin_request"></textarea>
+                                        <div class="mt-2 text-right text-xs font-bold" :class="currentOutreach.linkedin_request.length > 300 ? 'text-rose-500' : 'text-slate-400'" x-text="`${currentOutreach.linkedin_request.length} / 300 chars`"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Follow Up LinkedIn -->
+                                <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-darkBorder shadow-sm overflow-hidden group">
+                                    <div class="px-6 py-4 bg-slate-50 dark:bg-[#111113] border-b border-slate-100 dark:border-darkBorder flex justify-between items-center">
+                                        <h4 class="font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                            LinkedIn Follow-up
+                                        </h4>
+                                        <button @click="copyText(currentOutreach.followup_linkedin)" class="text-xs font-bold text-brandIndigo bg-brandIndigo/10 px-3 py-1.5 rounded-md hover:bg-brandIndigo/20 transition-colors">Copy</button>
+                                    </div>
+                                    <div class="p-6">
+                                        <textarea readonly class="w-full h-24 bg-transparent border-0 outline-none resize-none text-sm text-slate-700 dark:text-zinc-300 leading-relaxed font-medium" x-text="currentOutreach.followup_linkedin"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- View: History -->
+                <div x-show="outreachTab === 'history'" x-transition.opacity class="space-y-4">
+                    <template x-if="history.length === 0">
+                        <div class="bg-white dark:bg-darkCard rounded-2xl p-10 border border-slate-200 dark:border-darkBorder text-center">
+                            <p class="text-slate-400 dark:text-zinc-600 italic font-medium">No outreach history found.</p>
+                        </div>
+                    </template>
+                    <template x-for="item in history" :key="item.id">
+                        <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-darkBorder shadow-sm p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:border-brandIndigo/50">
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white text-lg mb-1" x-text="`${item.prospect_name} - ${item.company}`"></h4>
+                                <div class="flex items-center gap-3 text-xs font-semibold text-slate-500 dark:text-zinc-400">
+                                    <span x-text="window.formatIST(item.created_at)"></span>
+                                    <span>•</span>
+                                    <span class="text-brandIndigo" x-text="item.model_used || 'Gemini 2.5'"></span>
+                                </div>
+                            </div>
+                            <button @click="viewHistoryItem(item)" class="shrink-0 px-4 py-2 border border-slate-200 dark:border-darkBorder rounded-lg text-sm font-bold hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                View Assets
+                            </button>
+                        </div>
+                    </template>
+                </div>
+
             </div>   </div>
 
         </main>
@@ -1454,5 +1597,113 @@
         </button>
     </div>
 
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('outreachApp', () => ({
+                outreachTab: 'generator',
+                briefs: [],
+                history: [],
+                selectedBriefId: '',
+                personalizationLevel: 'High',
+                currentOutreach: null,
+                generating: false,
+
+                async init() {
+                    // Start fetching once view is active or immediately
+                    this.$watch('activeView', async (val) => {
+                        if (val === 'outreach' && this.briefs.length === 0) {
+                            await this.fetchData();
+                        }
+                    });
+                    
+                    // Fetch immediately if it starts on outreach (e.g. deep link or reload)
+                    if (this.activeView === 'outreach') {
+                        await this.fetchData();
+                    }
+                },
+
+                async fetchData() {
+                    try {
+                        const { data: briefData } = await window.supabase
+                            .from('PreMeetingBriefs')
+                            .select('id, prospect_name, company, role')
+                            .order('created_at', { ascending: false });
+                        if (briefData) this.briefs = briefData;
+
+                        const { data: historyData } = await window.supabase
+                            .from('OutreachMessages')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+                        if (historyData) this.history = historyData;
+                    } catch(err) {
+                        console.error('Data fetch error:', err);
+                    }
+                },
+
+                async generateOutreach() {
+                    if (!this.selectedBriefId) return;
+                    this.generating = true;
+                    
+                    try {
+                        const { data: session } = await window.supabase.auth.getSession();
+                        const token = session.session.access_token;
+                        const functionUrl = `${window.supabase.supabaseUrl}/functions/v1/generate-outreach`;
+                        
+                        const res = await fetch(functionUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({ brief_id: this.selectedBriefId })
+                        });
+
+                        const jsonRes = await res.json();
+                        
+                        if (!res.ok) {
+                            throw new Error(jsonRes.error || 'Failed to generate');
+                        }
+
+                        this.currentOutreach = jsonRes.data;
+                        
+                        // Refetch history silently
+                        const { data: historyData } = await window.supabase
+                            .from('OutreachMessages')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+                        if (historyData) this.history = historyData;
+
+                    } catch (err) {
+                        console.error(err);
+                        alert(`Error: ${err.message}`);
+                    } finally {
+                        this.generating = false;
+                    }
+                },
+
+                viewHistoryItem(item) {
+                    this.selectedBriefId = item.brief_id;
+                    this.currentOutreach = {
+                        subject_line: item.subject_line,
+                        cold_email: item.cold_email,
+                        linkedin_request: item.linkedin_request,
+                        linkedin_message: item.linkedin_message,
+                        followup_email: item.followup_email,
+                        followup_linkedin: item.followup_linkedin
+                    };
+                    this.outreachTab = 'generator';
+                },
+
+                async copyText(text) {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        alert('Copied to clipboard!');
+                    } catch (err) {
+                        console.error('Failed to copy', err);
+                    }
+                }
+            }));
+        });
+    </script>
 </body>
 </html>

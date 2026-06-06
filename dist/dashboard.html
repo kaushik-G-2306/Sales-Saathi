@@ -1045,12 +1045,47 @@
                                 console.log('[AUTH TOKEN EXISTS]', !!session?.access_token);
                                 console.log('[AUTH TOKEN LENGTH]', session?.access_token?.length);
 
-                                const functionUrl = `${window.supabase.supabaseUrl}/functions/v1/generate-brief`;
                                 const headers = {
                                     'Content-Type': 'application/json',
                                     'apikey': window.supabase.supabaseKey,
                                     'Authorization': `Bearer ${session?.access_token}`
                                 };
+
+                                // STEP 1: Fetch Prospect Enrichment
+                                console.log('[ENRICHMENT START]');
+                                let enrichment_data = null;
+                                try {
+                                    const enrichUrl = `${window.supabase.supabaseUrl}/functions/v1/enrich-prospect`;
+                                    const enrichRes = await fetch(enrichUrl, {
+                                        method: 'POST',
+                                        headers: headers,
+                                        body: JSON.stringify({
+                                            prospect_name: payload.prospect_name,
+                                            company: payload.company,
+                                            role: payload.role,
+                                            linkedin_url: '' // optional
+                                        }),
+                                        signal: controller.signal
+                                    });
+
+                                    if (enrichRes.ok) {
+                                        const enrichBody = await enrichRes.json();
+                                        enrichment_data = enrichBody.enrichment_data;
+                                        console.log('[ENRICHMENT SUCCESS]', enrichment_data);
+                                    } else {
+                                        console.warn('[ENRICHMENT FAILED]', await enrichRes.text());
+                                    }
+                                } catch (enrichErr) {
+                                    console.error('[ENRICHMENT THREW]', enrichErr);
+                                }
+
+                                // Attach enrichment data to original payload
+                                if (enrichment_data) {
+                                    payload.enrichment_data = enrichment_data;
+                                }
+
+                                // STEP 2: Generate Brief
+                                const functionUrl = `${window.supabase.supabaseUrl}/functions/v1/generate-brief`;
                                 const options = {
                                     method: 'POST',
                                     headers: headers,
