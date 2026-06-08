@@ -99,3 +99,99 @@ CREATE POLICY "Users can view own outreach" ON public."OutreachMessages"
 
 CREATE POLICY "Users can insert own outreach" ON public."OutreachMessages"
     FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- CalendarConnections Table
+CREATE TABLE public."CalendarConnections" (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES public."Users"(id) ON DELETE CASCADE,
+    provider TEXT NOT NULL,
+    calendar_email TEXT,
+    connection_status TEXT DEFAULT 'connected',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE(user_id, provider)
+);
+
+ALTER TABLE public."CalendarConnections" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own connections" ON public."CalendarConnections"
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own connections" ON public."CalendarConnections"
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own connections" ON public."CalendarConnections"
+    FOR UPDATE USING (auth.uid() = user_id);
+
+-- UnifiedMeetings Table
+CREATE TABLE public."UnifiedMeetings" (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES public."Users"(id) ON DELETE CASCADE,
+    source TEXT NOT NULL CHECK (source IN ('sales_saathi', 'google', 'outlook')),
+    meeting_title TEXT NOT NULL,
+    company TEXT,
+    meeting_datetime TIMESTAMP WITH TIME ZONE NOT NULL,
+    external_event_id TEXT,
+    attendees JSONB,
+    brief_id UUID REFERENCES public."PreMeetingBriefs"(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX idx_unifiedmeetings_datetime ON public."UnifiedMeetings"(meeting_datetime);
+
+ALTER TABLE public."UnifiedMeetings" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own meetings" ON public."UnifiedMeetings"
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own meetings" ON public."UnifiedMeetings"
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own meetings" ON public."UnifiedMeetings"
+    FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own meetings" ON public."UnifiedMeetings"
+    FOR DELETE USING (auth.uid() = user_id);
+
+-- ==========================================
+-- MIGRATION: AI Brief Generation & PDF V2
+-- ==========================================
+
+-- 1. Changes to PreMeetingBriefs
+ALTER TABLE public."PreMeetingBriefs" 
+ADD COLUMN IF NOT EXISTS prospect_email TEXT,
+ADD COLUMN IF NOT EXISTS pdf_storage_path TEXT,
+ADD COLUMN IF NOT EXISTS pdf_url TEXT;
+
+-- 2. Changes to UnifiedMeetings
+ALTER TABLE public."UnifiedMeetings" 
+ADD COLUMN IF NOT EXISTS brief_status TEXT DEFAULT 'not_started',
+ADD COLUMN IF NOT EXISTS auto_generate_enabled BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS auto_email_enabled BOOLEAN DEFAULT false;
+
+-- 3. Constraints
+ALTER TABLE public."UnifiedMeetings"
+DROP CONSTRAINT IF EXISTS valid_brief_status;
+
+ALTER TABLE public."UnifiedMeetings"
+ADD CONSTRAINT valid_brief_status 
+CHECK (
+    brief_status IN (
+        'not_started', 
+        'generating', 
+        'completed', 
+        'failed'
+    )
+);
+
+-- 4. Indexes
+CREATE INDEX IF NOT EXISTS idx_unifiedmeetings_brief_status 
+ON public."UnifiedMeetings"(brief_status);
+
+CREATE INDEX IF NOT EXISTS idx_unifiedmeetings_auto_generate 
+ON public."UnifiedMeetings"(auto_generate_enabled) 
+WHERE auto_generate_enabled = true;
+
+CREATE INDEX IF NOT EXISTS idx_unifiedmeetings_auto_email 
+ON public."UnifiedMeetings"(auto_email_enabled) 
+WHERE auto_email_enabled = true;

@@ -151,7 +151,16 @@
                                         <p class="text-xs text-slate-500 dark:text-zinc-400">Sync meetings for auto-briefs.</p>
                                     </div>
                                 </div>
-                                <button class="px-4 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90">Connect</button>
+                                <div class="flex items-center gap-3">
+                                    <button x-show="!googleCalendarConnected" @click="$store.auth.connectGoogleCalendar()" class="px-4 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90">Connect</button>
+                                    <template x-if="googleCalendarConnected">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-emerald-500 font-bold text-sm">Connected ✓</span>
+                                            <button @click="$store.auth.connectGoogleCalendar()" class="px-3 py-2 rounded-lg bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-zinc-300 text-xs font-bold hover:bg-slate-300 dark:hover:bg-white/20 transition-colors">Reconnect</button>
+                                            <button @click="syncGoogleCalendar()" class="px-4 py-2 rounded-lg bg-brandIndigo text-white text-xs font-bold hover:opacity-90 shadow-sm transition-opacity">Sync Google Calendar</button>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
 
                             <!-- HubSpot -->
@@ -187,23 +196,91 @@
                     plan: ''
                 },
                 msg: '',
+                googleCalendarConnected: false,
                 
                 init() {
-                    setTimeout(() => {
-                        if (!this.$store.auth.isLoggedIn) {
-                            window.location.href = 'auth.html';
-                            return;
+                    console.log("SETTINGS INIT START");
+                    console.log("AUTH STORE:", Alpine.store('auth'));
+                    console.log("AUTH STORE USER:", Alpine.store('auth')?.user);
+                    console.log("AUTH STORE SESSION:", Alpine.store('auth')?.session);
+
+                    if (!this.$store.auth.loading) {
+                        this.loadProfile();
+                    } else {
+                        this.$watch('$store.auth.loading', (isLoading) => {
+                            if (!isLoading) {
+                                this.loadProfile();
+                            }
+                        });
+                    }
+                },
+
+                async loadProfile() {
+                    if (!this.$store.auth.isLoggedIn) {
+                        window.location.href = 'auth.html';
+                        return;
+                    }
+                    console.log('Session:', this.$store.auth.session);
+                    console.log('User:', this.$store.auth.user);
+                    console.log('Profile:', this.profile);
+
+                    const u = this.$store.auth.user || {};
+                    this.profile = {
+                        name: u?.name || '',
+                        email: u?.email || '',
+                        role: u?.role || 'Account Executive',
+                        crm: u?.crm || 'HubSpot',
+                        plan: u?.plan || 'Free'
+                    };
+                    
+                    try {
+                        if (u?.id) {
+                            const { db } = await import('./src/db.js');
+                            const conn = await db.getCalendarConnection(u.id, 'google');
+                            if (conn && conn.connection_status === 'connected') {
+                                this.googleCalendarConnected = true;
+                            }
                         }
-                        const u = this.$store.auth.user;
-                        this.profile = {
-                            name: u.name || '',
-                            email: u.email || '',
-                            role: u.role || 'Account Executive',
-                            crm: u.crm || 'HubSpot',
-                            plan: u.plan || 'Free'
-                        };
-                        this.loading = false;
-                    }, 600);
+                    } catch(e) {
+                        console.error("Failed to load connection status:", e);
+                    }
+
+                    this.loading = false;
+                },
+
+                async syncGoogleCalendar() {
+                    console.log('Syncing Google Calendar via Edge Function...');
+                    this.msg = 'Starting sync...';
+                    
+                    try {
+                        const response = await window.supabase.functions.invoke("sync-google-calendar");
+                        const data = response.data;
+                        const error = response.error;
+                        
+                        if (error) {
+                            throw error;
+                        }
+                        
+                        if (data && data.success) {
+                            this.msg = `Sync complete! Added: ${data.inserted_count}, Updated: ${data.updated_count}`;
+                        } else if (data && data.error) {
+                            throw new Error(data.error);
+                        } else {
+                            this.msg = 'Sync complete!';
+                        }
+                    } catch (err) {
+                        console.error('Sync failed:', err);
+                        let errMsg = err.message || 'Unknown error';
+                        if (errMsg.includes('{"error"')) {
+                            try {
+                                const parsed = JSON.parse(errMsg);
+                                errMsg = parsed.error || errMsg;
+                            } catch(e) {}
+                        }
+                        this.msg = `Sync failed: ${errMsg}`;
+                    } finally {
+                        setTimeout(() => { if (this.msg.includes('Sync complete')) this.msg = ''; }, 5000);
+                    }
                 },
 
                 async saveProfile() {

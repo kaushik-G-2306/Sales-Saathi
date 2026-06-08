@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured, db } from './db.js';
+import { supabase, isSupabaseConfigured, db, supabaseClientId } from './db.js';
 
 // Set VITE_DEBUG_MODE=true in .env to enable verbose console output during development.
 const DEBUG = import.meta.env.VITE_DEBUG_MODE === 'true';
@@ -9,14 +9,29 @@ const authStore = {
         loading: true,
 
         async init() {
+            console.log(`[AUTH] ${supabaseClientId} Starting auth store init...`);
             this.loading = true;
             if (isSupabaseConfigured) {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                    await this.handleSession(session);
+                console.log(`[AUTH] ${supabaseClientId} Calling supabase.auth.getSession()...`);
+                try {
+                    const getSessionPromise = supabase.auth.getSession();
+                    console.log(`[AUTH] ${supabaseClientId} getSession Promise created:`, getSessionPromise);
+                    const { data: { session }, error } = await getSessionPromise;
+                    console.log(`[AUTH] ${supabaseClientId} getSession resolved. Error:`, error, 'Session:', session);
+                    if (session) {
+                        await this.handleSession(session);
+                    }
+                } catch (e) {
+                    console.error(`[AUTH] ${supabaseClientId} getSession threw an error:`, e);
                 }
                 
+                console.log(`[AUTH] ${supabaseClientId} Attaching onAuthStateChange listener...`);
+                
+                if (window.__AUTH_INITIALIZED__) return;
+                window.__AUTH_INITIALIZED__ = true;
+
                 supabase.auth.onAuthStateChange(async (event, session) => {
+                    console.log(`[AUTH] ${supabaseClientId} onAuthStateChange event: ${event}`);
                     if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                         await this.handleSession(session);
                     } else if (event === 'SIGNED_OUT') {
@@ -48,7 +63,59 @@ const authStore = {
         },
 
         async handleSession(session) {
+            console.log('--- handleSession executing ---');
             this.isLoggedIn = true;
+
+            console.log("Session:", session);
+            console.log("Provider:", session?.user?.app_metadata?.provider);
+            console.log("Provider token:", session?.provider_token);
+
+            // If the user just connected Google Calendar, save connection status
+            if (session.provider_token && session.user?.app_metadata?.provider === 'google') {
+                try {
+                    console.log('Provider token:', session.provider_token);
+                    console.log('Provider refresh token exists:', !!session.provider_refresh_token);
+                    
+                    const { data: sessionData } = await supabase.auth.getSession();
+                    console.log('Current session before invoke:', sessionData);
+                    console.log('Access token exists:', !!sessionData?.session?.access_token);
+                    
+                    const accessToken = sessionData?.session?.access_token || session.access_token;
+                    console.log('Access token length:', accessToken?.length || 0);
+                    
+                    console.log('Calling store-google-token with explicit Authorization header...');
+
+                    const response = await supabase.functions.invoke('store-google-token', {
+                        body: {
+                            provider_token: session.provider_token,
+                            provider_refresh_token: session.provider_refresh_token || null
+                        },
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`
+                        }
+                    });
+                    
+                    const resData = response.data;
+                    const funcErr = response.error;
+                    
+                    console.log('store-google-token response:', response);
+                    
+                    if (funcErr) {
+                        console.error("Backend token storage failed:", funcErr);
+                    } else {
+                        console.log("Token securely stored in backend.", resData);
+                    }
+
+                    await db.upsertCalendarConnection(session.user.id, {
+                        provider: 'google',
+                        calendar_email: session.user.email,
+                        connection_status: 'connected'
+                    });
+                } catch(err) {
+                    console.error("Error saving calendar connection:", err);
+                }
+            }
+            
             // Fetch or create user record in our DB
             let userRecord = await db.getUser(session.user.id);
             if (!userRecord) {
@@ -232,6 +299,33 @@ const authStore = {
                 this.isLoggedIn = true;
                 // Fake redirect reload
                 setTimeout(() => window.location.href = 'dashboard.html', 500);
+            }
+        },
+
+        async connectGoogleCalendar() {
+            if (isSupabaseConfigured) {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin + '/settings.html',
+                        scopes: 'https://www.googleapis.com/auth/calendar.readonly',
+                        queryParams: {
+                            access_type: 'offline',
+                            prompt: 'consent'
+                        }
+                    }
+                });
+                if (error) throw error;
+            } else {
+                // Mock Flow
+                if (!this.user) throw new Error('Must be logged in to connect calendar');
+                await db.upsertCalendarConnection(this.user.id, {
+                    provider: 'google',
+                    calendar_email: this.user.email,
+                    connection_status: 'connected'
+                });
+                // Fake redirect reload
+                setTimeout(() => window.location.reload(), 500);
             }
         },
 

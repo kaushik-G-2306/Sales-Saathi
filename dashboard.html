@@ -811,37 +811,129 @@
                     <div class="space-y-8">
                         
                         <!-- Section 3: Upcoming Meetings Arena -->
-                        <section>
+                        <section x-data="{
+                            meetings: [],
+                            loading: true,
+                            async fetchMeetings() {
+                                console.log('Upcoming Meetings component initialized');
+                                
+                                let attempts = 0;
+                                while (!window.supabase && attempts < 50) {
+                                    await new Promise(r => setTimeout(r, 100));
+                                    attempts++;
+                                }
+
+                                if (!window.supabase) {
+                                    console.error('Failed to find window.supabase');
+                                    this.loading = false;
+                                    return;
+                                }
+
+                                console.log('Fetching UnifiedMeetings');
+
+                                const { data: sessionData } = await window.supabase.auth.getSession();
+                                
+                                console.log('[DEBUG] Current User ID:', sessionData?.session?.user?.id);
+                                console.log('[DEBUG] Session Exists:', !!sessionData?.session);
+
+                                if (!sessionData?.session) {
+                                    console.warn('No active session found for UnifiedMeetings');
+                                    this.loading = false;
+                                    return;
+                                }
+                                
+                                const startOfToday = new Date();
+                                startOfToday.setHours(0,0,0,0);
+
+                                const { data, error } = await window.supabase
+                                    .from('UnifiedMeetings')
+                                    .select('*')
+                                    .gte('meeting_datetime', startOfToday.toISOString())
+                                    .order('meeting_datetime', { ascending: true });
+                                
+                                console.log('[DEBUG] Meeting Count:', data?.length);
+                                console.log('[DEBUG] Meetings:', data);
+
+                                if (data?.length) {
+                                    console.log('[DEBUG] First Meeting:', data[0]);
+                                }
+
+                                if (error) {
+                                    console.error('Failed to fetch meetings:', error);
+                                } else {
+                                    this.meetings = data || [];
+                                    console.log('UnifiedMeetings fetched:', this.meetings);
+                                    console.log('Meeting render count:', this.meetings?.length);
+                                }
+                                
+                                console.log('[RENDER] meetings array:', this.meetings);
+                                console.log('[RENDER] rendered meetings count:', this.meetings.length);
+
+                                console.log('[RENDER] Meeting IDs:', this.meetings.map(m => m.id));
+
+                                console.log('[RENDER] Meeting Titles:', 
+                                    this.meetings.map(m => ({
+                                        id: m.id,
+                                        title: m.meeting_title,
+                                        source: m.source,
+                                        datetime: m.meeting_datetime
+                                    }))
+                                );
+
+                                console.log(
+                                    '[RENDER] Duplicate IDs:',
+                                    this.meetings
+                                        .map(m => m.id)
+                                        .filter((id, idx, arr) => arr.indexOf(id) !== idx)
+                                );
+                                
+                                this.loading = false;
+                            },
+                            formatIST(dateString) {
+                                if (!dateString) return '';
+                                const d = new Date(dateString);
+                                return d.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+                            },
+                            getSourceBadge(source) {
+                                switch(source) {
+                                    case 'sales_saathi': return 'Sales Saathi';
+                                    case 'google': return 'Google Calendar';
+                                    case 'outlook': return 'Outlook';
+                                    default: return source;
+                                }
+                            }
+                        }" x-init="fetchMeetings()">
                             <h2 class="text-lg font-extrabold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                                 <svg class="w-5 h-5 text-slate-500 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                 Today's Calendar
                             </h2>
                             <div class="relative pl-6 border-l-2 border-slate-200 dark:border-white/10 space-y-6">
-                                <!-- Meeting Node -->
-                                <div class="relative">
-                                    <div class="absolute -left-[29px] top-1 w-4 h-4 rounded-full bg-brandIndigo ring-4 ring-slate-50 dark:ring-darkBg"></div>
-                                    <div class="bg-white dark:bg-darkCard border border-brandIndigo/30 rounded-xl p-4 shadow-sm shadow-brandIndigo/5">
-                                        <p class="text-xs font-bold text-brandIndigo mb-1 font-mono">11:00 AM — 11:45 AM</p>
-                                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">TechFlow Enterprise Discovery</h3>
-                                        <div class="flex items-center gap-2 mt-3">
-                                            <img src="https://ui-avatars.com/api/?name=Sarah+Jenkins&size=64&background=f8fafc&color=0f172a&bold=true" class="w-6 h-6 rounded-full border border-slate-200" alt="Avatar">
-                                            <img src="https://ui-avatars.com/api/?name=David+Kim&size=64&background=f8fafc&color=0f172a&bold=true" class="w-6 h-6 rounded-full border border-slate-200 -ml-3" alt="Avatar">
-                                            <span class="text-[10px] font-semibold text-slate-500 ml-1">+2 attendees</span>
-                                        </div>
-                                        <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2">
-                                            <button class="flex-1 py-1.5 text-xs font-bold bg-brandIndigo text-white rounded-lg hover:bg-indigo-500 transition-colors">Join Call</button>
-                                            <button class="flex-1 py-1.5 text-xs font-bold bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">AI Brief</button>
+                                
+                                <div x-show="loading" class="text-sm font-medium text-slate-500 dark:text-zinc-400 italic">
+                                    Loading calendar...
+                                </div>
+
+                                <div x-show="meetings.length === 0 && !loading" x-cloak class="text-sm font-medium text-slate-500 dark:text-zinc-400 italic">
+                                    No upcoming meetings scheduled.
+                                </div>
+
+                                <template x-for="meeting in meetings" :key="meeting.id">
+                                    <div class="relative">
+                                        <div class="absolute -left-[29px] top-1 w-4 h-4 rounded-full bg-brandIndigo ring-4 ring-slate-50 dark:ring-darkBg"></div>
+                                        <div class="bg-white dark:bg-darkCard border border-brandIndigo/30 rounded-xl p-4 shadow-sm shadow-brandIndigo/5">
+                                            <div class="flex justify-between items-start mb-1">
+                                                <p class="text-xs font-bold text-brandIndigo font-mono" x-text="formatIST(meeting.meeting_datetime)"></p>
+                                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-zinc-300" x-text="getSourceBadge(meeting.source)"></span>
+                                            </div>
+                                            <h3 class="text-sm font-bold text-slate-900 dark:text-white" x-text="meeting.meeting_title"></h3>
+                                            <p class="text-xs font-semibold text-slate-500 dark:text-zinc-400 mt-1" x-text="meeting.company"></p>
+                                            
+                                            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2" x-show="meeting.brief_id">
+                                                <button @click="window.location.href='brief-result.html?id=' + meeting.brief_id" class="flex-1 py-1.5 text-xs font-bold bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-white rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">View AI Brief</button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <!-- Meeting Node -->
-                                <div class="relative">
-                                    <div class="absolute -left-[29px] top-1 w-4 h-4 rounded-full bg-slate-300 dark:bg-zinc-600 ring-4 ring-slate-50 dark:ring-darkBg"></div>
-                                    <div class="bg-transparent opacity-70">
-                                        <p class="text-xs font-bold text-slate-500 dark:text-zinc-500 mb-1 font-mono">2:30 PM — 3:00 PM</p>
-                                        <h3 class="text-sm font-bold text-slate-700 dark:text-zinc-300">Internal Sync: Q3 Pipeline</h3>
-                                    </div>
-                                </div>
+                                </template>
                             </div>
                         </section>
 
@@ -924,6 +1016,440 @@
                             </div>
                         </div>
                     </section>
+                </div>
+            </div>
+
+            <!-- Upcoming Meetings View -->
+            <div x-show="activeView === 'meetings'" x-cloak class="w-full max-w-7xl mx-auto animate-[fadeIn_0.3s_ease-out]"
+                 x-data="{
+                    upcomingLoading: true,
+                    upcomingMeetings: [],
+                    actionToast: '',
+                    emailLoadingId: null,
+                    isSyncing: false,
+                    autoEmailBriefs: true,
+                    async toggleEmailPreferences() {
+                        // x-model already toggles this.autoEmailBriefs, so we just save it to the DB
+                        const sessionData = await window.supabase.auth.getSession();
+                        const userId = sessionData?.data?.session?.user?.id;
+                        if (userId) {
+                            await window.supabase.from('Users').update({ auto_email_briefs: this.autoEmailBriefs }).eq('id', userId);
+                        }
+                    },
+                    async syncGoogleCalendar() {
+                        console.log('Syncing Google Calendar via Edge Function...');
+                        this.actionToast = 'Starting sync...';
+                        this.isSyncing = true;
+                        
+                        try {
+                            const response = await window.supabase.functions.invoke('sync-google-calendar');
+                            const data = response.data;
+                            const error = response.error;
+                            
+                            if (error) {
+                                throw error;
+                            }
+                            
+                            if (data && data.success) {
+                                this.actionToast = `Sync complete! Added: ${data.inserted_count}, Updated: ${data.updated_count}`;
+                                await this.loadUpcomingMeetings();
+                            } else if (data && data.error) {
+                                throw new Error(data.error);
+                            } else {
+                                this.actionToast = 'Sync complete!';
+                                await this.loadUpcomingMeetings();
+                            }
+                        } catch (err) {
+                            console.error('Sync failed:', err);
+                            let errMsg = err.message || 'Unknown error';
+                            // Clean up stack traces if present
+                            if (errMsg.includes('{') && errMsg.includes('}')) {
+                                try {
+                                    const parsed = JSON.parse(errMsg);
+                                    errMsg = parsed.error || errMsg;
+                                } catch(e) {}
+                            }
+                            this.actionToast = `Sync failed: ${errMsg}`;
+                        } finally {
+                            this.isSyncing = false;
+                            setTimeout(() => this.actionToast = '', 5000);
+                        }
+                    },
+                    async sendBriefEmail(meeting) {
+                        this.emailLoadingId = meeting.id;
+                        console.log('[EMAIL] Send brief requested for:', meeting);
+                        
+                        try {
+                            const { data: sessionData } = await window.supabase.auth.getSession();
+                            const token = sessionData?.session?.access_token;
+                            
+                            const res = await fetch(`${window.supabase.supabaseUrl}/functions/v1/send-brief-email`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({ brief_id: meeting.brief_id })
+                            });
+                            
+                            const result = await res.json();
+                            
+                            if (!res.ok) {
+                                throw new Error(result.error || 'Failed to send email');
+                            }
+                            
+                            this.actionToast = 'Brief email sent successfully!';
+                        } catch (err) {
+                            console.error('[EMAIL] Send failed:', err);
+                            this.actionToast = `Failed: ${err.message}`;
+                        } finally {
+                            this.emailLoadingId = null;
+                            setTimeout(() => this.actionToast = '', 4000);
+                        }
+                    },
+                    extractCompanyFromDomain(domain) {
+                        if (!domain) return 'Unknown Company';
+                        let name = domain.toLowerCase();
+                        const tlds = ['.com', '.io', '.ai', '.net', '.org', '.co.uk'];
+                        for (const tld of tlds) {
+                            if (name.endsWith(tld)) {
+                                name = name.slice(0, -tld.length);
+                                break;
+                            }
+                        }
+                        return name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                    },
+                    extractNameFromEmail(email) {
+                        if (!email) return 'Unknown';
+                        const localPart = email.split('@')[0];
+                        const spaced = localPart.replace(/[._-]/g, ' ');
+                        return spaced.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                    },
+                    async generateGoogleBrief(meeting) {
+                        try {
+                            console.log('[BRIEF] Starting generation');
+                            
+                            // 1. Update status locally and in DB safely
+                            meeting.brief_status = 'generating';
+                            try {
+                                await window.supabase.from('UnifiedMeetings').update({ brief_status: 'generating' }).eq('id', meeting.id);
+                            } catch (dbErr) {
+                                console.warn('[BRIEF] Failed to update DB to generating:', dbErr);
+                            }
+                            
+                            // 2. Parse attendee
+                            let prospectName = 'Meeting Participant';
+                            let companyName = 'Unknown Company';
+                            let prospectEmail = '';
+                            
+                            const ignoreDomains = ['gmail.com', 'googlemail.com', 'outlook.com', 'hotmail.com', 'live.com', 'yahoo.com'];
+                            const attendees = meeting.attendees || [];
+                            
+                            for (let att of attendees) {
+                                let emailStr = typeof att === 'string' ? att : att.email;
+                                if (!emailStr) continue;
+                                
+                                // Ignore organizer/self
+                                if (att.organizer === true || att.self === true) continue;
+                                
+                                emailStr = emailStr.trim();
+                                const parts = emailStr.split('@');
+                                if (parts.length === 2) {
+                                    const domain = parts[1].toLowerCase();
+                                    if (!ignoreDomains.includes(domain)) {
+                                        prospectEmail = emailStr;
+                                        
+                                        if (att.displayName) {
+                                            prospectName = att.displayName;
+                                        } else {
+                                            prospectName = this.extractNameFromEmail(emailStr);
+                                        }
+                                        
+                                        companyName = this.extractCompanyFromDomain(domain);
+                                        console.log(`[BRIEF] Parsed attendee - Name: ${prospectName}, Company: ${companyName}, Email: ${prospectEmail}`);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!prospectEmail) {
+                                console.log('[BRIEF] Parsed attendee: No suitable external attendee found, using fallbacks.');
+                            }
+                            
+                            const { data: sessionData } = await window.supabase.auth.getSession();
+                            const token = sessionData?.session?.access_token;
+
+                            // 2.5 Call enrich-prospect BEFORE generate-brief with a timeout
+                            console.log('[BRIEF] Calling enrich-prospect');
+                            let enrichmentData = null;
+                            try {
+                                const enrichController = new AbortController();
+                                const enrichTimeout = setTimeout(() => enrichController.abort(), 15000); // 15s timeout
+                                const enrichRes = await fetch(`${window.supabase.supabaseUrl}/functions/v1/enrich-prospect`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${token}`
+                                    },
+                                    body: JSON.stringify({
+                                        prospect_name: prospectName,
+                                        company: companyName,
+                                        role: '',
+                                        prospect_email: prospectEmail
+                                    }),
+                                    signal: enrichController.signal
+                                });
+                                clearTimeout(enrichTimeout);
+                                
+                                if (enrichRes.ok) {
+                                    const enrichBody = await enrichRes.json();
+                                    enrichmentData = enrichBody.enrichment_data;
+                                    console.log('[BRIEF] Enrichment success');
+                                } else {
+                                    console.warn('[BRIEF] Enrichment failed:', await enrichRes.text());
+                                }
+                            } catch (e) {
+                                console.error('[BRIEF] Enrichment threw or timed out:', e);
+                            }
+                            
+                            // 3. Call generate-brief with a timeout
+                            console.log('[BRIEF] Calling generate-brief');
+                            // Format attendees list
+                            const attendeesList = (meeting.attendees || []).map(a => {
+                                const email = typeof a === 'string' ? a : a.email;
+                                const name = a.displayName ? ` (${a.displayName})` : '';
+                                const isOrg = a.organizer ? ' [Organizer]' : '';
+                                return `- ${email}${name}${isOrg}`;
+                            }).join('\n');
+
+                            const additionalContext = `Meeting Title: ${meeting.meeting_title}\n\nDescription:\n${meeting.description || 'No description provided.'}\n\nAttendees:\n${attendeesList}`;
+
+                            const payload = {
+                                prospect_name: prospectName,
+                                company: companyName,
+                                prospect_email: prospectEmail,
+                                meeting_date: meeting.meeting_datetime,
+                                meeting_type: 'Discovery Call',
+                                additional_context: additionalContext,
+                                skip_meeting_creation: true,
+                                enrichment_data: enrichmentData
+                            };
+                            
+                            const genController = new AbortController();
+                            const genTimeout = setTimeout(() => genController.abort(), 45000); // 45s timeout for Gemini
+                            
+                            const response = await fetch(`${window.supabase.supabaseUrl}/functions/v1/generate-brief`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify(payload),
+                                signal: genController.signal
+                            });
+                            clearTimeout(genTimeout);
+                            
+                            const result = await response.json();
+                            
+                            if (!response.ok || !result.brief_id) {
+                                throw new Error(result.error || 'Failed to generate brief');
+                            }
+                            
+                            console.log('[BRIEF] Brief created:', result.brief_id);
+                            
+                            // 4. Update meeting
+                            await window.supabase.from('UnifiedMeetings').update({ 
+                                brief_id: result.brief_id,
+                                brief_status: 'completed',
+                                company: companyName
+                            }).eq('id', meeting.id);
+                            
+                            console.log('[BRIEF] Meeting updated');
+                            
+                            meeting.brief_id = result.brief_id;
+                            meeting.brief_status = 'completed';
+                            meeting.company = companyName; // Update local view
+                            this.actionToast = 'AI Brief Generated';
+                            setTimeout(() => this.actionToast = '', 3000);
+                            
+                        } catch (err) {
+                            console.error('[BRIEF] Generation failed:', err);
+                            meeting.brief_status = 'failed';
+                            try {
+                                await window.supabase.from('UnifiedMeetings').update({ brief_status: 'failed' }).eq('id', meeting.id);
+                            } catch (dbErr) {
+                                console.warn('[BRIEF] Failed to update DB to failed:', dbErr);
+                            }
+                        }
+                    },
+                    async loadUpcomingMeetings() {
+                        this.upcomingLoading = true;
+                        try {
+                            // Fetch user preferences
+                            const sessionData = await window.supabase.auth.getSession();
+                            if (sessionData?.data?.session?.user?.id) {
+                                const { data: userData } = await window.supabase.from('Users').select('auto_email_briefs').eq('id', sessionData.data.session.user.id).single();
+                                if (userData && userData.auto_email_briefs !== undefined) {
+                                    this.autoEmailBriefs = userData.auto_email_briefs;
+                                }
+                            }
+
+                            const { data, error } = await window.supabase
+                                .from('UnifiedMeetings')
+                                .select('*')
+                                .gte('meeting_datetime', new Date().toISOString())
+                                .order('meeting_datetime', { ascending: true });
+                                
+                            if (error) throw error;
+                            
+                            // --- ZOMBIE CLEANUP ---
+                            // If any meeting is stuck in 'generating' when loaded from DB,
+                            // it means a previous generation crashed or the user refreshed the page.
+                            // We reset it to 'failed' so the user can retry.
+                            for (let m of (data || [])) {
+                                if (m.brief_status === 'generating') {
+                                    m.brief_status = 'failed';
+                                    window.supabase.from('UnifiedMeetings')
+                                        .update({ brief_status: 'failed' })
+                                        .eq('id', m.id)
+                                        .then(() => console.log(`[CLEANUP] Reset stuck meeting ${m.id} to failed.`))
+                                        .catch(e => console.error('[CLEANUP] Failed to reset stuck meeting:', e));
+                                }
+                            }
+
+                            this.upcomingMeetings = data || [];
+                        } catch (err) {
+                            console.error('Failed to load upcoming meetings:', err);
+                        } finally {
+                            this.upcomingLoading = false;
+                        }
+                    },
+                    formatIST(dateString) {
+                        if (!dateString) return '';
+                        const d = new Date(dateString);
+                        return d.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+                    }
+                 }"
+                 x-init="
+                    $watch('activeView', value => {
+                        if (value === 'meetings') {
+                            loadUpcomingMeetings();
+                        }
+                    });
+                    if (activeView === 'meetings') {
+                        loadUpcomingMeetings();
+                    }
+                 ">
+                
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Upcoming Meetings</h1>
+                        <p class="text-slate-500 dark:text-zinc-400 font-medium">View all scheduled meetings across your connected sources.</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer mr-2">
+                            <div class="relative flex items-center">
+                                <input type="checkbox" class="sr-only" x-model="autoEmailBriefs" @change="toggleEmailPreferences()">
+                                <div class="block w-10 h-6 rounded-full transition-colors duration-300" :class="autoEmailBriefs ? 'bg-emerald-500 dark:bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'"></div>
+                                <div class="absolute left-1 bg-white w-4 h-4 rounded-full transition-transform duration-300" :class="autoEmailBriefs ? 'translate-x-4' : 'translate-x-0'"></div>
+                            </div>
+                            <span class="text-xs font-bold text-slate-600 dark:text-zinc-300">Auto-Email Briefs</span>
+                        </label>
+                        <button @click="syncGoogleCalendar()" :disabled="isSyncing" class="px-4 py-2 bg-brandIndigo hover:opacity-90 disabled:opacity-50 text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2">
+                            <svg x-show="!isSyncing" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" /></svg>
+                            <svg x-show="isSyncing" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span x-text="isSyncing ? 'Syncing...' : 'Sync Calendar'"></span>
+                        </button>
+                        <button @click="loadUpcomingMeetings()" class="px-4 py-2 bg-white dark:bg-darkCard border border-slate-200 dark:border-white/10 rounded-xl text-sm font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
+                    <div x-show="upcomingLoading" class="p-8 flex justify-center items-center">
+                        <svg class="animate-spin w-8 h-8 text-brandIndigo" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </div>
+
+                    <div x-show="!upcomingLoading && upcomingMeetings.length === 0" x-cloak class="p-12 text-center">
+                        <p class="text-slate-500 dark:text-zinc-400 font-medium italic">No upcoming meetings found</p>
+                    </div>
+
+                    <div x-show="!upcomingLoading && upcomingMeetings.length > 0" x-cloak class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-xs font-extrabold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
+                                    <th class="px-6 py-4 whitespace-nowrap">Meeting Title</th>
+                                    <th class="px-6 py-4 whitespace-nowrap">Company</th>
+                                    <th class="px-6 py-4 whitespace-nowrap">Date & Time</th>
+                                    <th class="px-6 py-4 whitespace-nowrap">Source</th>
+                                    <th class="px-6 py-4 whitespace-nowrap text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-white/10 text-sm font-medium text-slate-900 dark:text-white">
+                                <template x-for="meeting in upcomingMeetings" :key="meeting.id">
+                                    <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                                        <td class="px-6 py-4" x-text="meeting.meeting_title"></td>
+                                        <td class="px-6 py-4 text-slate-500 dark:text-zinc-400" x-text="meeting.company || '-'"></td>
+                                        <td class="px-6 py-4 font-mono text-brandIndigo text-xs font-bold whitespace-nowrap" x-text="formatIST(meeting.meeting_datetime)"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span x-show="meeting.source === 'google'" class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">Google Calendar</span>
+                                            <span x-show="meeting.source === 'sales_saathi'" class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">Sales Saathi</span>
+                                            <span x-show="meeting.source !== 'google' && meeting.source !== 'sales_saathi'" class="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-zinc-300 text-xs font-bold uppercase tracking-wider" x-text="meeting.source"></span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                                            <!-- completed / has brief_id -->
+                                            <div x-show="meeting.brief_status === 'completed' || meeting.brief_id" class="flex items-center justify-end gap-2">
+                                                <button @click="window.location.href='brief-result.html?id=' + meeting.brief_id" class="px-3 py-1.5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-zinc-300 text-xs font-bold rounded-lg transition-colors">
+                                                    View Brief
+                                                </button>
+                                                <button @click="sendBriefEmail(meeting)" :disabled="emailLoadingId === meeting.id" class="px-3 py-1.5 bg-brandIndigo hover:opacity-90 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1.5">
+                                                    <svg x-show="emailLoadingId !== meeting.id" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                                    <svg x-show="emailLoadingId === meeting.id" x-cloak class="animate-spin w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                    Send Email
+                                                </button>
+                                            </div>
+                                            <!-- generating -->
+                                            <div x-show="meeting.brief_status === 'generating'" class="flex justify-end">
+                                                <button disabled class="px-3 py-1.5 bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-zinc-500 text-xs font-bold rounded-lg flex items-center gap-2 cursor-not-allowed">
+                                                    <svg class="animate-spin w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                    Generating...
+                                                </button>
+                                            </div>
+                                            <!-- failed -->
+                                            <div x-show="meeting.brief_status === 'failed'" class="flex justify-end">
+                                                <button @click="generateGoogleBrief(meeting)" class="px-3 py-1.5 bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5">
+                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                                    Retry Brief
+                                                </button>
+                                            </div>
+                                            <!-- not_started / default fallback -->
+                                            <div x-show="!meeting.brief_id && (!meeting.brief_status || meeting.brief_status === 'not_started')" class="flex justify-end">
+                                                <button @click="generateGoogleBrief(meeting)" class="px-3 py-1.5 bg-brandIndigo/10 hover:bg-brandIndigo/20 text-brandIndigo text-xs font-bold rounded-lg transition-colors">
+                                                    Generate Brief
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Toast Notification -->
+                <div x-show="actionToast" 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-2"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 translate-y-2"
+                     x-cloak
+                     class="fixed bottom-6 right-6 px-4 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl shadow-2xl flex items-center gap-3 z-50">
+                    <svg class="w-5 h-5 text-emerald-400 dark:text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <span class="text-sm font-bold" x-text="actionToast"></span>
                 </div>
             </div>
 

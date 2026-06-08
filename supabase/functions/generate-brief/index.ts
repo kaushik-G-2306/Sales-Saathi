@@ -82,7 +82,7 @@ serve(async (req) => {
       });
     }
 
-    const { prospect_name, company, role, meeting_type, meeting_datetime, additional_context, enrichment_data } = requestData;
+    const { prospect_name, company, role, meeting_type, meeting_datetime, additional_context, enrichment_data, prospect_email, skip_meeting_creation } = requestData;
 
     // Basic validation matching the required dashboard form fields
     if (!prospect_name || !company) {
@@ -222,8 +222,36 @@ ${enrichment_data ? `\n--- ENRICHMENT DATA ---\n(Strictly use this as the true s
       throw new Error("Failed to extract content from Gemini response.");
     }
 
+    // Clean up markdown code fences if Gemini returned them
+    let cleanText = generatedText.trim();
+    if (cleanText.startsWith('```json')) {
+      cleanText = cleanText.replace(/^```json\n?/, '');
+    } else if (cleanText.startsWith('```')) {
+      cleanText = cleanText.replace(/^```\n?/, '');
+    }
+    if (cleanText.endsWith('```')) {
+      cleanText = cleanText.replace(/\n?```$/, '');
+    }
+    cleanText = cleanText.trim();
+
     // Parse the generated JSON from Gemini
-    const responsePayload = JSON.parse(generatedText);
+    let responsePayload;
+    try {
+      responsePayload = JSON.parse(cleanText);
+    } catch (error) {
+      console.error("RAW GEMINI RESPONSE:", generatedText);
+      console.error("PARSE ERROR:", error);
+      console.log("Response length:", generatedText.length);
+      console.log("Response first chunk:", generatedText.slice(0, 1000));
+      console.log("Response last chunk:", generatedText.slice(-1000));
+      
+      // Defensive parsing fallback: return raw text instead of throwing 500
+      responsePayload = {
+        executive_summary: "FAILED TO PARSE AI RESPONSE",
+        company_overview: "Gemini returned invalid JSON.",
+        raw_response: generatedText
+      };
+    }
 
     let dbInsertError = null;
     let briefId = null;
@@ -240,6 +268,7 @@ ${enrichment_data ? `\n--- ENRICHMENT DATA ---\n(Strictly use this as the true s
         additional_context: additional_context || null,
         generated_brief: responsePayload,
         enrichment_data: enrichment_data || null,
+        prospect_email: prospect_email || null,
         status: 'completed',
         generation_time_ms: generationTimeMs,
         model_used: modelName
@@ -250,6 +279,25 @@ ${enrichment_data ? `\n--- ENRICHMENT DATA ---\n(Strictly use this as the true s
         dbInsertError = insertError.message;
       } else {
         briefId = data.id;
+
+        if (!skip_meeting_creation) {
+          const { error: umError } = await userSupabase.from('UnifiedMeetings').insert({
+            user_id: user.id,
+            source: 'sales_saathi',
+            meeting_title: (meeting_type || 'Discovery Call') + ' with ' + prospect_name,
+            company: company,
+            meeting_datetime: meeting_datetime || new Date().toISOString(),
+            brief_id: data.id
+          });
+
+          if (umError) {
+            console.error('UnifiedMeetings insert failed:', umError);
+          } else {
+            console.log('UnifiedMeeting created for brief', data.id);
+          }
+        } else {
+          console.log('Skipped UnifiedMeeting creation for brief', data.id);
+        }
       }
     } else if (supabaseUrl === '') {
       // Mock save for local test without Supabase linked

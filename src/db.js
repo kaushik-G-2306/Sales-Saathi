@@ -5,8 +5,15 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 export const isSupabaseConfigured = supabaseUrl !== '' && supabaseAnonKey !== '';
 
+export const supabaseClientId = isSupabaseConfigured ? crypto.randomUUID() : null;
+console.log('[SUPABASE INIT] isSupabaseConfigured:', isSupabaseConfigured);
 export const supabase = isSupabaseConfigured 
-    ? createClient(supabaseUrl, supabaseAnonKey) 
+    ? (() => {
+        console.log(`[SUPABASE INIT] ${supabaseClientId} Creating client...`);
+        const client = createClient(supabaseUrl, supabaseAnonKey);
+        console.log(`[SUPABASE INIT] ${supabaseClientId} Client created successfully.`);
+        return client;
+    })() 
     : null;
 
 // Mock Local Storage DB if Supabase isn't configured
@@ -82,11 +89,44 @@ export const db = {
         if (isSupabaseConfigured) {
             const { data, error } = await supabase.from('PreMeetingBriefs').insert([briefData]).select().single();
             if (error) throw error;
+            
+            const meetingPayload = {
+                user_id: briefData.user_id,
+                source: 'sales_saathi',
+                meeting_title: (briefData.meeting_type || 'Discovery Call') + ' with ' + briefData.prospect_name,
+                company: briefData.company,
+                meeting_datetime: briefData.meeting_datetime || new Date().toISOString(),
+                brief_id: data.id
+            };
+
+            console.log('UnifiedMeetings payload:', meetingPayload);
+
+            const { data: meetingData, error: meetingError } = await supabase
+                .from('UnifiedMeetings')
+                .insert([meetingPayload])
+                .select();
+
+            console.log('UnifiedMeetings result:', meetingData);
+            console.error('UnifiedMeetings error:', meetingError);
+
             return data;
         } else {
             const db = getMockDb();
             const newBrief = { id: uuidv4(), created_at: new Date().toISOString(), status: 'generating', ...briefData };
             db.briefs.unshift(newBrief); // add to top
+            
+            if (!db.unified_meetings) db.unified_meetings = [];
+            db.unified_meetings.push({
+                id: uuidv4(),
+                user_id: briefData.user_id,
+                source: 'sales_saathi',
+                meeting_title: (briefData.meeting_type || 'Discovery Call') + ' with ' + briefData.prospect_name,
+                company: briefData.company,
+                meeting_datetime: briefData.meeting_datetime || new Date().toISOString(),
+                brief_id: newBrief.id,
+                created_at: new Date().toISOString()
+            });
+
             saveMockDb(db);
             return newBrief;
         }
@@ -139,6 +179,46 @@ export const db = {
             const db = getMockDb();
             db.briefs = db.briefs.filter(b => b.id !== id);
             saveMockDb(db);
+        }
+    },
+
+    async upsertCalendarConnection(userId, connectionData) {
+        if (isSupabaseConfigured) {
+            // First check if one exists
+            const { data: existing } = await supabase.from('CalendarConnections').select('*').eq('user_id', userId).eq('provider', connectionData.provider).single();
+            if (existing) {
+                const { data, error } = await supabase.from('CalendarConnections').update({ ...connectionData, updated_at: new Date().toISOString() }).eq('id', existing.id).select().single();
+                if (error) throw error;
+                return data;
+            } else {
+                const { data, error } = await supabase.from('CalendarConnections').insert([{ user_id: userId, ...connectionData }]).select().single();
+                if (error) throw error;
+                return data;
+            }
+        } else {
+            const db = getMockDb();
+            if (!db.calendar_connections) db.calendar_connections = [];
+            const index = db.calendar_connections.findIndex(c => c.user_id === userId && c.provider === connectionData.provider);
+            const now = new Date().toISOString();
+            if (index > -1) {
+                db.calendar_connections[index] = { ...db.calendar_connections[index], ...connectionData, updated_at: now };
+            } else {
+                db.calendar_connections.push({ id: uuidv4(), user_id: userId, created_at: now, updated_at: now, ...connectionData });
+            }
+            saveMockDb(db);
+            return db.calendar_connections.find(c => c.user_id === userId && c.provider === connectionData.provider);
+        }
+    },
+
+    async getCalendarConnection(userId, provider = 'google') {
+        if (isSupabaseConfigured) {
+            const { data, error } = await supabase.from('CalendarConnections').select('*').eq('user_id', userId).eq('provider', provider).single();
+            if (error) return null;
+            return data;
+        } else {
+            const db = getMockDb();
+            if (!db.calendar_connections) return null;
+            return db.calendar_connections.find(c => c.user_id === userId && c.provider === provider) || null;
         }
     }
 };

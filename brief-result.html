@@ -203,6 +203,51 @@
                         </template>
                     </div>
                 </div>
+
+                <!-- Smart Icebreakers -->
+                <div
+                    class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-darkBorder shadow-sm overflow-hidden mt-6">
+                    <div
+                        class="px-6 py-4 border-b border-slate-100 dark:border-darkBorder bg-slate-50 dark:bg-[#111113]">
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                            <svg class="w-4 h-4 text-brandIndigo" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Smart Icebreakers
+                        </h3>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <template x-if="brief?.generated_brief?.smart_icebreakers?.length">
+                            <template x-for="(ice, i) in brief.generated_brief.smart_icebreakers" :key="i">
+                                <template x-if="ice && ice.text">
+                                    <div class="rounded-xl border border-slate-200 dark:border-darkBorder overflow-hidden">
+                                        <!-- Text row -->
+                                        <div class="px-4 py-3 bg-brandIndigo/5 border-b border-brandIndigo/10">
+                                            <p class="text-sm font-bold text-brandIndigo flex items-start gap-2">
+                                                <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03-8-9-8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                </svg>
+                                                <span x-text="ice.text"></span>
+                                            </p>
+                                        </div>
+                                        <!-- Reason row -->
+                                        <div class="px-4 py-3 bg-white dark:bg-darkCard">
+                                            <p class="text-xs text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mb-1">
+                                                Why this works:
+                                            </p>
+                                            <p class="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed font-medium">
+                                                <span x-text="ice.reason || 'Establishes initial rapport.'"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </template>
+                        </template>
+                        <template x-if="!brief?.generated_brief?.smart_icebreakers?.length">
+                            <p class="text-slate-400 dark:text-zinc-600 italic text-sm">No personalized icebreakers available.</p>
+                        </template>
+                    </div>
+                </div>
             </div>
 
             <!-- ═══════════════════════════════════════════════
