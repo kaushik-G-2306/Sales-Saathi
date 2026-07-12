@@ -243,7 +243,7 @@ const authStore = {
                 const { error } = await supabase.auth.signInWithOtp({ 
                     email,
                     options: {
-                        emailRedirectTo: window.location.origin + '/dashboard.html'
+                        emailRedirectTo: window.location.origin + window.location.pathname.replace('auth.html', 'dashboard.html')
                     }
                 });
                 if (error) throw error;
@@ -285,7 +285,7 @@ const authStore = {
                 const { error } = await supabase.auth.signInWithOAuth({ 
                     provider: 'google',
                     options: {
-                        redirectTo: window.location.origin + '/dashboard.html',
+                        redirectTo: window.location.origin + window.location.pathname.replace('auth.html', 'dashboard.html'),
                         scopes: 'https://www.googleapis.com/auth/calendar.readonly',
                         queryParams: {
                             access_type: 'offline',
@@ -321,7 +321,7 @@ const authStore = {
                 const { data, error } = await supabase.auth.linkIdentity({
                     provider: 'google',
                     options: {
-                        redirectTo: window.location.origin + '/settings.html',
+                        redirectTo: window.location.origin + window.location.pathname,
                         scopes: 'https://www.googleapis.com/auth/calendar.readonly',
                         queryParams: {
                             access_type: 'offline',
@@ -347,7 +347,7 @@ const authStore = {
     async resetPasswordForEmail(email) {
         if (isSupabaseConfigured) {
             const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + '/auth.html#reset',
+                redirectTo: window.location.origin + window.location.pathname.split('#')[0].split('?')[0] + '#reset',
             });
             if (error) throw error;
             return data;
