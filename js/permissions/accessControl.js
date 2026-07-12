@@ -36,7 +36,9 @@ export function handleFeatureClick(featureId, currentPlanId, onAllowed) {
             window.Alpine.store('upgradeModal').open(feature.name, feature.requiredPlan);
         } else {
             // Fallback redirect if modal isn't initialized
-            window.location.href = `/pricing.html?upgrade_from=${currentPlanId}&feature=${featureId}`;
+            const isProduction = window.location.hostname.includes('github.io');
+            const basePath = isProduction ? '/Sales-Saathi' : '';
+            window.location.href = basePath + `/pricing.html?upgrade_from=${currentPlanId}&feature=${featureId}`;
         }
     }
 }

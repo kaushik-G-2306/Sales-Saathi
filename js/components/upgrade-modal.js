@@ -60,7 +60,9 @@ document.addEventListener('alpine:init', () => {
 
         upgrade() {
             // Redirect to pricing page with context
-            window.location.href = `/pricing.html?upgrade_from=${this.currentPlan}&feature=${encodeURIComponent(this.featureName)}`;
+            const isProduction = window.location.hostname.includes('github.io');
+            const basePath = isProduction ? '/Sales-Saathi' : '';
+            window.location.href = basePath + `/pricing.html?upgrade_from=${this.currentPlan}&feature=${encodeURIComponent(this.featureName)}`;
         }
     });
 });
@@ -68,6 +70,9 @@ document.addEventListener('alpine:init', () => {
 // Inject the Modal DOM globally
 (function injectUpgradeModal() {
     if (document.getElementById('global-upgrade-modal')) return;
+
+    const isProduction = window.location.hostname.includes('github.io');
+    const basePath = isProduction ? '/Sales-Saathi' : '';
 
     const modalHTML = `
         <div id="global-upgrade-modal" 
@@ -122,7 +127,7 @@ document.addEventListener('alpine:init', () => {
                 
                 <div class="flex flex-col gap-3">
                     <button @click="$store.upgradeModal.upgrade()" class="w-full px-6 py-3.5 bg-brandIndigo text-slate-900 dark:text-white font-bold rounded-xl shadow-lg shadow-brandIndigo/20 hover:bg-indigo-500 hover:-translate-y-0.5 transition-all" x-text="'Upgrade to ' + $store.upgradeModal.requiredPlan"></button>
-                    <a href="/pricing.html" class="w-full px-6 py-3 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-zinc-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-200 dark:bg-white/10 transition-colors">Compare Plans</a>
+                    <a href="${basePath}/pricing.html" class="w-full px-6 py-3 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-zinc-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-200 dark:bg-white/10 transition-colors">Compare Plans</a>
                     <button @click="$store.upgradeModal.close()" class="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors mt-2">Maybe Later</button>
                 </div>
             </div>
