@@ -1,142 +1,151 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ 
-    activeScreen: window.location.hash.includes('type=recovery') ? 'reset' : (window.location.hash === '#signup' ? 'signup' : 'login'), 
-    darkMode: true,
-    loading: false,
-    firstName: '',
-    lastName: '',
-    email: '',
-    signupEmail: '',
-    registeredEmail: $persist(''),
-    loginError: '',
-    company: '',
-    password: '',
-    confirmPassword: '',
-    
-    // Recovery State
-    recoverySent: false,
-    recoveryEmail: '',
-    recoveryError: '',
-    
-    // OTP State
-    otpSent: false,
-    otpEmail: '',
-    
-    // Verification State
-    isVerified: false,
-    countdown: 60,
-    
-    get passwordStrength() {
-        if (!this.password) return 0;
-        let score = 0;
-        if (this.password.length > 7) score += 1;
-        if (this.password.match(/[A-Z]/)) score += 1;
-        if (this.password.match(/[0-9]/)) score += 1;
-        if (this.password.match(/[^A-Za-z0-9]/)) score += 1;
-        return score; // 0 to 4
-    },
-    
-    get strengthColor() {
-        if (this.passwordStrength <= 1) return 'bg-rose-500';
-        if (this.passwordStrength === 2) return 'bg-amber-500';
-        if (this.passwordStrength >= 3) return 'bg-brandEmerald';
-        return 'bg-slate-200 dark:bg-white/10';
-    },
-
-    startCountdown() {
-        this.countdown = 60;
-        let interval = setInterval(() => {
-            if(this.countdown > 0) {
-                this.countdown--;
-            } else {
-                clearInterval(interval);
-            }
-        }, 1000);
-    },
-
-    async handleLogin() {
-        this.loading = true;
-        this.loginError = '';
-        try {
-            await this.$store.auth.signInEmail(this.email, this.password);
-            window.location.href = 'dashboard.html';
-        } catch (error) {
-            this.loginError = error.message;
-        } finally {
-            this.loading = false;
-        }
-    },
-
-    async handleSignup() {
-        this.loading = true;
-        this.loginError = '';
-        try {
-            const data = await this.$store.auth.signUpEmail((this.firstName + ' ' + this.lastName).trim(), this.signupEmail, this.password);
-            
-            // If email confirmation is enabled, session will be null.
-            if (data && !data.session) {
-                alert('Account created! Please check your email to verify your account.');
-                this.activeScreen = 'login';
-                this.email = this.signupEmail;
-            } else {
-                // Email confirmation is disabled or mock flow, session exists.
-                window.location.href = 'onboarding.html';
-            }
-        } catch (error) {
-            alert('Signup Error: ' + error.message);
-        } finally {
-            this.loading = false;
-        }
-    },
-
-    async handleGoogle() {
-        try {
-            await this.$store.auth.signInGoogle();
-        } catch (error) {
-            alert(error.message);
-        }
-    },
-
-    async handleOTP() {
-        this.loading = true;
-        this.loginError = '';
-        try {
-            await this.$store.auth.signInOTP(this.otpEmail);
-            this.otpSent = true;
-        } catch (error) {
-            this.loginError = error.message;
-        } finally {
-            this.loading = false;
-        }
-    },
-
-    async handleRecovery() {
-        this.loading = true;
-        this.recoveryError = '';
-        try {
-            await this.$store.auth.resetPasswordForEmail(this.recoveryEmail);
-            this.recoverySent = true;
-        } catch (error) {
-            this.recoveryError = error.message;
-        } finally {
-            this.loading = false;
-        }
-    },
-
-    async handlePasswordReset() {
-        this.loading = true;
-        try {
-            await this.$store.auth.updatePassword(this.password);
-            alert('Password updated successfully!');
-            this.activeScreen = 'login';
-        } catch (error) {
-            alert('Error updating password: ' + error.message);
-        } finally {
-            this.loading = false;
-        }
-    }
-}" :class="{ 'dark': darkMode }">
+<html lang="en" x-data="authPage" :class="{ 'dark': darkMode }">
 <head>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('authPage', () => ({
+                activeScreen: window.location.hash.includes('type=recovery') ? 'reset' : (window.location.hash === '#signup' ? 'signup' : 'login'), 
+                darkMode: true,
+                loading: false,
+                firstName: '',
+                lastName: '',
+                email: '',
+                signupEmail: '',
+                registeredEmail: '',
+                loginError: '',
+                company: '',
+                password: '',
+                confirmPassword: '',
+                
+                // Recovery State
+                recoverySent: false,
+                recoveryEmail: '',
+                recoveryError: '',
+                
+                // OTP State
+                otpSent: false,
+                otpEmail: '',
+                
+                // Verification State
+                isVerified: false,
+                countdown: 60,
+                
+                init() {
+                    this.registeredEmail = this.$persist('');
+                },
+                
+                get passwordStrength() {
+                    if (!this.password) return 0;
+                    let score = 0;
+                    if (this.password.length > 7) score += 1;
+                    if (this.password.match(/[A-Z]/)) score += 1;
+                    if (this.password.match(/[0-9]/)) score += 1;
+                    if (this.password.match(/[^A-Za-z0-9]/)) score += 1;
+                    return score; // 0 to 4
+                },
+                
+                get strengthColor() {
+                    if (this.passwordStrength <= 1) return 'bg-rose-500';
+                    if (this.passwordStrength === 2) return 'bg-amber-500';
+                    if (this.passwordStrength >= 3) return 'bg-brandEmerald';
+                    return 'bg-slate-200 dark:bg-white/10';
+                },
+
+                startCountdown() {
+                    this.countdown = 60;
+                    let interval = setInterval(() => {
+                        if(this.countdown > 0) {
+                            this.countdown--;
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 1000);
+                },
+
+                async handleLogin() {
+                    this.loading = true;
+                    this.loginError = '';
+                    try {
+                        await this.$store.auth.signInEmail(this.email, this.password);
+                        window.location.href = 'dashboard.html';
+                    } catch (error) {
+                        this.loginError = error.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async handleSignup() {
+                    this.loading = true;
+                    this.loginError = '';
+                    try {
+                        const data = await this.$store.auth.signUpEmail((this.firstName + ' ' + this.lastName).trim(), this.signupEmail, this.password);
+                        
+                        // If email confirmation is enabled, session will be null.
+                        if (data && !data.session) {
+                            alert('Account created! Please check your email to verify your account.');
+                            this.activeScreen = 'login';
+                            this.email = this.signupEmail;
+                        } else {
+                            // Email confirmation is disabled or mock flow, session exists.
+                            window.location.href = 'onboarding.html';
+                        }
+                    } catch (error) {
+                        alert('Signup Error: ' + error.message);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async handleGoogle() {
+                    try {
+                        await this.$store.auth.signInGoogle();
+                    } catch (error) {
+                        alert(error.message);
+                    }
+                },
+
+                async handleOTP() {
+                    this.loading = true;
+                    this.loginError = '';
+                    try {
+                        await this.$store.auth.signInOTP(this.otpEmail);
+                        this.otpSent = true;
+                    } catch (error) {
+                        this.loginError = error.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async handleRecovery() {
+                    this.loading = true;
+                    this.recoveryError = '';
+                    try {
+                        await this.$store.auth.resetPasswordForEmail(this.recoveryEmail);
+                        this.recoverySent = true;
+                    } catch (error) {
+                        this.recoveryError = error.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async handlePasswordReset() {
+                    this.loading = true;
+                    try {
+                        await this.$store.auth.updatePassword(this.password);
+                        alert('Password updated successfully!');
+                        this.activeScreen = 'login';
+                    } catch (error) {
+                        alert('Error updating password: ' + error.message);
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }));
+        });
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authentication | Sales Saathi</title>
