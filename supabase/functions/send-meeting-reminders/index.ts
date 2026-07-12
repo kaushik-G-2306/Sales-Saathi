@@ -156,6 +156,73 @@ serve(async (req) => {
 
         if (!emailRes.ok) {
           const errText = await emailRes.text();
+          console.error(`[REMINDERS] Resend API Error output: ${errText}`);
+          
+          let parsedError;
+          try {
+            parsedError = JSON.parse(errText);
+          } catch (e) {
+            parsedError = { message: errText };
+          }
+          
+          const isSandboxError = parsedError.message && parsedError.message.includes('only send testing emails to your own email address');
+          if (isSandboxError) {
+              const emailMatch = parsedError.message.match(/\(([^)]+)\)/);
+              if (emailMatch && emailMatch[1]) {
+                  const sandboxEmail = emailMatch[1];
+                  console.log(`[REMINDERS] Resend sandbox restriction detected. Retrying with sandbox email: ${sandboxEmail}`);
+                  
+                  const retryRes = await fetch('https://api.resend.com/emails', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${resendApiKey}`
+                    },
+                    body: JSON.stringify({
+                      from: 'Sales Saathi Reminders <onboarding@resend.dev>',
+                      to: [sandboxEmail],
+                      subject: `[Sandbox Dev] Briefing: Upcoming meeting with ${companyName}`,
+                      html: `
+                        <div style="background-color: #fffbeb; border-left: 4px solid #d97706; padding: 12px; margin-bottom: 20px; font-family: sans-serif; font-size: 14px; color: #b45309; border-radius: 4px;">
+                            <strong>Sandbox Mode Notice:</strong> This reminder was originally sent to <strong>${userEmail}</strong>, but was forwarded to your Resend owner email (<strong>${sandboxEmail}</strong>) due to Resend sandbox domain restrictions.
+                        </div>
+                        <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+                          <h2 style="color: #6366f1; margin-bottom: 5px;">It's almost time!</h2>
+                          <p style="font-size: 15px; color: #475569;">Hi ${userName},</p>
+                          <p style="font-size: 15px; color: #475569; line-height: 1.5;">This is your automated briefing for your upcoming meeting: <strong>${meeting.meeting_title}</strong>.</p>
+                          
+                          <div style="display: inline-block; background: #e0e7ff; color: #4338ca; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 14px; margin-bottom: 10px;">
+                             🕒 Starts at ${timeString}
+                          </div>
+
+                          ${briefHtml}
+                          
+                          <br/>
+                          <p style="font-size: 14px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 20px;">Go crush it!<br/><strong>Sales Saathi Automation</strong></p>
+                        </div>
+                      `
+                    })
+                  });
+                  
+                  if (retryRes.ok) {
+                      console.log(`[REMINDERS] Successfully forwarded reminder for meeting ${meeting.id} to sandbox email: ${sandboxEmail}`);
+                      // Mark as sent
+                      const { error: updateError } = await supabaseAdmin
+                        .from('UnifiedMeetings')
+                        .update({ reminder_sent: true })
+                        .eq('id', meeting.id);
+               
+                      if (updateError) {
+                        console.error(`[REMINDERS] Failed to mark meeting ${meeting.id} as sent in database:`, updateError);
+                      }
+                      results.push({ id: meeting.id, status: 'sent', forwarded_to: sandboxEmail });
+                      continue;
+                  } else {
+                      const retryErrText = await retryRes.text();
+                      throw new Error(`Forwarding failed: ${retryErrText}`);
+                  }
+              }
+          }
           throw new Error(`Resend API Error: ${errText}`);
         }
 

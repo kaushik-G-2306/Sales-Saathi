@@ -5,12 +5,13 @@
 
 ---
 
-## Release Documents
+## Release & Strategy Documents
 
 | Document | Description |
 |---|---|
 | [CHANGELOG.md](../CHANGELOG.md) | Full version history and change log |
 | [RELEASE_NOTES_v0.1.md](../RELEASE_NOTES_v0.1.md) | v0.1 Stable release notes, features, limitations |
+| [competitor_analysis.md](competitor_analysis.md) | Competitor positioning, MVP feature scoping, product roadmap, and backend integrations |
 
 ---
 

@@ -139,6 +139,14 @@
                         <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Connected Apps</h2>
                         <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium mb-8">Connect your tools to allow Sales Saathi to automate your research automatically before meetings.</p>
 
+                        <!-- Feedback Message -->
+                        <div x-show="msg" 
+                             :class="msg.includes('failed') ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400' : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'"
+                             class="mb-6 p-4 rounded-xl text-sm font-bold transition-all" 
+                             x-text="msg"
+                             x-cloak>
+                        </div>
+
                         <div class="space-y-4">
                             <!-- Google Calendar -->
                             <div class="flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-darkBorder bg-slate-50 dark:bg-[#111113]">
@@ -152,11 +160,12 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <button x-show="!googleCalendarConnected" @click="$store.auth.connectGoogleCalendar()" class="px-4 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90">Connect</button>
+                                    <button x-show="!googleCalendarConnected" @click="handleConnectCalendar()" class="px-4 py-2 rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90">Connect</button>
                                     <template x-if="googleCalendarConnected">
-                                        <div class="flex items-center gap-3">
+                                        <div class="flex flex-wrap items-center gap-3">
                                             <span class="text-emerald-500 font-bold text-sm">Connected ✓</span>
-                                            <button @click="$store.auth.connectGoogleCalendar()" class="px-3 py-2 rounded-lg bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-zinc-300 text-xs font-bold hover:bg-slate-300 dark:hover:bg-white/20 transition-colors">Reconnect</button>
+                                            <button @click="disconnectGoogleCalendar()" class="px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 text-slate-700 dark:text-zinc-300 text-xs font-bold hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-500/30 transition-colors">Disconnect</button>
+                                            <button @click="handleConnectCalendar()" class="px-3 py-2 rounded-lg bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-zinc-300 text-xs font-bold hover:bg-slate-300 dark:hover:bg-white/20 transition-colors">Reconnect</button>
                                             <button @click="syncGoogleCalendar()" class="px-4 py-2 rounded-lg bg-brandIndigo text-white text-xs font-bold hover:opacity-90 shadow-sm transition-opacity">Sync Google Calendar</button>
                                         </div>
                                     </template>
@@ -248,25 +257,133 @@
                     this.loading = false;
                 },
 
+                async handleConnectCalendar() {
+                    this.msg = 'Redirecting to Google...';
+                    try {
+                        await this.$store.auth.connectGoogleCalendar();
+                    } catch (err) {
+                        console.error('Connection error:', err);
+                        let errMsg = err.message || 'Unknown error';
+                        if (errMsg.includes('already linked')) {
+                            errMsg = 'This Google account is already linked to another Sales Saathi user. Please use a different Google account or log into the original account to disconnect it first.';
+                        } else if (errMsg.includes('Manual linking is disabled')) {
+                            errMsg = 'Manual linking is disabled in your Supabase project. Please go to Supabase Dashboard > Authentication > Providers and enable "Manual Linking".';
+                        }
+                        this.msg = `Connection failed: ${errMsg}`;
+                        setTimeout(() => this.msg = '', 8000);
+                    }
+                },
+
+                async disconnectGoogleCalendar() {
+                    this.msg = 'Disconnecting...';
+                    try {
+                        const { db, isSupabaseConfigured, supabase } = await import('./src/db.js');
+                        const u = this.$store.auth.user;
+                        
+                        if (isSupabaseConfigured) {
+                            const { data: { session } } = await supabase.auth.getSession();
+                            const googleIdentity = session?.user?.identities?.find(id => id.provider === 'google');
+                            if (googleIdentity) {
+                                await supabase.auth.unlinkIdentity(googleIdentity);
+                            }
+                        }
+                        
+                        if (u?.id) {
+                            await db.upsertCalendarConnection(u.id, {
+                                provider: 'google',
+                                connection_status: 'disconnected'
+                            });
+                        }
+                        
+                        this.googleCalendarConnected = false;
+                        this.msg = 'Disconnected Google Calendar successfully. You can now try connecting again.';
+                        setTimeout(() => this.msg = '', 5000);
+                    } catch (err) {
+                        console.error('Disconnect error:', err);
+                        this.msg = 'Failed to disconnect: ' + (err.message || 'Unknown error');
+                    }
+                },
+
                 async syncGoogleCalendar() {
-                    console.log('Syncing Google Calendar via Edge Function...');
+                    console.log('Syncing Google Calendar...');
                     this.msg = 'Starting sync...';
                     
                     try {
-                        const response = await window.supabase.functions.invoke("sync-google-calendar");
-                        const data = response.data;
-                        const error = response.error;
-                        
-                        if (error) {
-                            throw error;
-                        }
-                        
-                        if (data && data.success) {
-                            this.msg = `Sync complete! Added: ${data.inserted_count}, Updated: ${data.updated_count}`;
-                        } else if (data && data.error) {
-                            throw new Error(data.error);
+                        const { isSupabaseConfigured } = await import('./src/db.js');
+                        if (isSupabaseConfigured) {
+                            const response = await window.supabase.functions.invoke("sync-google-calendar");
+                            const data = response.data;
+                            const error = response.error;
+                            
+                            if (error) {
+                                // Supabase JS v2 FunctionsHttpError handling
+                                if (error.context && typeof error.context.json === 'function') {
+                                    try {
+                                        const errData = await error.context.json();
+                                        throw new Error(errData.error || errData.message || error.message);
+                                    } catch(e) {
+                                        throw error;
+                                    }
+                                }
+                                throw error;
+                            }
+                            
+                            if (data && data.success) {
+                                this.msg = `Sync complete! Added: ${data.inserted_count}, Updated: ${data.updated_count}`;
+                            } else if (data && data.error) {
+                                throw new Error(data.error);
+                            } else {
+                                this.msg = 'Sync complete!';
+                            }
                         } else {
-                            this.msg = 'Sync complete!';
+                            // Mock Sync Flow for local development
+                            await new Promise(resolve => setTimeout(resolve, 1500));
+                            
+                            const mockDbRaw = localStorage.getItem('sales_saathi_mock_db');
+                            const mockDb = mockDbRaw ? JSON.parse(mockDbRaw) : { users: [], briefs: [], calendar_connections: [], unified_meetings: [] };
+                            if (!mockDb.unified_meetings) mockDb.unified_meetings = [];
+                            
+                            const extId1 = 'mock-event-1';
+                            const extId2 = 'mock-event-2';
+                            
+                            const hasEvent1 = mockDb.unified_meetings.some(m => m.external_event_id === extId1);
+                            const hasEvent2 = mockDb.unified_meetings.some(m => m.external_event_id === extId2);
+                            
+                            let added = 0;
+                            const u = this.$store.auth.user || {};
+                            
+                            if (!hasEvent1) {
+                                mockDb.unified_meetings.push({
+                                    id: 'mock-meeting-id-1',
+                                    user_id: u.id,
+                                    source: 'google',
+                                    meeting_title: 'Google Sync: Alignment Meeting with Acme Corp',
+                                    company: 'Acme Corp',
+                                    meeting_datetime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                                    external_event_id: extId1,
+                                    attendees: [{ email: 'john@acme.com', name: 'John Doe' }],
+                                    created_at: new Date().toISOString()
+                                });
+                                added++;
+                            }
+                            
+                            if (!hasEvent2) {
+                                mockDb.unified_meetings.push({
+                                    id: 'mock-meeting-id-2',
+                                    user_id: u.id,
+                                    source: 'google',
+                                    meeting_title: 'Google Sync: Discovery Call with Pied Piper',
+                                    company: 'Pied Piper',
+                                    meeting_datetime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+                                    external_event_id: extId2,
+                                    attendees: [{ email: 'richard@piedpiper.com', name: 'Richard Hendricks' }],
+                                    created_at: new Date().toISOString()
+                                });
+                                added++;
+                            }
+                            
+                            localStorage.setItem('sales_saathi_mock_db', JSON.stringify(mockDb));
+                            this.msg = `Sync complete! Added: ${added}, Updated: ${2 - added}`;
                         }
                     } catch (err) {
                         console.error('Sync failed:', err);

@@ -153,6 +153,48 @@ serve(async (req) => {
 
         if (!resendReq.ok) {
             console.error('Resend Error:', resendRes);
+            
+            // Check for Resend sandbox constraint
+            const isSandboxError = resendRes.message && resendRes.message.includes('only send testing emails to your own email address');
+            if (isSandboxError) {
+                const emailMatch = resendRes.message.match(/\(([^)]+)\)/);
+                if (emailMatch && emailMatch[1]) {
+                    const sandboxEmail = emailMatch[1];
+                    console.log(`[EMAIL] Resend sandbox restriction detected. Retrying with sandbox email: ${sandboxEmail}`);
+                    
+                    const retryResendReq = await fetch('https://api.resend.com/emails', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${resendApiKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            from: 'Sales Saathi <onboarding@resend.dev>',
+                            to: [sandboxEmail],
+                            subject: `[Sandbox Dev] Pre-Meeting Brief: ${companyName}`,
+                            html: `
+                            <div style="background-color: #fffbeb; border-left: 4px solid #d97706; padding: 12px; margin-bottom: 20px; font-family: sans-serif; font-size: 14px; color: #b45309; border-radius: 4px;">
+                                <strong>Sandbox Mode Notice:</strong> This email was originally sent to <strong>${userEmail}</strong>, but was forwarded to your Resend owner email (<strong>${sandboxEmail}</strong>) due to Resend sandbox domain restrictions.
+                            </div>
+                            ` + htmlContent
+                        })
+                    });
+                    
+                    const retryResendRes = await retryResendReq.json();
+                    if (retryResendReq.ok) {
+                        return new Response(JSON.stringify({ 
+                            success: true, 
+                            resend_id: retryResendRes.id,
+                            notice: `Email forwarded to sandbox owner address (${sandboxEmail})`
+                        }), {
+                            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                            status: 200,
+                        });
+                    } else {
+                        throw new Error(retryResendRes.message || 'Failed to send email to sandbox address');
+                    }
+                }
+            }
             throw new Error(resendRes.message || 'Failed to send email via Resend');
         }
 

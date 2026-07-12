@@ -1,6 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ annualBilling: true, activeFaq: null, darkMode: true, scrolled: false }" @scroll.window="scrolled = (window.pageYOffset > 20)" :class="{ 'dark': darkMode }">
+<html lang="en"
+    x-data="{ annualBilling: $persist(true), activeFaq: null, scrolled: false, isLoggedIn: $persist(false), userName: $persist('Alex Rivera'), targetFeature: new URLSearchParams(window.location.search).get('feature'), recommendedPlan: 'pro', currentPlan: localStorage.getItem('ss_plan') || 'free' }"
+    x-init="if (targetFeature && window.AppPermissions && window.AppPermissions.Features[targetFeature]) recommendedPlan = window.AppPermissions.Features[targetFeature].requiredPlan; else recommendedPlan = 'pro'; $watch('annualBilling', val => localStorage.setItem('billingCycle', val ? 'yearly' : 'monthly')); localStorage.setItem('billingCycle', annualBilling ? 'yearly' : 'monthly'); window.addEventListener('ss:planChanged', e => currentPlan = e.detail.plan)"
+    @scroll.window="scrolled = (window.pageYOffset > 20)" >
+
 <head>
+    <!-- Global Theme Manager -->
+    <script src="/js/theme-manager.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Saathi | Pricing & Plans</title>
@@ -17,7 +23,8 @@
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <!-- Tailwind Config -->
     <script>
@@ -26,8 +33,7 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
                     colors: {
                         darkBg: '#09090b',
                         darkCard: '#18181b',
@@ -35,34 +41,39 @@
                         lightBorder: 'rgba(15,23,42,0.08)',
                         brandIndigo: '#4f46e5',
                         brandViolet: '#6366f1',
-                        brandEmerald: '#10b981',
-                    }
+                        brandEmerald: '#10b981' }
                 }
             }
         }
     </script>
     <style>
-        [x-cloak] { display: none !important; }
+        [x-cloak] {
+            display: none !important;
+        }
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
+
         .dark .glass-panel {
             background: rgba(24, 24, 27, 0.7);
         }
-        
+
         .pricing-card {
             transition: all 0.3s ease-in-out;
         }
+
         .pricing-card:hover {
             transform: translateY(-4px);
         }
-        
+
         /* Inner glow for popular plan */
         .glow-border {
             position: relative;
         }
+
         .glow-border::before {
             content: "";
             position: absolute;
@@ -75,21 +86,25 @@
             mask-composite: exclude;
             pointer-events: none;
         }
-        
+
         /* Table hover effects */
         .table-row-hover:hover td {
             background-color: rgba(79, 70, 229, 0.05);
         }
+
         .dark .table-row-hover:hover td {
             background-color: rgba(79, 70, 229, 0.1);
         }
     </style>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgNTAgTDQwIDI1IEw4NSAyNSBMNjUgNDUgTDUwIDQ1IEw2MCAzNSBMMzAgMzUgTDE1IDUwIFoiIGZpbGw9IiMzOGJkZjgiLz48cGF0aCBkPSJNODUgNTAgTDYwIDc1IEwxNSA3NSBMMzUgNTUgTDUwIDU1IEw0MCA2NSBMNzAgNjUgWiIgZmlsbD0iIzYzNjZmMSIvPjwvc3ZnPg==">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTUgNTAgTDQwIDI1IEw4NSAyNSBMNjUgNDUgTDUwIDQ1IEw2MCAzNSBMMzAgMzUgTDE1IDUwIFoiIGZpbGw9IiMzOGJkZjgiLz48cGF0aCBkPSJNODUgNTAgTDYwIDc1IEwxNSA3NSBMMzUgNTUgTDUwIDU1IEw0MCA2NSBMNzAgNjUgWiIgZmlsbD0iIzYzNjZmMSIvPjwvc3ZnPg==">
 </head>
-<body class="bg-slate-50 dark:bg-darkBg text-slate-900 dark:text-zinc-100 font-sans antialiased min-h-screen transition-colors duration-300 selection:bg-brandIndigo selection:text-white">
 
-    <!-- Global Preloader Engine -->
-    <div x-data="{ pageLoaded: false }" 
+<body
+    class="bg-slate-50 dark:bg-darkBg text-slate-900 dark:text-zinc-100 font-sans antialiased min-h-screen transition-colors duration-300 selection:bg-brandIndigo selection:text-white">
+
+        <!-- Global Preloader Engine -->
+    <div x-data="{ pageLoaded: false }"
          x-init="window.addEventListener('load', () => { setTimeout(() => pageLoaded = true, 300) })"
          x-show="!pageLoaded"
          x-transition:leave="transition ease-in duration-400"
@@ -99,377 +114,71 @@
          x-cloak>
         <div class="relative w-16 h-16 animate-pulse">
             <div class="absolute inset-0 bg-brandIndigo/40 blur-2xl rounded-full"></div>
-            <img src="logo.png" alt="Sales Saathi Loading" class="relative z-10 w-full h-full drop-shadow-2xl object-contain" />
+            <img src="/logo.png" alt="Sales Saathi Loading" class="relative z-10 w-full h-full drop-shadow-2xl object-contain" />
         </div>
     </div>
 
     <!-- SECTION 1: Sticky Navigation Header -->
-    <header class="fixed top-0 w-full z-50 transition-all duration-300"
-            :class="[
-                isScrolled 
-                    ? (darkMode ? 'bg-[#09090b]/75 backdrop-blur-xl border-b border-white/5 shadow-2xl' : 'bg-white/80 backdrop-blur-xl border-b border-slate-200/80 shadow-sm')
-                    : 'bg-transparent border-transparent'
-            ]"
-            x-data="{ mobileMenuOpen: false, activeDropdown: null, isScrolled: false }"
-            @scroll.window="isScrolled = (window.pageYOffset > 20) ? true : false"
-            @keydown.escape="activeDropdown = null; mobileMenuOpen = false">
-            
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 lg:h-20">
-                
-                <!-- Left: Logo & Brand -->
-                <a href="index.html" class="flex items-center gap-2.5 group outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-lg shrink-0 z-50 relative">
-                    <img src="logo.png" alt="Sales Saathi Logo" class="h-9 w-auto rounded-lg shadow-lg group-hover:scale-105 transition-transform duration-200 object-contain" style="min-width:36px;" />
-                    <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white transition-colors duration-200">Sales Saathi</span>
-                </a>
-
-                <!-- Middle: Desktop Navigation Structure -->
-                <nav class="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2 h-full" @click.away="activeDropdown = null">
-                    
-                    <!-- Features w/ Full 10-Item Mega-Dropdown -->
-                    <div class="relative h-full flex items-center">
-                        <button @click="activeDropdown = activeDropdown === 'features' ? null : 'features'"
-                                @mouseenter="activeDropdown = 'features'"
-                                class="px-4 py-2 flex items-center gap-1.5 text-sm font-semibold rounded-md outline-none transition-colors duration-200"
-                                :class="activeDropdown === 'features' ? 'text-slate-900 dark:text-white bg-slate-100/50 dark:bg-white/5' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5'">
-                            Features
-                            <svg class="w-4 h-4 transition-transform duration-200" :class="activeDropdown === 'features' ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                        </button>
-
-                        <!-- Full 10-Feature Frosted Dark Mega Menu Panel -->
-                        <div x-show="activeDropdown === 'features'" x-transition.opacity.duration.200ms x-cloak
-                             @mouseleave="activeDropdown = null"
-                             class="absolute top-full left-1/2 -translate-x-1/2 w-[95vw] max-w-[700px] mt-2 p-5 bg-white/95 dark:bg-[#18181b]/95 border border-slate-200 dark:border-white/5 rounded-2xl shadow-2xl backdrop-blur-xl overflow-hidden">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1 relative z-10">
-
-                                <!-- Item 1: Pre-Meeting Briefs -->
-                                <a href="features.html#briefs" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-500/15 text-brandIndigo flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20 group-hover:scale-105 transition-transform">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-brandIndigo transition-colors leading-tight">Pre-Meeting Briefs</h4>
-                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Generate AI-powered meeting briefs with CRM, company, and stakeholder insights.</p>
-                                    </div>
-                                </a>
-
-                                <!-- Item 2: Smart Ice-Breakers -->
-                                <a href="features.html#icebreakers" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 text-brandEmerald flex items-center justify-center shrink-0 border border-emerald-100 dark:border-emerald-500/20 group-hover:scale-105 transition-transform">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-brandEmerald transition-colors leading-tight">Smart Ice-Breakers</h4>
-                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Create personalized conversation starters instantly.</p>
-                                    </div>
-                                </a>
-
-                                <!-- Item 3: Live Meeting Coach -->
-                                <a href="features.html#coach" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-500/15 text-purple-500 flex items-center justify-center shrink-0 border border-purple-100 dark:border-purple-500/20 group-hover:scale-105 transition-transform">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-purple-500 transition-colors leading-tight">Live Meeting Coach</h4>
-                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Get real-time coaching, objection handling, and talking points during calls.</p>
-                                    </div>
-                                </a>
-
-                                <!-- Item 4: AI Meeting Summaries -->
-                                <a href="features.html#summaries" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0 border border-amber-100 dark:border-amber-500/20 group-hover:scale-105 transition-transform">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-amber-500 transition-colors leading-tight">AI Meeting Summaries</h4>
-                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Automatically capture, summarize, and organize meeting outcomes.</p>
-                                    </div>
-                                </a>
-
-                                <!-- Item 5: Follow-Up Automation -->
-                                <a href="features.html#automation" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-500/15 text-sky-500 flex items-center justify-center shrink-0 border border-sky-100 dark:border-sky-500/20 group-hover:scale-105 transition-transform">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-sky-500 transition-colors leading-tight">Follow-Up Automation</h4>
-                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Generate personalized follow-up emails and action items in seconds.</p>
-                                    </div>
-                                </a>
-
-                                <!-- Item 6: Outreach Generator -->
-                                <a href="features.html#outreach" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-500/15 text-blue-500 flex items-center justify-center shrink-0 border border-blue-100 dark:border-blue-500/20 group-hover:scale-105 transition-transform">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-blue-500 transition-colors leading-tight">Outreach Generator</h4>
-                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Create highly personalized outbound messages at scale.</p>
-                                    </div>
-                                </a>
-
-                                <!-- Item 7: Deal Risk Predictor -->
-                                <a href="features.html#risk" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-9 h-9 rounded-lg bg-rose-50 dark:bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0 border border-rose-100 dark:border-rose-500/20 group-hover:scale-105 transition-transform">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-rose-500 transition-colors leading-tight">Deal Risk Predictor</h4>
-                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Identify at-risk deals before they impact pipeline performance.</p>
-                                    </div>
-                                </a>
-
-                                <!-- Item 8: Relationship Intelligence -->
-                                <a href="features.html#intelligence" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-9 h-9 rounded-lg bg-violet-50 dark:bg-violet-500/15 text-violet-500 flex items-center justify-center shrink-0 border border-violet-100 dark:border-violet-500/20 group-hover:scale-105 transition-transform">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-violet-500 transition-colors leading-tight">Relationship Intelligence</h4>
-                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Map stakeholder relationships and influence across accounts.</p>
-                                    </div>
-                                </a>
-
-                                <!-- Item 9: Pipeline Analytics -->
-                                <a href="features.html#analytics" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-9 h-9 rounded-lg bg-teal-50 dark:bg-teal-500/15 text-teal-500 flex items-center justify-center shrink-0 border border-teal-100 dark:border-teal-500/20 group-hover:scale-105 transition-transform">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-teal-500 transition-colors leading-tight">Pipeline Analytics</h4>
-                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Track pipeline health, conversion trends, and revenue performance.</p>
-                                    </div>
-                                </a>
-
-                                <!-- Item 10: Revenue Intelligence -->
-                                <a href="features.html#revenue" class="group flex gap-3.5 p-2.5 rounded-xl hover:bg-slate-100/60 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-9 h-9 rounded-lg bg-orange-50 dark:bg-orange-500/15 text-orange-500 flex items-center justify-center shrink-0 border border-orange-100 dark:border-orange-500/20 group-hover:scale-105 transition-transform">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-[13px] font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-orange-500 transition-colors leading-tight">Revenue Intelligence</h4>
-                                        <p class="text-[11px] text-slate-500 dark:text-zinc-400 font-medium leading-relaxed">Forecast revenue and uncover next-best actions using AI.</p>
-                                    </div>
-                                </a>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Solutions w/ Mega-Dropdown -->
-                    <div class="relative h-full flex items-center">
-                        <button @click="activeDropdown = activeDropdown === 'solutions' ? null : 'solutions'"
-                                @mouseenter="activeDropdown = 'solutions'"
-                                class="px-4 py-2 flex items-center gap-1.5 text-sm font-semibold rounded-md outline-none transition-colors duration-200"
-                                :class="activeDropdown === 'solutions' ? 'text-slate-900 dark:text-white bg-slate-100/50 dark:bg-white/5' : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5'">
-                            Solutions
-                            <svg class="w-4 h-4 transition-transform duration-200" :class="activeDropdown === 'solutions' ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                        </button>
-                        <div x-show="activeDropdown === 'solutions'" x-transition.opacity.duration.200ms x-cloak
-                             @mouseleave="activeDropdown = null"
-                             class="absolute top-full left-1/2 -translate-x-1/2 w-[500px] mt-1 p-6 bg-white dark:bg-[#121215] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-                            <div class="grid grid-cols-1 gap-4">
-                                <div onclick="window.location.href='solutions/account-executives.html'" class="cursor-pointer group flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-slate-700 dark:text-zinc-300">
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brandIndigo transition-colors">For Account Executives</h4>
-                                        <p class="text-xs text-slate-500 dark:text-zinc-400 font-medium">Close deals faster with automated prep and follow-up.</p>
-                                    </div>
-                                </div>
-                                <div onclick="window.location.href='solutions/sales-leaders.html'" class="cursor-pointer group flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-slate-700 dark:text-zinc-300">
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brandIndigo transition-colors">For Sales Leaders</h4>
-                                        <p class="text-xs text-slate-500 dark:text-zinc-400 font-medium">Scale winning behaviors and gain pipeline visibility.</p>
-                                    </div>
-                                </div>
-                                <div onclick="window.location.href='solutions/revenue-operations.html'" class="cursor-pointer group flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-slate-700 dark:text-zinc-300">
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brandIndigo transition-colors">For Revenue Operations</h4>
-                                        <p class="text-xs text-slate-500 dark:text-zinc-400 font-medium">Ensure 100% CRM hygiene without nagging reps.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <a href="pricing.html" class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5 rounded-md transition-colors duration-200">Pricing</a>
-                    <a href="resources.html" class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5 rounded-md transition-colors duration-200">Resources</a>
-                    <a href="contact.html" class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/50 dark:hover:bg-white/5 rounded-md transition-colors duration-200">Contact</a>
-                </nav>
-
-                <!-- Right: Action Control Cluster -->
-                <div class="hidden lg:flex items-center gap-3 relative z-50">
-                    <!-- Theme Toggle -->
-                    <button @click="darkMode = !darkMode" 
-                            class="p-2 rounded-full text-slate-500 dark:text-zinc-400 hover:bg-slate-200/50 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo" 
-                            aria-label="Toggle Theme">
-                        <svg x-show="!darkMode" x-cloak class="w-5 h-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                        <svg x-show="darkMode" x-cloak class="w-5 h-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-                    </button>
-                    
-                    <div class="w-px h-5 bg-slate-300 dark:bg-white/10 mx-1"></div>
-                    
-                    <template x-if="!$store.auth.isLoggedIn">
-                        <div class="flex items-center gap-3">
-                            <a href="auth.html#login" class="px-4 py-2 text-sm font-bold text-slate-700 dark:text-zinc-200 bg-slate-100/50 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-full transition-all">Log In</a>
-                            <a href="auth.html#signup" class="relative inline-flex items-center justify-center px-6 py-2 text-sm font-bold text-white bg-gradient-to-b from-brandIndigo to-brandViolet rounded-full shadow-[0_4px_15px_rgba(79,70,229,0.3)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.5)] hover:-translate-y-0.5 active:scale-95 transition-all duration-200">
-                                Sign Up
-                            </a>
-                        </div>
-                    </template>
-
-                    <template x-if="$store.auth.isLoggedIn">
-                        <div class="relative" x-data="{ profileOpen: false }" @click.away="profileOpen = false">
-                            <button @click="profileOpen = !profileOpen" class="flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-full pr-2">
-                                <div class="text-right hidden xl:block">
-                                    <p class="text-sm font-bold text-slate-900 dark:text-white leading-tight" x-text="$store.auth.user?.name || 'Loading...'"></p>
-                                    <p class="text-[10px] font-semibold text-brandIndigo dark:text-indigo-400 uppercase tracking-wider">Pro Tier</p>
-                                </div>
-                                <div class="w-10 h-10 rounded-full border border-slate-200 dark:border-darkBorder overflow-hidden bg-slate-100 dark:bg-darkCard">
-                                    <img :src="'https://ui-avatars.com/api/?name=' + encodeURIComponent($store.auth.user?.name || 'Loading...') + '&background=4f46e5&color=fff&bold=true'" :alt="userName" class="w-full h-full object-cover" />
-                                </div>
-                            </button>
-                            <div x-show="profileOpen" x-transition.opacity.duration.200ms x-cloak class="absolute top-full right-0 mt-3 w-56 bg-white dark:bg-[#121215] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl py-2 overflow-hidden z-50">
-                                <a href="dashboard.html" class="block px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                    Dashboard Workspace
-                                </a>
-                                <a href="settings.html" class="block px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                                    Account Settings
-                                </a>
-                                <div class="h-px bg-slate-100 dark:bg-white/10 my-1"></div>
-                                <button @click="isLoggedIn = false; profileOpen = false" class="w-full text-left px-4 py-2.5 text-sm font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-white/5 transition-colors outline-none">
-                                    Log Out
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <!-- Mobile & Tablet Framework (<1024px) -->
-                <div class="flex lg:hidden items-center gap-4 relative z-50">
-                    <button @click="darkMode = !darkMode" class="p-2 text-slate-500 dark:text-zinc-400">
-                        <svg x-show="!darkMode" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                        <svg x-show="darkMode" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-                    </button>
-                    
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 -mr-2 text-slate-900 dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-md z-50 relative">
-                        <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                        <svg x-show="mobileMenuOpen" x-cloak class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide-Out Utility Navigation Drawer (Mobile) -->
-        <div x-show="mobileMenuOpen" x-cloak
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-y-[-10px]"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 translate-y-[-10px]"
-             class="lg:hidden absolute top-full left-0 w-full bg-white dark:bg-[#09090b] border-t border-slate-200 dark:border-white/10 shadow-2xl z-40">
-            <div class="flex flex-col p-6 space-y-4">
-                <div x-data="{ openAccord: null }" class="flex flex-col divide-y divide-slate-100 dark:divide-white/5 border-y border-slate-100 dark:border-white/5">
-                    <div class="py-4">
-                        <button @click="openAccord = openAccord === 'features' ? null : 'features'" class="w-full flex justify-between items-center text-left outline-none">
-                            <span class="text-lg font-bold text-slate-900 dark:text-white">Features</span>
-                            <svg class="w-5 h-5 text-slate-500 transition-transform duration-200" :class="openAccord === 'features' ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                        </button>
-                        <div x-show="openAccord === 'features'" x-collapse x-cloak class="pt-4 pb-2 space-y-3">
-                            <a href="features.html#briefs" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Pre-Meeting Briefs</a>
-                            <a href="features.html#icebreakers" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Smart Ice-Breakers</a>
-                            <a href="features.html#coach" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Live Meeting Coach</a>
-                            <a href="features.html#summaries" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">AI Meeting Summaries</a>
-                            <a href="features.html#automation" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Follow-Up Automation</a>
-                            <a href="features.html#outreach" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Outreach Generator</a>
-                            <a href="features.html#risk" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Deal Risk Predictor</a>
-                            <a href="features.html#intelligence" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Relationship Intelligence</a>
-                            <a href="features.html#analytics" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Pipeline Analytics</a>
-                            <a href="features.html#revenue" class="block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-brandIndigo/30 hover:text-brandIndigo dark:hover:text-white transition-colors">Revenue Intelligence</a>
-                        </div>
-                    </div>
-                    <div class="py-4">
-                        <div class="w-full flex justify-between items-center text-left outline-none">
-                            <a href="solutions.html" class="text-lg font-bold text-slate-900 dark:text-white flex-1">Solutions</a>
-                            <button @click="openAccord = openAccord === 'solutions' ? null : 'solutions'" class="p-2 -mr-2">
-                                <svg class="w-5 h-5 text-slate-500 transition-transform duration-200" :class="openAccord === 'solutions' ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                            </button>
-                        </div>
-                        <div x-show="openAccord === 'solutions'" x-collapse x-cloak class="pt-4 pb-2 space-y-4">
-                            <div onclick="window.location.href='solutions/account-executives.html'" class="cursor-pointer block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-slate-200 dark:border-white/10">For Account Executives</div>
-                            <div onclick="window.location.href='solutions/sales-leaders.html'" class="cursor-pointer block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-slate-200 dark:border-white/10">For Sales Leaders</div>
-                            <div onclick="window.location.href='solutions/revenue-operations.html'" class="cursor-pointer block text-sm font-semibold text-slate-600 dark:text-zinc-400 pl-4 border-l-2 border-slate-200 dark:border-white/10">For Revenue Operations</div>
-                        </div>
-                    </div>
-                    <a href="pricing.html" class="py-4 text-lg font-bold text-slate-900 dark:text-white block">Pricing</a>
-                    <a href="resources.html" class="py-4 text-lg font-bold text-slate-900 dark:text-white block">Resources</a>
-                    <a href="contact.html" class="py-4 text-lg font-bold text-slate-900 dark:text-white block">Contact</a>
-                </div>
-                <div class="pt-6 mt-auto">
-                    <template x-if="!$store.auth.isLoggedIn">
-                        <div class="space-y-3">
-                            <a href="auth.html#login" class="w-full py-3.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white text-center font-bold text-lg block hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">Log In</a>
-                            <a href="auth.html#signup" class="w-full py-3.5 rounded-full bg-gradient-to-b from-brandIndigo to-brandViolet text-white text-center font-bold text-lg block shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-transform">Sign Up</a>
-                        </div>
-                    </template>
-                    <template x-if="$store.auth.isLoggedIn">
-                        <div class="space-y-4">
-                            <div class="flex items-center gap-4 mb-6 border-b border-slate-100 dark:border-white/5 pb-6">
-                                <div class="w-12 h-12 rounded-full border border-slate-200 dark:border-darkBorder overflow-hidden bg-slate-100 dark:bg-darkCard">
-                                    <img :src="'https://ui-avatars.com/api/?name=' + encodeURIComponent($store.auth.user?.name || 'Loading...') + '&background=4f46e5&color=fff&bold=true'" :alt="userName" class="w-full h-full object-cover" />
-                                </div>
-                                <div>
-                                    <p class="text-base font-bold text-slate-900 dark:text-white leading-tight" x-text="$store.auth.user?.name || 'Loading...'"></p>
-                                    <p class="text-xs font-semibold text-brandIndigo dark:text-indigo-400 uppercase tracking-wider">Pro Tier</p>
-                                </div>
-                            </div>
-                            <a href="dashboard.html" class="block text-lg font-bold text-slate-900 dark:text-white">Dashboard Workspace</a>
-                            <a href="settings.html" class="block text-lg font-bold text-slate-900 dark:text-white">Account Settings</a>
-                            <button @click="isLoggedIn = false" class="block w-full text-left text-lg font-bold text-rose-500 mt-4 outline-none">Log Out</button>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </div>
-    </header>
+    <!-- SECTION 1: Dynamic Global Header Mount -->
+    <div id="global-header-mount"></div>
+    <script type="module" src="/js/auth-manager.js"></script>
+    <script type="module" src="/js/header-manager.js"></script>
+    <script type="module" src="/js/permissions/index.js"></script>
 
     <!-- SECTION 1: Cinematic Conversion Hero Canvas -->
     <section class="relative pt-32 pb-16 lg:pt-48 lg:pb-24 overflow-hidden">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAzNHYtNGgtMnY0aC00djJoNHY0aDJ2LTRoNHYtMmgtNHptMC0zMFYwaC0ydjRoLTR2Mmg0djRoMnYtNGg0VjRoLTR6bS0yMiAwdjRoNHYyaC00djRoLTJWMGgyem0wIDMwdjRoNHYyaC00djRoLTJ2LTRoNHYtMmg0di0yaC00eiIgZmlsbD0iIzlmYTliMSIgZmlsbC1vcGFjaXR5PSIwLjA1Ii8+PC9nPjwvc3ZnPg==')] pointer-events-none"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brandIndigo/20 dark:bg-brandIndigo/10 rounded-full blur-[120px] pointer-events-none"></div>
-        
+        <div
+            class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAzNHYtNGgtMnY0aC00djJoNHY0aDJ2LTRoNHYtMmgtNHptMC0zMFYwaC0ydjRoLTR2Mmg0djRoMnYtNGg0VjRoLTR6bS0yMiAwdjRoNHYyaC00djRoLTJWMGgyem0wIDMwdjRoNHYyaC00djRoLTJ2LTRoNHYtMmg0di0yaC00eiIgZmlsbD0iIzlmYTliMSIgZmlsbC1vcGFjaXR5PSIwLjA1Ii8+PC9nPjwvc3ZnPg==')] pointer-events-none">
+        </div>
+        <div
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brandIndigo/20 dark:bg-brandIndigo/10 rounded-full blur-[120px] pointer-events-none">
+        </div>
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brandIndigo/20 bg-brandIndigo/5 dark:bg-brandIndigo/10 mb-6">
-                <span class="text-xs font-bold text-brandIndigo dark:text-indigo-400 uppercase tracking-wider">Pricing Plans</span>
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brandIndigo/20 bg-brandIndigo/5 dark:bg-brandIndigo/10 mb-6">
+                <span class="text-xs font-bold text-brandIndigo dark:text-indigo-400 uppercase tracking-wider">Pricing
+                    Plans</span>
             </div>
-            
-            <h1 class="text-4xl md:text-5xl lg:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-6">
-                Simple, Transparent <span class="text-transparent bg-clip-text bg-gradient-to-r from-brandIndigo to-brandEmerald">Pricing</span>
+
+            <!-- Dynamic Upgrade Banner -->
+            <template x-if="targetFeature && window.AppPermissions">
+                <div class="mb-6 mx-auto max-w-xl bg-brandIndigo/10 border border-brandIndigo/20 rounded-xl p-4 flex items-center justify-center gap-3">
+                    <svg class="w-5 h-5 text-brandIndigo dark:text-brandViolet" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <p class="text-sm font-semibold text-slate-800 dark:text-zinc-200">
+                        To access <span class="font-bold" x-text="window.AppPermissions.Features[targetFeature].name">this feature</span>, you need the <span class="font-bold text-brandIndigo dark:text-brandViolet capitalize" x-text="recommendedPlan">Premium</span> plan.
+                    </p>
+                </div>
+            </template>
+
+            <h1
+                class="text-4xl md:text-5xl lg:text-7xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-6">
+                Simple, Transparent <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-brandIndigo to-brandEmerald">Pricing</span>
             </h1>
             <p class="text-lg text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto font-medium mb-12">
-                Scale your sales operations without unpredictable costs. Start for free, upgrade when you need to dominate your pipeline.
+                Scale your sales operations without unpredictable costs. Start for free, upgrade when you need to
+                dominate your pipeline.
             </p>
-            
+
             <!-- Billing Toggle -->
             <div class="flex items-center justify-center gap-4">
-                <span class="text-sm font-semibold" :class="!annualBilling ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-zinc-500'">Monthly</span>
-                
-                <button @click="annualBilling = !annualBilling" class="relative w-16 h-8 rounded-full bg-slate-200 dark:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo shadow-inner" :class="annualBilling ? 'bg-brandIndigo dark:bg-brandIndigo/50' : ''">
-                    <div class="absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow transition-transform" :class="annualBilling ? 'translate-x-8' : 'translate-x-0'"></div>
+                <span class="text-sm font-semibold"
+                    :class="!annualBilling ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-zinc-500'">Monthly</span>
+
+                <button @click="annualBilling = !annualBilling"
+                    class="relative w-16 h-8 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo shadow-inner"
+                    :class="annualBilling ? 'bg-brandIndigo dark:bg-brandIndigo/50' : 'bg-slate-300 dark:bg-white/10'">
+                    <div class="absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-sm transition-transform"
+                        :class="annualBilling ? 'translate-x-8' : 'translate-x-0'"></div>
                 </button>
-                
+
                 <div class="flex items-center gap-2">
-                    <span class="text-sm font-semibold" :class="annualBilling ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-zinc-500'">Yearly</span>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-brandEmerald/10 text-brandEmerald border border-brandEmerald/20 uppercase tracking-wider">Save 20%</span>
+                    <span class="text-sm font-semibold"
+                        :class="annualBilling ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-zinc-500'">Yearly</span>
+                    <span
+                        class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-brandEmerald/10 text-brandEmerald border border-brandEmerald/20 uppercase tracking-wider">Save
+                        20%</span>
                 </div>
             </div>
         </div>
@@ -479,46 +188,57 @@
     <section class="relative pb-24 z-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-8">
-                
-                <!-- Card 1: Starter Plan -->
-                <div class="pricing-card flex flex-col bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-3xl p-8 shadow-sm">
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Starter Plan</h3>
-                    <p class="text-sm text-slate-500 dark:text-zinc-400 mb-6 min-h-[40px]">Perfect for individual reps evaluating the platform.</p>
-                    
-                    <div class="mb-1 h-[70px]">
-                        <div x-show="!annualBilling" x-cloak>
-                            <span class="text-4xl font-extrabold text-slate-900 dark:text-white">₹1,499</span>
-                            <span class="text-slate-500 dark:text-zinc-400 font-medium">/mo</span>
-                        </div>
-                        <div x-show="annualBilling">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-sm text-slate-400 line-through">₹17,988</span>
-                                <span class="text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-1.5 py-0.5 rounded">Save 20%</span>
-                            </div>
-                            <span class="text-4xl font-extrabold text-slate-900 dark:text-white">₹14,390</span>
-                            <span class="text-slate-500 dark:text-zinc-400 font-medium">/yr</span>
-                        </div>
+
+                <!-- Card 1: Free Plan -->
+                <div
+                    @click="recommendedPlan = 'free'"
+                    :class="[recommendedPlan === 'free' ? 'ring-4 ring-brandIndigo shadow-indigo-500/30 scale-105 z-10 shadow-2xl' : 'hover:scale-105 hover:shadow-xl', currentPlan === 'free' ? 'ring-2 ring-brandEmerald border-brandEmerald' : '']"
+                    class="cursor-pointer pricing-card flex flex-col bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-3xl p-8 shadow-sm transition-all duration-300 relative">
+                    <div x-show="currentPlan === 'free'" class="absolute -top-3 right-6 bg-brandEmerald text-white text-[10px] font-black uppercase tracking-wider py-1 px-3 rounded-full shadow-md flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Active Plan
                     </div>
-                    
-                    <a href="auth.html" class="w-full block text-center py-3 px-4 rounded-xl font-bold text-slate-700 dark:text-white bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 transition-colors mb-8 mt-4">Start Free Trial</a>
-                    
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Free Plan</h3>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 mb-6 min-h-[40px]">Perfect for individual reps
+                        evaluating the platform.</p>
+                    <div class="mb-6">
+                        <span class="text-4xl font-extrabold text-slate-900 dark:text-white">₹0</span>
+                        <span class="text-slate-500 dark:text-zinc-400 font-medium">/mo</span>
+                    </div>
+                    <button @click="if(currentPlan === 'free') { window.location.href='dashboard.html' } else { $el.textContent = 'Activating...'; window.activateFreePlan() }"
+                        :class="currentPlan === 'free' ? 'opacity-60 cursor-not-allowed bg-slate-200 dark:bg-white/10' : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-slate-200 dark:bg-white/10'"
+                        class="w-full block text-center py-3 px-4 rounded-xl font-bold text-slate-700 dark:text-white border border-slate-200 dark:border-white/10 transition-colors mb-8"
+                        x-text="currentPlan === 'free' ? 'Manage Plan' : 'Start Free'"></button>
+
                     <div class="flex flex-col gap-4 flex-1">
-                        <p class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Includes:</p>
+                        <p class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Includes:
+                        </p>
                         <ul class="flex flex-col gap-3">
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-600 dark:text-zinc-300">25 AI Meeting Briefs / mo</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-600 dark:text-zinc-300">20 Outreach targets / mo</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-600 dark:text-zinc-300">Basic CRM hooks</span>
                             </li>
                             <li class="flex items-start gap-3 opacity-40">
-                                <svg class="w-5 h-5 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                <svg class="w-5 h-5 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                                 <span class="text-sm text-slate-600 dark:text-zinc-300">Relationship Intelligence</span>
                             </li>
                         </ul>
@@ -526,49 +246,77 @@
                 </div>
 
                 <!-- Card 2: Pro Plan (Highlighted) -->
-                <div class="pricing-card glow-border flex flex-col bg-slate-900 dark:bg-zinc-900/80 rounded-3xl p-8 shadow-2xl scale-105 z-10 relative">
-                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brandIndigo to-brandViolet text-white text-xs font-bold uppercase tracking-wider py-1 px-4 rounded-full shadow-lg flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <div
+                    @click="recommendedPlan = 'pro'"
+                    :class="recommendedPlan === 'pro' ? 'ring-4 ring-brandIndigo shadow-indigo-500/30 scale-105 z-10 shadow-2xl' : 'glow-border hover:scale-105 hover:shadow-xl scale-100'"
+                    class="cursor-pointer pricing-card flex flex-col bg-slate-900 dark:bg-zinc-900/80 rounded-3xl p-8 relative transition-all duration-300">
+                    <div x-show="currentPlan !== 'pro'"
+                        class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brandIndigo to-brandViolet text-white text-xs font-bold uppercase tracking-wider py-1 px-4 rounded-full shadow-lg flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
                         Most Popular
                     </div>
-                    
+                    <div x-show="currentPlan === 'pro'" class="absolute -top-3 right-6 bg-brandEmerald text-white text-[10px] font-black uppercase tracking-wider py-1 px-3 rounded-full shadow-md flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Active Plan
+                    </div>
+
                     <h3 class="text-lg font-bold text-white mb-2 mt-2">Pro Plan</h3>
-                    <p class="text-sm text-slate-300 dark:text-zinc-400 mb-6 min-h-[40px]">For high-performing AEs dominating their quota.</p>
-                    
+                    <p class="text-sm text-slate-300 dark:text-zinc-400 mb-6 min-h-[40px]">For high-performing AEs
+                        dominating their quota.</p>
+
                     <div class="mb-1 h-[70px]">
                         <div x-show="!annualBilling" x-cloak>
-                            <span class="text-4xl font-extrabold text-white">₹3,999</span>
+                            <span class="text-4xl font-extrabold text-white">₹1,499</span>
                             <span class="text-slate-400 font-medium">/mo</span>
                         </div>
                         <div x-show="annualBilling">
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="text-sm text-slate-400 line-through">₹47,988</span>
-                                <span class="text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-1.5 py-0.5 rounded">Save 20%</span>
+                                <span class="text-sm text-slate-400 line-through">₹17,988</span>
+                                <span
+                                    class="text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-1.5 py-0.5 rounded">Save
+                                    ₹2,998</span>
                             </div>
-                            <span class="text-4xl font-extrabold text-white">₹38,390</span>
+                            <span class="text-4xl font-extrabold text-white">₹14,990</span>
                             <span class="text-slate-400 font-medium">/yr</span>
                         </div>
                     </div>
-                    
-                    <a href="auth.html" class="w-full block text-center py-3 px-4 rounded-xl font-bold text-white bg-brandIndigo hover:bg-brandViolet shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all mb-8 mt-4">Start 14-Day Free Trial</a>
-                    
+
+                    <button @click="if(currentPlan === 'pro') { window.location.href='dashboard.html' } else if ($store.auth.isAuthenticated) { window.location.href='payment.html?plan=pro&billing=' + (annualBilling ? 'yearly' : 'monthly') } else { window.location.href='auth.html' }"
+                        :class="currentPlan === 'pro' ? 'opacity-60 cursor-not-allowed bg-brandIndigo/50' : 'bg-brandIndigo hover:bg-brandViolet shadow-[0_0_20px_rgba(79,70,229,0.4)]'"
+                        class="w-full block text-center py-3 px-4 rounded-xl font-bold text-white transition-all mb-8 mt-4"
+                        x-text="currentPlan === 'pro' ? 'Manage Plan' : 'Start 14-Day Free Trial'"></button>
+
                     <div class="flex flex-col gap-4 flex-1">
                         <p class="text-xs font-bold text-white uppercase tracking-wider">Everything in Free, plus:</p>
                         <ul class="flex flex-col gap-3">
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-200">Unlimited Meeting Briefs</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-200">Unlimited AI Ice-Breakers</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-200">Relationship Intelligence</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-200">Priority Sync Queues</span>
                             </li>
                         </ul>
@@ -576,45 +324,70 @@
                 </div>
 
                 <!-- Card 3: Team Plan -->
-                <div class="pricing-card flex flex-col bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-3xl p-8 shadow-sm">
+                <div
+                    @click="recommendedPlan = 'team'"
+                    :class="[recommendedPlan === 'team' ? 'ring-4 ring-brandIndigo shadow-indigo-500/30 scale-105 z-10 shadow-2xl' : 'hover:scale-105 hover:shadow-xl', currentPlan === 'team' ? 'ring-2 ring-brandEmerald border-brandEmerald' : '']"
+                    class="cursor-pointer pricing-card flex flex-col bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-3xl p-8 shadow-sm transition-all duration-300 relative">
+                    <div x-show="currentPlan === 'team'" class="absolute -top-3 right-6 bg-brandEmerald text-white text-[10px] font-black uppercase tracking-wider py-1 px-3 rounded-full shadow-md flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Active Plan
+                    </div>
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Team Plan</h3>
-                    <p class="text-sm text-slate-500 dark:text-zinc-400 mb-6 min-h-[40px]">For mid-market sales teams scaling their motion.</p>
-                    
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 mb-6 min-h-[40px]">For mid-market sales teams
+                        scaling their motion.</p>
+
                     <div class="mb-1 h-[70px]">
                         <div x-show="!annualBilling" x-cloak>
-                            <span class="text-4xl font-extrabold text-slate-900 dark:text-white">₹7,499</span>
-                            <span class="text-slate-500 dark:text-zinc-400 font-medium">/user/mo</span>
-                            <p class="text-xs text-slate-400 mt-1">Minimum 5 Users</p>
+                            <span class="text-4xl font-extrabold text-slate-900 dark:text-white">₹4,999</span>
+                            <span class="text-slate-500 dark:text-zinc-400 font-medium">/mo</span>
+                            <p class="text-xs text-slate-400 mt-1">Up to 10 Users</p>
                         </div>
                         <div x-show="annualBilling">
                             <div class="flex items-center gap-2 mb-1">
-                                <span class="text-sm text-slate-400 line-through">₹89,988</span>
-                                <span class="text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-1.5 py-0.5 rounded">Save 20%</span>
+                                <span class="text-sm text-slate-400 line-through">₹59,988</span>
+                                <span
+                                    class="text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-1.5 py-0.5 rounded">Save
+                                    20%</span>
                             </div>
-                            <span class="text-4xl font-extrabold text-slate-900 dark:text-white">₹71,990</span>
-                            <span class="text-slate-500 dark:text-zinc-400 font-medium">/user/yr</span>
+                            <span class="text-4xl font-extrabold text-slate-900 dark:text-white">₹47,990</span>
+                            <span class="text-slate-500 dark:text-zinc-400 font-medium">/yr</span>
                         </div>
                     </div>
-                    
-                    <a href="auth.html" class="w-full block text-center py-3 px-4 rounded-xl font-bold text-slate-700 dark:text-white bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 transition-colors mb-8 mt-4">Start Team Trial</a>
-                    
+
+                    <button @click="if(currentPlan === 'team') { window.location.href='dashboard.html' } else if ($store.auth.isAuthenticated) { window.location.href='payment.html?plan=team&billing=' + (annualBilling ? 'yearly' : 'monthly') } else { window.location.href='auth.html' }"
+                        :class="currentPlan === 'team' ? 'opacity-60 cursor-not-allowed bg-slate-200 dark:bg-white/10' : 'bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-slate-200 dark:bg-white/10'"
+                        class="w-full block text-center py-3 px-4 rounded-xl font-bold text-slate-700 dark:text-white border border-slate-200 dark:border-white/10 transition-colors mb-8 mt-4"
+                        x-text="currentPlan === 'team' ? 'Manage Plan' : 'Start Team Trial'"></button>
+
                     <div class="flex flex-col gap-4 flex-1">
-                        <p class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Everything in Pro, plus:</p>
+                        <p class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Everything
+                            in Pro, plus:</p>
                         <ul class="flex flex-col gap-3">
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-600 dark:text-zinc-300">Shared Workspaces</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-600 dark:text-zinc-300">Deal Risk Tracking</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-600 dark:text-zinc-300">Manager Dashboards</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-600 dark:text-zinc-300">Slack Notification Nodes</span>
                             </li>
                         </ul>
@@ -622,32 +395,57 @@
                 </div>
 
                 <!-- Card 4: Enterprise Plan -->
-                <div class="pricing-card flex flex-col bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-3xl p-8 shadow-sm">
+                <div
+                    @click="recommendedPlan = 'enterprise'"
+                    :class="[recommendedPlan === 'enterprise' ? 'ring-4 ring-brandIndigo shadow-indigo-500/30 scale-105 z-10 shadow-2xl' : 'hover:scale-105 hover:shadow-xl', currentPlan === 'enterprise' ? 'ring-2 ring-brandEmerald border-brandEmerald' : '']"
+                    class="cursor-pointer pricing-card flex flex-col bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-3xl p-8 shadow-sm transition-all duration-300 relative">
+                    <div x-show="currentPlan === 'enterprise'" class="absolute -top-3 right-6 bg-brandEmerald text-white text-[10px] font-black uppercase tracking-wider py-1 px-3 rounded-full shadow-md flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Active Plan
+                    </div>
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Enterprise</h3>
-                    <p class="text-sm text-slate-500 dark:text-zinc-400 mb-6 min-h-[40px]">For large orgs needing custom security and governance.</p>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 mb-6 min-h-[40px]">For large orgs needing custom
+                        security and governance.</p>
                     <div class="mb-6">
                         <span class="text-4xl font-extrabold text-slate-900 dark:text-white">Custom</span>
                     </div>
-                    <a href="auth.html" class="w-full block text-center py-3 px-4 rounded-xl font-bold text-slate-700 dark:text-white bg-transparent border-2 border-slate-200 dark:border-darkBorder hover:border-brandIndigo dark:hover:border-brandIndigo transition-colors mb-8">Contact Sales</a>
-                    
+                    <button @click="if(currentPlan === 'enterprise') { window.location.href='dashboard.html' } else { window.location.href='contact.html?inquiry=enterprise' }"
+                        :class="currentPlan === 'enterprise' ? 'opacity-60 cursor-not-allowed bg-slate-200 dark:bg-white/10' : 'bg-transparent hover:border-brandIndigo dark:hover:border-brandIndigo'"
+                        class="w-full block text-center py-3 px-4 rounded-xl font-bold text-slate-700 dark:text-white border-2 border-slate-200 dark:border-darkBorder transition-colors mb-8"
+                        x-text="currentPlan === 'enterprise' ? 'Manage Plan' : 'Contact Sales'"></button>
+
                     <div class="flex flex-col gap-4 flex-1">
-                        <p class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Everything in Team, plus:</p>
+                        <p class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Everything
+                            in Team, plus:</p>
                         <ul class="flex flex-col gap-3">
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-600 dark:text-zinc-300">SSO & SAML Tokens</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                                 <span class="text-sm text-slate-600 dark:text-zinc-300">Custom AI LLM Models</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                <span class="text-sm text-slate-600 dark:text-zinc-300">Advanced Security Controls</span>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span class="text-sm text-slate-600 dark:text-zinc-300">Advanced Security
+                                    Controls</span>
                             </li>
                             <li class="flex items-start gap-3">
-                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                <span class="text-sm text-slate-600 dark:text-zinc-300">White-Glove Onboarding & CSM</span>
+                                <svg class="w-5 h-5 text-brandEmerald shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span class="text-sm text-slate-600 dark:text-zinc-300">White-Glove Onboarding &
+                                    CSM</span>
                             </li>
                         </ul>
                     </div>
@@ -662,94 +460,160 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center lg:text-left">
                 <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white">Compare features side-by-side</h2>
-                <p class="mt-4 text-slate-600 dark:text-zinc-400">Dive into the details to find the exact plan your team needs.</p>
+                <p class="mt-4 text-slate-600 dark:text-zinc-400">Dive into the details to find the exact plan your team
+                    needs.</p>
             </div>
-            
+
             <div class="overflow-x-auto pb-4">
                 <table class="w-full text-left border-collapse min-w-[800px]">
                     <thead>
                         <tr class="border-b border-slate-200 dark:border-darkBorder">
-                            <th class="py-6 px-4 text-sm font-bold text-slate-900 dark:text-white w-1/3 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm z-10">Features</th>
-                            <th class="py-6 px-4 text-sm font-bold text-slate-900 dark:text-white text-center w-1/6">Free</th>
-                            <th class="py-6 px-4 text-sm font-bold text-brandIndigo text-center w-1/6 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-t-xl">Pro</th>
-                            <th class="py-6 px-4 text-sm font-bold text-slate-900 dark:text-white text-center w-1/6">Team</th>
-                            <th class="py-6 px-4 text-sm font-bold text-slate-900 dark:text-white text-center w-1/6">Enterprise</th>
+                            <th
+                                class="py-6 px-4 text-sm font-bold text-slate-900 dark:text-white w-1/3 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm z-10">
+                                Features</th>
+                            <th class="py-6 px-4 text-sm font-bold text-slate-900 dark:text-white text-center w-1/6">
+                                Free</th>
+                            <th
+                                class="py-6 px-4 text-sm font-bold text-brandIndigo text-center w-1/6 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-t-xl">
+                                Pro</th>
+                            <th class="py-6 px-4 text-sm font-bold text-slate-900 dark:text-white text-center w-1/6">
+                                Team</th>
+                            <th class="py-6 px-4 text-sm font-bold text-slate-900 dark:text-white text-center w-1/6">
+                                Enterprise</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200 dark:divide-darkBorder">
                         <!-- Row 1 -->
                         <tr class="table-row-hover transition-colors">
-                            <td class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">AI Meeting Briefs</td>
+                            <td
+                                class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">
+                                AI Meeting Briefs</td>
                             <td class="py-4 px-4 text-sm text-slate-500 dark:text-zinc-400 text-center">25 / mo</td>
-                            <td class="py-4 px-4 text-sm font-semibold text-slate-900 dark:text-white text-center bg-indigo-50/30 dark:bg-indigo-900/10">Unlimited</td>
+                            <td
+                                class="py-4 px-4 text-sm font-semibold text-slate-900 dark:text-white text-center bg-indigo-50/30 dark:bg-indigo-900/10">
+                                Unlimited</td>
                             <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Unlimited</td>
                             <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Unlimited</td>
                         </tr>
                         <!-- Row 2 -->
                         <tr class="table-row-hover transition-colors">
-                            <td class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">AI Outreach Generation</td>
+                            <td
+                                class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">
+                                AI Outreach Generation</td>
                             <td class="py-4 px-4 text-sm text-slate-500 dark:text-zinc-400 text-center">20 targets</td>
-                            <td class="py-4 px-4 text-sm font-semibold text-slate-900 dark:text-white text-center bg-indigo-50/30 dark:bg-indigo-900/10">Unlimited</td>
+                            <td
+                                class="py-4 px-4 text-sm font-semibold text-slate-900 dark:text-white text-center bg-indigo-50/30 dark:bg-indigo-900/10">
+                                Unlimited</td>
                             <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Unlimited</td>
                             <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Unlimited</td>
                         </tr>
                         <!-- Row 3 -->
                         <tr class="table-row-hover transition-colors">
-                            <td class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">AI Follow-Up Automation</td>
+                            <td
+                                class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">
+                                AI Follow-Up Automation</td>
                             <td class="py-4 px-4 text-center">
-                                <svg class="w-5 h-5 text-slate-300 dark:text-zinc-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+                                <svg class="w-5 h-5 text-slate-300 dark:text-zinc-600 mx-auto" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                                </svg>
                             </td>
                             <td class="py-4 px-4 text-center bg-indigo-50/30 dark:bg-indigo-900/10">
-                                <svg class="w-5 h-5 text-brandEmerald mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald mx-auto" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                             </td>
                             <td class="py-4 px-4 text-center">
-                                <svg class="w-5 h-5 text-brandEmerald mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald mx-auto" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                             </td>
                             <td class="py-4 px-4 text-center">
-                                <svg class="w-5 h-5 text-brandEmerald mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald mx-auto" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                             </td>
                         </tr>
                         <!-- Row 4 -->
                         <tr class="table-row-hover transition-colors">
-                            <td class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">CRM Integration</td>
-                            <td class="py-4 px-4 text-sm text-slate-500 dark:text-zinc-400 text-center">Basic (Read-only)</td>
-                            <td class="py-4 px-4 text-sm font-semibold text-slate-900 dark:text-white text-center bg-indigo-50/30 dark:bg-indigo-900/10">Bi-directional</td>
-                            <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Bi-directional + Custom Fields</td>
-                            <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Full API & Webhooks</td>
+                            <td
+                                class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">
+                                CRM Integration</td>
+                            <td class="py-4 px-4 text-sm text-slate-500 dark:text-zinc-400 text-center">Basic
+                                (Read-only)</td>
+                            <td
+                                class="py-4 px-4 text-sm font-semibold text-slate-900 dark:text-white text-center bg-indigo-50/30 dark:bg-indigo-900/10">
+                                Bi-directional</td>
+                            <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Bi-directional +
+                                Custom Fields</td>
+                            <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Full API &
+                                Webhooks</td>
                         </tr>
                         <!-- Row 5 -->
                         <tr class="table-row-hover transition-colors">
-                            <td class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">Analytics & Reporting</td>
+                            <td
+                                class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">
+                                Analytics & Reporting</td>
                             <td class="py-4 px-4 text-center">
-                                <svg class="w-5 h-5 text-slate-300 dark:text-zinc-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+                                <svg class="w-5 h-5 text-slate-300 dark:text-zinc-600 mx-auto" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                                </svg>
                             </td>
-                            <td class="py-4 px-4 text-sm font-semibold text-slate-900 dark:text-white text-center bg-indigo-50/30 dark:bg-indigo-900/10">Personal Dashboards</td>
-                            <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Team Roll-up Dashboards</td>
-                            <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Custom BI Exports</td>
+                            <td
+                                class="py-4 px-4 text-sm font-semibold text-slate-900 dark:text-white text-center bg-indigo-50/30 dark:bg-indigo-900/10">
+                                Personal Dashboards</td>
+                            <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Team Roll-up
+                                Dashboards</td>
+                            <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Custom BI
+                                Exports</td>
                         </tr>
                         <!-- Row 6 -->
                         <tr class="table-row-hover transition-colors">
-                            <td class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">Deal Risk Prediction</td>
+                            <td
+                                class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">
+                                Deal Risk Prediction</td>
                             <td class="py-4 px-4 text-center">
-                                <svg class="w-5 h-5 text-slate-300 dark:text-zinc-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+                                <svg class="w-5 h-5 text-slate-300 dark:text-zinc-600 mx-auto" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                                </svg>
                             </td>
                             <td class="py-4 px-4 text-center bg-indigo-50/30 dark:bg-indigo-900/10">
-                                <svg class="w-5 h-5 text-slate-300 dark:text-zinc-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+                                <svg class="w-5 h-5 text-slate-300 dark:text-zinc-600 mx-auto" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                                </svg>
                             </td>
                             <td class="py-4 px-4 text-center">
-                                <svg class="w-5 h-5 text-brandEmerald mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald mx-auto" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                             </td>
                             <td class="py-4 px-4 text-center">
-                                <svg class="w-5 h-5 text-brandEmerald mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                <svg class="w-5 h-5 text-brandEmerald mx-auto" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
                             </td>
                         </tr>
                         <!-- Row 7 -->
                         <tr class="table-row-hover transition-colors">
-                            <td class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">Dedicated Support</td>
+                            <td
+                                class="py-4 px-4 text-sm font-semibold text-slate-700 dark:text-zinc-300 sticky left-0 bg-slate-50/90 dark:bg-[#0c0c0e]/90 backdrop-blur-sm">
+                                Dedicated Support</td>
                             <td class="py-4 px-4 text-sm text-slate-500 dark:text-zinc-400 text-center">Community</td>
-                            <td class="py-4 px-4 text-sm font-semibold text-slate-900 dark:text-white text-center bg-indigo-50/30 dark:bg-indigo-900/10">Standard Email</td>
-                            <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Priority 24/7</td>
-                            <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Dedicated CSM</td>
+                            <td
+                                class="py-4 px-4 text-sm font-semibold text-slate-900 dark:text-white text-center bg-indigo-50/30 dark:bg-indigo-900/10">
+                                Standard Email</td>
+                            <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Priority 24/7
+                            </td>
+                            <td class="py-4 px-4 text-sm text-slate-600 dark:text-zinc-400 text-center">Dedicated CSM
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -762,26 +626,31 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white">The ROI of Sales Saathi</h2>
-                <p class="mt-4 text-lg text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto">Measurable impact across the entire revenue organization based on our enterprise cohort data.</p>
+                <p class="mt-4 text-lg text-slate-600 dark:text-zinc-400 max-w-2xl mx-auto">Measurable impact across the
+                    entire revenue organization based on our enterprise cohort data.</p>
             </div>
-            
+
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-8">
-                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 text-center shadow-sm">
+                <div
+                    class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 text-center shadow-sm">
                     <div class="text-3xl md:text-5xl font-extrabold text-brandEmerald mb-2">-70%</div>
                     <p class="text-sm font-bold text-slate-900 dark:text-white mb-1">Preparation Time</p>
                     <p class="text-xs text-slate-500 dark:text-zinc-400">Hours saved per rep weekly</p>
                 </div>
-                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 text-center shadow-sm">
+                <div
+                    class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 text-center shadow-sm">
                     <div class="text-3xl md:text-5xl font-extrabold text-brandIndigo mb-2">+40%</div>
                     <p class="text-sm font-bold text-slate-900 dark:text-white mb-1">Follow-Up Consistency</p>
                     <p class="text-xs text-slate-500 dark:text-zinc-400">SLA adherence improvement</p>
                 </div>
-                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 text-center shadow-sm">
+                <div
+                    class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 text-center shadow-sm">
                     <div class="text-3xl md:text-5xl font-extrabold text-brandViolet mb-2">+35%</div>
                     <p class="text-sm font-bold text-slate-900 dark:text-white mb-1">Rep Output</p>
                     <p class="text-xs text-slate-500 dark:text-zinc-400">Increase in outbound volume</p>
                 </div>
-                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 text-center shadow-sm">
+                <div
+                    class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 text-center shadow-sm">
                     <div class="text-3xl md:text-5xl font-extrabold text-brandEmerald mb-2">-25%</div>
                     <p class="text-sm font-bold text-slate-900 dark:text-white mb-1">Sales Cycle Length</p>
                     <p class="text-xs text-slate-500 dark:text-zinc-400">Faster time to close won</p>
@@ -791,25 +660,32 @@
     </section>
 
     <!-- SECTION 5: Multi-Variant Social Proof Grid -->
-    <section class="py-24 bg-slate-50 dark:bg-darkBg relative border-t border-slate-200 dark:border-darkBorder overflow-hidden">
+    <section
+        class="py-24 bg-slate-50 dark:bg-darkBg relative border-t border-slate-200 dark:border-darkBorder overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-b from-transparent to-brandIndigo/5 pointer-events-none"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                
+
                 <!-- Testimonial 1 -->
-                <div class="bg-white dark:bg-[#121215] border border-slate-200 dark:border-darkBorder rounded-2xl p-8 shadow-sm flex flex-col justify-between">
+                <div
+                    class="bg-white dark:bg-[#121215] border border-slate-200 dark:border-darkBorder rounded-2xl p-8 shadow-sm flex flex-col justify-between">
                     <div>
                         <div class="flex gap-1 mb-6">
                             <template x-for="i in 5">
-                                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
                             </template>
                         </div>
                         <p class="text-slate-700 dark:text-zinc-300 mb-8 font-medium leading-relaxed">
-                            "Sales Saathi effectively replaced two point-solutions in our stack. The Pro plan paid for itself in week one just by recovering 4 hours of admin time per rep."
+                            "Sales Saathi effectively replaced two point-solutions in our stack. The Pro plan paid for
+                            itself in week one just by recovering 4 hours of admin time per rep."
                         </p>
                     </div>
                     <div class="flex items-center gap-4 pt-6 border-t border-slate-100 dark:border-white/10">
-                        <img src="https://i.pravatar.cc/150?u=1" alt="Sarah J." class="w-12 h-12 rounded-full grayscale hover:grayscale-0 transition-all border border-slate-200 dark:border-white/10">
+                        <img src="https://i.pravatar.cc/150?u=1" alt="Sarah J."
+                            class="w-12 h-12 rounded-full grayscale hover:grayscale-0 transition-all border border-slate-200 dark:border-white/10">
                         <div>
                             <h4 class="font-bold text-slate-900 dark:text-white text-sm">Sarah Jenkins</h4>
                             <p class="text-xs text-slate-500 dark:text-zinc-400">VP of Revenue, TechFlow</p>
@@ -818,20 +694,28 @@
                 </div>
 
                 <!-- Testimonial 2 -->
-                <div class="bg-white dark:bg-[#121215] border border-slate-200 dark:border-darkBorder rounded-2xl p-8 shadow-sm flex flex-col justify-between relative overflow-hidden">
+                <div
+                    class="bg-white dark:bg-[#121215] border border-slate-200 dark:border-darkBorder rounded-2xl p-8 shadow-sm flex flex-col justify-between relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-24 h-24 bg-brandIndigo/5 rounded-bl-full"></div>
                     <div class="relative z-10">
                         <div class="flex gap-1 mb-6">
                             <template x-for="i in 5">
-                                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
                             </template>
                         </div>
                         <p class="text-slate-700 dark:text-zinc-300 mb-8 font-medium leading-relaxed">
-                            "The Team plan's deal risk tracking feature highlighted a massive blindspot in our Q3 pipeline. The ROI of closing just one of those at-risk deals was over 100x the software cost."
+                            "The Team plan's deal risk tracking feature highlighted a massive blindspot in our Q3
+                            pipeline. The ROI of closing just one of those at-risk deals was over 100x the software
+                            cost."
                         </p>
                     </div>
-                    <div class="flex items-center gap-4 pt-6 border-t border-slate-100 dark:border-white/10 relative z-10">
-                        <img src="https://i.pravatar.cc/150?u=2" alt="Marcus T." class="w-12 h-12 rounded-full grayscale hover:grayscale-0 transition-all border border-slate-200 dark:border-white/10">
+                    <div
+                        class="flex items-center gap-4 pt-6 border-t border-slate-100 dark:border-white/10 relative z-10">
+                        <img src="https://i.pravatar.cc/150?u=2" alt="Marcus T."
+                            class="w-12 h-12 rounded-full grayscale hover:grayscale-0 transition-all border border-slate-200 dark:border-white/10">
                         <div>
                             <h4 class="font-bold text-slate-900 dark:text-white text-sm">Marcus Torres</h4>
                             <p class="text-xs text-slate-500 dark:text-zinc-400">Director of Sales Ops, OmniStack</p>
@@ -840,19 +724,25 @@
                 </div>
 
                 <!-- Testimonial 3 -->
-                <div class="bg-white dark:bg-[#121215] border border-slate-200 dark:border-darkBorder rounded-2xl p-8 shadow-sm flex flex-col justify-between">
+                <div
+                    class="bg-white dark:bg-[#121215] border border-slate-200 dark:border-darkBorder rounded-2xl p-8 shadow-sm flex flex-col justify-between">
                     <div>
                         <div class="flex gap-1 mb-6">
                             <template x-for="i in 5">
-                                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
                             </template>
                         </div>
                         <p class="text-slate-700 dark:text-zinc-300 mb-8 font-medium leading-relaxed">
-                            "Implementation on the Enterprise tier took less than 48 hours. Security approved the SAML integration immediately, and our AEs had customized AI models running the next day."
+                            "Implementation on the Enterprise tier took less than 48 hours. Security approved the SAML
+                            integration immediately, and our AEs had customized AI models running the next day."
                         </p>
                     </div>
                     <div class="flex items-center gap-4 pt-6 border-t border-slate-100 dark:border-white/10">
-                        <img src="https://i.pravatar.cc/150?u=3" alt="Emily R." class="w-12 h-12 rounded-full grayscale hover:grayscale-0 transition-all border border-slate-200 dark:border-white/10">
+                        <img src="https://i.pravatar.cc/150?u=3" alt="Emily R."
+                            class="w-12 h-12 rounded-full grayscale hover:grayscale-0 transition-all border border-slate-200 dark:border-white/10">
                         <div>
                             <h4 class="font-bold text-slate-900 dark:text-white text-sm">Emily Rossi</h4>
                             <p class="text-xs text-slate-500 dark:text-zinc-400">Chief Information Officer, Nexus</p>
@@ -870,70 +760,115 @@
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white">Frequently Asked Questions</h2>
             </div>
-            
+
             <div class="space-y-4">
-                
+
                 <!-- FAQ 1 -->
-                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-xl overflow-hidden shadow-sm">
-                    <button @click="activeFaq = activeFaq === 1 ? null : 1" class="w-full flex justify-between items-center p-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo">
-                        <span class="font-bold text-slate-900 dark:text-white text-lg">Do you offer a free trial for the Pro and Team plans?</span>
-                        <svg class="w-5 h-5 text-brandIndigo transition-transform duration-300" :class="activeFaq === 1 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                <div
+                    class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-xl overflow-hidden shadow-sm">
+                    <button @click="activeFaq = activeFaq === 1 ? null : 1"
+                        class="w-full flex justify-between items-center p-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo">
+                        <span class="font-bold text-slate-900 dark:text-white text-lg">Do you offer a free trial for the
+                            Pro and Team plans?</span>
+                        <svg class="w-5 h-5 text-brandIndigo transition-transform duration-300"
+                            :class="activeFaq === 1 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
                     </button>
                     <div x-show="activeFaq === 1" x-collapse x-cloak>
                         <div class="px-6 pb-6 text-slate-600 dark:text-zinc-400 leading-relaxed text-sm">
-                            Yes. Both Pro and Team plans come with a full-featured 14-day free trial. No credit card is required to start, and you will have unlimited access to all AI features to evaluate the platform thoroughly before committing.
+                            Yes. Both Pro and Team plans come with a full-featured 14-day free trial. No credit card is
+                            required to start, and you will have unlimited access to all AI features to evaluate the
+                            platform thoroughly before committing.
                         </div>
                     </div>
                 </div>
 
                 <!-- FAQ 2 -->
-                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-xl overflow-hidden shadow-sm">
-                    <button @click="activeFaq = activeFaq === 2 ? null : 2" class="w-full flex justify-between items-center p-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo">
-                        <span class="font-bold text-slate-900 dark:text-white text-lg">Which CRMs are currently supported?</span>
-                        <svg class="w-5 h-5 text-brandIndigo transition-transform duration-300" :class="activeFaq === 2 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                <div
+                    class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-xl overflow-hidden shadow-sm">
+                    <button @click="activeFaq = activeFaq === 2 ? null : 2"
+                        class="w-full flex justify-between items-center p-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo">
+                        <span class="font-bold text-slate-900 dark:text-white text-lg">Which CRMs are currently
+                            supported?</span>
+                        <svg class="w-5 h-5 text-brandIndigo transition-transform duration-300"
+                            :class="activeFaq === 2 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
                     </button>
                     <div x-show="activeFaq === 2" x-collapse x-cloak>
                         <div class="px-6 pb-6 text-slate-600 dark:text-zinc-400 leading-relaxed text-sm">
-                            We currently offer bi-directional native integrations with Salesforce, HubSpot, and Zoho CRM. For other platforms, we provide a robust REST API and webhook infrastructure on our Team and Enterprise tiers to facilitate custom data pipelines.
+                            We currently offer bi-directional native integrations with Salesforce, HubSpot, and Zoho
+                            CRM. For other platforms, we provide a robust REST API and webhook infrastructure on our
+                            Team and Enterprise tiers to facilitate custom data pipelines.
                         </div>
                     </div>
                 </div>
 
                 <!-- FAQ 3 -->
-                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-xl overflow-hidden shadow-sm">
-                    <button @click="activeFaq = activeFaq === 3 ? null : 3" class="w-full flex justify-between items-center p-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo">
-                        <span class="font-bold text-slate-900 dark:text-white text-lg">What are your contract terms and cancellation conditions?</span>
-                        <svg class="w-5 h-5 text-brandIndigo transition-transform duration-300" :class="activeFaq === 3 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                <div
+                    class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-xl overflow-hidden shadow-sm">
+                    <button @click="activeFaq = activeFaq === 3 ? null : 3"
+                        class="w-full flex justify-between items-center p-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo">
+                        <span class="font-bold text-slate-900 dark:text-white text-lg">What are your contract terms and
+                            cancellation conditions?</span>
+                        <svg class="w-5 h-5 text-brandIndigo transition-transform duration-300"
+                            :class="activeFaq === 3 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
                     </button>
                     <div x-show="activeFaq === 3" x-collapse x-cloak>
                         <div class="px-6 pb-6 text-slate-600 dark:text-zinc-400 leading-relaxed text-sm">
-                            Monthly plans can be canceled at any time from your billing dashboard with zero penalty, effectively ending your subscription at the current billing cycle. Annual plans represent a 12-month commitment allowing you to lock in the 20% discount rate.
+                            Monthly plans can be canceled at any time from your billing dashboard with zero penalty,
+                            effectively ending your subscription at the current billing cycle. Annual plans represent a
+                            12-month commitment allowing you to lock in the 20% discount rate.
                         </div>
                     </div>
                 </div>
 
                 <!-- FAQ 4 -->
-                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-xl overflow-hidden shadow-sm">
-                    <button @click="activeFaq = activeFaq === 4 ? null : 4" class="w-full flex justify-between items-center p-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo">
-                        <span class="font-bold text-slate-900 dark:text-white text-lg">How is my CRM data handled and secured?</span>
-                        <svg class="w-5 h-5 text-brandIndigo transition-transform duration-300" :class="activeFaq === 4 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                <div
+                    class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-xl overflow-hidden shadow-sm">
+                    <button @click="activeFaq = activeFaq === 4 ? null : 4"
+                        class="w-full flex justify-between items-center p-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo">
+                        <span class="font-bold text-slate-900 dark:text-white text-lg">How is my CRM data handled and
+                            secured?</span>
+                        <svg class="w-5 h-5 text-brandIndigo transition-transform duration-300"
+                            :class="activeFaq === 4 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
                     </button>
                     <div x-show="activeFaq === 4" x-collapse x-cloak>
                         <div class="px-6 pb-6 text-slate-600 dark:text-zinc-400 leading-relaxed text-sm">
-                            We operate on a zero-retention policy for CRM payload data during model inference. Data is encrypted in transit (TLS 1.3) and at rest (AES-256). We are fully SOC2 Type II compliant and GDPR ready. Sales Saathi does not train public LLMs on your proprietary deal data.
+                            We operate on a zero-retention policy for CRM payload data during model inference. Data is
+                            encrypted in transit (TLS 1.3) and at rest (AES-256). We are fully SOC2 Type II compliant
+                            and GDPR ready. Sales Saathi does not train public LLMs on your proprietary deal data.
                         </div>
                     </div>
                 </div>
 
                 <!-- FAQ 5 -->
-                <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-xl overflow-hidden shadow-sm">
-                    <button @click="activeFaq = activeFaq === 5 ? null : 5" class="w-full flex justify-between items-center p-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo">
-                        <span class="font-bold text-slate-900 dark:text-white text-lg">Do you offer custom LLMs for Enterprise?</span>
-                        <svg class="w-5 h-5 text-brandIndigo transition-transform duration-300" :class="activeFaq === 5 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                <div
+                    class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-xl overflow-hidden shadow-sm">
+                    <button @click="activeFaq = activeFaq === 5 ? null : 5"
+                        class="w-full flex justify-between items-center p-6 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo">
+                        <span class="font-bold text-slate-900 dark:text-white text-lg">Do you offer custom LLMs for
+                            Enterprise?</span>
+                        <svg class="w-5 h-5 text-brandIndigo transition-transform duration-300"
+                            :class="activeFaq === 5 ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
                     </button>
                     <div x-show="activeFaq === 5" x-collapse x-cloak>
                         <div class="px-6 pb-6 text-slate-600 dark:text-zinc-400 leading-relaxed text-sm">
-                            Yes. On the Enterprise tier, our AI engineering team works with your RevOps department to fine-tune isolated, single-tenant AI models using your historical sales transcripts, ensuring the AI outputs match your exact organizational tone and MEDDIC methodologies.
+                            Yes. On the Enterprise tier, our AI engineering team works with your RevOps department to
+                            fine-tune isolated, single-tenant AI models using your historical sales transcripts,
+                            ensuring the AI outputs match your exact organizational tone and MEDDIC methodologies.
                         </div>
                     </div>
                 </div>
@@ -943,23 +878,23 @@
     </section>
 
     <!-- SECTION 7: High-Impact Final Conversion Area -->
-    <section class="py-24 relative overflow-hidden bg-slate-900 dark:bg-[#0a0a0c]">
-        <!-- Abstract glowing orb -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brandIndigo/20 rounded-full blur-[150px] pointer-events-none"></div>
-        
+    <section class="py-24 relative overflow-hidden bg-slate-50 dark:bg-[#0a0a0c]">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-6">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-6">
                 Ready to automate your pipeline?
             </h2>
-            <p class="text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
-                Join over 4,500 forward-thinking sales teams utilizing Sales Saathi to close deals faster and eliminate administrative overhead.
+            <p class="text-xl text-slate-600 dark:text-slate-300 mb-10 max-w-2xl mx-auto">
+                Join over 4,500 forward-thinking sales teams utilizing Sales Saathi to close deals faster and eliminate
+                administrative overhead.
             </p>
-            
+
             <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-12">
-                <a href="auth.html" class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-white bg-brandIndigo hover:bg-brandViolet shadow-[0_0_30px_rgba(79,70,229,0.5)] hover:scale-105 active:scale-95 transition-all text-lg">
+                <a href="auth.html"
+                    class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-white bg-brandIndigo hover:bg-indigo-500 shadow-md hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all text-lg">
                     Start Your 14-Day Free Trial
                 </a>
-                <a href="auth.html" class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-white bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 transition-colors text-lg">
+                <a href="contact.html"
+                    class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-slate-900 dark:text-white bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 backdrop-blur-md border border-slate-200 dark:border-white/10 transition-colors text-lg">
                     Contact Sales
                 </a>
             </div>
@@ -967,16 +902,28 @@
             <!-- Trust badges -->
             <div class="flex flex-wrap justify-center gap-6 opacity-70">
                 <div class="flex items-center gap-2">
-                    <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    <span class="text-sm font-bold text-slate-300">SOC2 Type II</span>
+                    <svg class="w-6 h-6 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span class="text-sm font-bold text-slate-600 dark:text-slate-300">SOC2 Type II</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                    <span class="text-sm font-bold text-slate-300">GDPR Ready</span>
+                    <svg class="w-6 h-6 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span class="text-sm font-bold text-slate-600 dark:text-slate-300">GDPR Ready</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
-                    <span class="text-sm font-bold text-slate-300">Zero Data Retention</span>
+                    <svg class="w-6 h-6 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                    <span class="text-sm font-bold text-slate-600 dark:text-slate-300">Zero Data Retention</span>
                 </div>
             </div>
         </div>
@@ -989,56 +936,274 @@
                 <!-- Brand Col -->
                 <div class="col-span-2 md:col-span-2 flex flex-col">
                     <a href="index.html" class="flex items-center gap-2.5 mb-6">
-                        <img src="logo.png" alt="Sales Saathi Logo" class="h-10 w-auto object-contain" style="min-width:40px;" />
-                        <span class="font-bold text-lg tracking-tight text-slate-900 dark:text-white">Sales Saathi</span>
+                        <img src="/logo.png" alt="Sales Saathi Logo" class="h-5 w-auto object-contain" />
+                        <span class="font-bold text-lg tracking-tight text-slate-900 dark:text-white">Sales
+                            Saathi</span>
                     </a>
-                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium mb-6 max-w-sm">The world's first AI-powered sales co-pilot designed to automate research, guide live discovery, and enforce CRM hygiene.</p>
+                    <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium mb-6 max-w-sm">The world's first
+                        AI-powered sales co-pilot designed to automate research, guide live discovery, and enforce CRM
+                        hygiene.</p>
                     <div class="flex gap-4">
-                        <a href="index.html" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                        <a href="index.html"
+                            class="text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
+                            </svg>
                         </a>
-                        <a href="index.html" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        <a href="index.html"
+                            class="text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                            </svg>
                         </a>
-                        <a href="index.html" class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        <a href="index.html"
+                            class="text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                            </svg>
                         </a>
                     </div>
                 </div>
                 <!-- Links 1 -->
                 <div class="col-span-1 flex flex-col gap-3">
                     <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Product</h4>
-                    <a href="index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Features</a>
-                    <a href="index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Integrations</a>
-                    <a href="pricing.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Pricing</a>
-                    <a href="index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Changelog</a>
+                    <a href="index.html"
+                        class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-slate-900 dark:text-white font-medium transition-colors">Features</a>
+                    <a href="index.html"
+                        class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-slate-900 dark:text-white font-medium transition-colors">Integrations</a>
+                    <a href="pricing.html"
+                        class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-slate-900 dark:text-white font-medium transition-colors">Pricing</a>
+                    <a href="index.html"
+                        class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-slate-900 dark:text-white font-medium transition-colors">Changelog</a>
                 </div>
                 <!-- Links 2 -->
                 <div class="col-span-1 flex flex-col gap-3">
                     <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Resources</h4>
-                    <a href="index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Documentation</a>
-                    <a href="index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Blog</a>
-                    <a href="index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Community</a>
-                    <a href="index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Help Center</a>
+                    <a href="index.html"
+                        class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-slate-900 dark:text-white font-medium transition-colors">Documentation</a>
+                    <a href="index.html"
+                        class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-slate-900 dark:text-white font-medium transition-colors">Blog</a>
+                    <a href="index.html"
+                        class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-slate-900 dark:text-white font-medium transition-colors">Community</a>
+                    <a href="index.html"
+                        class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-slate-900 dark:text-white font-medium transition-colors">Help
+                        Center</a>
                 </div>
                 <!-- Links 3 -->
                 <div class="col-span-1 flex flex-col gap-3">
                     <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Company</h4>
-                    <a href="index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">About Us</a>
-                    <a href="index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Careers</a>
-                    <a href="index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Privacy Policy</a>
-                    <a href="index.html" class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-white font-medium transition-colors">Terms of Service</a>
+                    <a href="index.html"
+                        class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-slate-900 dark:text-white font-medium transition-colors">About
+                        Us</a>
+                    <a href="index.html"
+                        class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-slate-900 dark:text-white font-medium transition-colors">Careers</a>
+                    <a href="index.html"
+                        class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-slate-900 dark:text-white font-medium transition-colors">Privacy
+                        Policy</a>
+                    <a href="index.html"
+                        class="text-sm text-slate-500 dark:text-zinc-400 hover:text-brandIndigo dark:hover:text-slate-900 dark:text-white font-medium transition-colors">Terms
+                        of Service</a>
                 </div>
             </div>
-            <div class="pt-8 border-t border-lightBorder dark:border-darkBorder flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-xs text-slate-400 dark:text-zinc-500 font-medium">© 2026 Sales Saathi Inc. All rights reserved.</p>
+            <div
+                class="pt-8 border-t border-lightBorder dark:border-darkBorder flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-xs text-slate-400 dark:text-zinc-500 font-medium">© 2026 Sales Saathi Inc. All rights
+                    reserved.</p>
                 <div class="flex items-center gap-2">
                     <span class="text-xs text-slate-400 dark:text-zinc-500 font-medium">System Status:</span>
-                    <span class="flex items-center gap-1.5 text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-2 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-brandEmerald"></span> 100% Operational</span>
+                    <span
+                        class="flex items-center gap-1.5 text-xs font-bold text-brandEmerald bg-brandEmerald/10 px-2 py-1 rounded-full"><span
+                            class="w-1.5 h-1.5 rounded-full bg-brandEmerald"></span> 100% Operational</span>
                 </div>
             </div>
         </div>
     </footer>
 
+    <!-- Pricing Interactivity Script -->
+    <script type="module">
+        import { supabase } from './src/lib/supabase.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.pricing-card');
+            const planNames = ['free', 'pro', 'team', 'enterprise'];
+
+            cards.forEach((card, index) => {
+                card.dataset.plan = planNames[index];
+                card.style.cursor = 'pointer';
+
+                // Handle Card Expand & Highlight
+                card.addEventListener('click', (e) => {
+                    // Ignore clicks on buttons/links
+                    if (e.target.closest('a') || e.target.closest('button')) return;
+
+                    const selectedPlan = card.dataset.plan;
+
+                    cards.forEach(c => {
+                        if (c === card) {
+                            // Expand and highlight
+                            c.classList.add('glow-border', 'scale-105', 'z-10', 'shadow-2xl', 'relative');
+                            c.classList.remove('scale-100', 'shadow-sm', 'border', 'border-slate-200', 'dark:border-darkBorder');
+                        } else {
+                            // Shrink and remove highlight
+                            c.classList.remove('glow-border', 'scale-105', 'z-10', 'shadow-2xl');
+                            c.classList.add('scale-100', 'shadow-sm');
+                            
+                            // Restore borders for non-pro cards
+                            if (c.dataset.plan !== 'pro') {
+                                c.classList.add('border', 'border-slate-200', 'dark:border-darkBorder');
+                                c.classList.remove('relative');
+                            }
+                        }
+                    });
+
+                    // Store selected plan
+                    localStorage.setItem('selectedPlan', selectedPlan);
+                });
+
+                // Handle Subscribe Button Authentication Check
+                const ctaButton = card.querySelector('a');
+                if (ctaButton) {
+                    ctaButton.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        
+                        // Ensure we store the plan they actually clicked to subscribe to
+                        const selectedPlan = card.dataset.plan;
+                        localStorage.setItem('selectedPlan', selectedPlan);
+                        
+                        try {
+                            // Check for active session using Supabase
+                            const { data: { session } } = await supabase.auth.getSession();
+                            
+                            if (!session) {
+                                // Not logged in -> Redirect to Auth
+                                window.location.href = 'auth.html#signup';
+                            } else {
+                                // Logged in -> Continue Subscription Flow
+                                
+                                // Fetch existing subscription to handle Upgrades gracefully
+                                const { data: currentSub } = await supabase
+                                    .from('subscriptions')
+                                    .select('*')
+                                    .eq('user_id', session.user.id)
+                                    .order('created_at', { ascending: false })
+                                    .limit(1)
+                                    .maybeSingle();
+
+                                // Temporarily removed the "already active" redirect so you can test the payment flow multiple times
+                                /*
+                                if (currentSub && currentSub.plan_type === selectedPlan && currentSub.subscription_status === 'active') {
+                                    // Already active on this exact plan
+                                    window.location.href = 'dashboard.html';
+                                    return;
+                                }
+                                */
+                                
+                                if (selectedPlan === 'free') {
+                                    // Change button state to loading
+                                    const originalText = ctaButton.textContent;
+                                    ctaButton.textContent = 'Activating...';
+                                    ctaButton.style.pointerEvents = 'none';
+
+                                    // Create or update subscription record
+                                    const payload = {
+                                        user_id: session.user.id,
+                                        plan_type: 'free',
+                                        subscription_status: 'active',
+                                        payment_status: 'free',
+                                        subscription_start_date: new Date().toISOString()
+                                    };
+                                    
+                                    let dbError;
+                                    if (currentSub) {
+                                        const { error } = await supabase
+                                            .from('subscriptions')
+                                            .update(payload)
+                                            .eq('id', currentSub.id);
+                                        dbError = error;
+                                    } else {
+                                        const { error } = await supabase
+                                            .from('subscriptions')
+                                            .insert([payload]);
+                                        dbError = error;
+                                    }
+                                        
+                                    if (dbError) {
+                                        console.error('Error activating free plan:', dbError);
+                                        alert('Failed to activate free plan: ' + dbError.message);
+                                        ctaButton.textContent = originalText;
+                                        ctaButton.style.pointerEvents = 'auto';
+                                    } else {
+                                        localStorage.setItem('_x_userPlan', '"free"');
+                                        window.location.href = 'dashboard.html';
+                                    }
+                                } else if (selectedPlan === 'pro' || selectedPlan === 'team' || selectedPlan === 'enterprise') {
+                                    // Always route to payment page for paid plans, even for trials
+                                    window.location.href = 'payment.html';
+                                }
+                            }
+                        } catch (err) {
+                            console.error("Auth check failed:", err);
+                            window.location.href = 'auth.html#signup';
+                        }
+                    });
+                }
+            });
+
+            // Load saved plan or default to 'pro'
+            const savedPlan = localStorage.getItem('selectedPlan') || 'pro';
+            const targetCard = Array.from(cards).find(c => c.dataset.plan === savedPlan);
+            if (targetCard) {
+                targetCard.click();
+            }
+        });
+    </script>
+    <script type="module">
+        import { supabase } from './src/lib/supabase.js';
+        window.activateFreePlan = async function() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.location.href = 'auth.html';
+                    return;
+                }
+                
+                const payload = {
+                    user_id: session.user.id,
+                    plan_type: 'free',
+                    subscription_status: 'active',
+                    subscription_start_date: new Date().toISOString()
+                };
+
+                const { data: existingSub } = await supabase.from('subscriptions').select('id').eq('user_id', session.user.id).maybeSingle();
+                let dbError;
+
+                if (existingSub) {
+                    const { error } = await supabase.from('subscriptions').update(payload).eq('user_id', session.user.id);
+                    dbError = error;
+                } else {
+                    const { error } = await supabase.from('subscriptions').insert([payload]);
+                    dbError = error;
+                }
+                
+                if (dbError) throw dbError;
+                
+                localStorage.setItem('ss_plan', 'free');
+                localStorage.setItem('_x_userPlan', '"free"');
+                
+                window.dispatchEvent(new CustomEvent('ss:planChanged', { detail: { plan: 'free' } }));
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 500);
+            } catch (err) {
+                console.error('Error activating free plan:', err);
+                alert('Failed to activate Free Plan. Please try again.');
+            }
+        };
+    </script>
 </body>
+
 </html>

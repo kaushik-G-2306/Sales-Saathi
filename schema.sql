@@ -195,3 +195,70 @@ WHERE auto_generate_enabled = true;
 CREATE INDEX IF NOT EXISTS idx_unifiedmeetings_auto_email 
 ON public."UnifiedMeetings"(auto_email_enabled) 
 WHERE auto_email_enabled = true;
+
+-- ==========================================
+-- MIGRATION: Subscriptions & Enterprise Leads
+-- Added for payment flow (payment.html)
+-- ==========================================
+
+-- Subscriptions Table
+-- Tracks each user's current plan and billing status
+CREATE TABLE IF NOT EXISTS public.subscriptions (
+    id                        UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id                   UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    plan_type                 TEXT NOT NULL DEFAULT 'free'
+                                  CHECK (plan_type IN ('free', 'pro', 'team', 'enterprise')),
+    subscription_status       TEXT NOT NULL DEFAULT 'trial'
+                                  CHECK (subscription_status IN ('trial', 'active', 'expired', 'cancelled')),
+    payment_status            TEXT DEFAULT 'unpaid'
+                                  CHECK (payment_status IN ('unpaid', 'paid', 'refunded')),
+    subscription_start_date   TIMESTAMP WITH TIME ZONE,
+    trial_start_date          TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
+    trial_end_date            TIMESTAMP WITH TIME ZONE DEFAULT (timezone('utc'::text, now()) + INTERVAL '14 days'),
+    created_at                TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at                TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id
+    ON public.subscriptions(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_subscriptions_status
+    ON public.subscriptions(subscription_status);
+
+ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own subscription"
+    ON public.subscriptions FOR SELECT
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own subscription"
+    ON public.subscriptions FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own subscription"
+    ON public.subscriptions FOR UPDATE
+    USING (auth.uid() = user_id);
+
+-- Enterprise Leads Table
+-- Stores enterprise inquiry form submissions
+CREATE TABLE IF NOT EXISTS public.enterprise_leads (
+    id            UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id       UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    company_name  TEXT NOT NULL,
+    work_email    TEXT NOT NULL,
+    phone_number  TEXT,
+    team_size     TEXT,
+    requirements  TEXT,
+    status        TEXT DEFAULT 'new' CHECK (status IN ('new', 'contacted', 'closed')),
+    created_at    TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.enterprise_leads ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can insert own enterprise lead"
+    ON public.enterprise_leads FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own enterprise leads"
+    ON public.enterprise_leads FOR SELECT
+    USING (auth.uid() = user_id);

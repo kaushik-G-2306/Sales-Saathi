@@ -1,0 +1,1 @@
+const https = require('https'); https.get('https://tpmnbglgmfqiiqxdjrwa.supabase.co/auth/v1/authorize?provider=google&scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar.readonly&prompt=consent&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar.readonly', function(res) { console.log(res.headers.location); });  

@@ -27,7 +27,10 @@ const authStore = {
                 
                 console.log(`[AUTH] ${supabaseClientId} Attaching onAuthStateChange listener...`);
                 
-                if (window.__AUTH_INITIALIZED__) return;
+                if (window.__AUTH_INITIALIZED__) {
+                    this.loading = false;
+                    return;
+                }
                 window.__AUTH_INITIALIZED__ = true;
 
                 supabase.auth.onAuthStateChange(async (event, session) => {
@@ -71,7 +74,8 @@ const authStore = {
             console.log("Provider token:", session?.provider_token);
 
             // If the user just connected Google Calendar, save connection status
-            if (session.provider_token && session.user?.app_metadata?.provider === 'google') {
+            const hasGoogleIdentity = session.user?.identities?.some(id => id.provider === 'google');
+            if (session.provider_token && (session.user?.app_metadata?.provider === 'google' || hasGoogleIdentity)) {
                 try {
                     console.log('Provider token:', session.provider_token);
                     console.log('Provider refresh token exists:', !!session.provider_refresh_token);
@@ -106,9 +110,12 @@ const authStore = {
                         console.log("Token securely stored in backend.", resData);
                     }
 
+                    const googleIdentity = session.user?.identities?.find(id => id.provider === 'google');
+                    const calendarEmail = googleIdentity?.identity_data?.email || session.user.email;
+
                     await db.upsertCalendarConnection(session.user.id, {
                         provider: 'google',
-                        calendar_email: session.user.email,
+                        calendar_email: calendarEmail,
                         connection_status: 'connected'
                     });
                 } catch(err) {
@@ -150,7 +157,9 @@ const authStore = {
             if (window.location.pathname.endsWith('auth.html') || window.location.pathname === '/' || window.location.pathname.endsWith('index.html')) {
                 // Prevent infinite redirect loops if we are already headed to the dashboard
                 if (window.location.pathname !== '/dashboard.html' && !window.location.pathname.endsWith('dashboard.html')) {
-                    window.location.href = 'dashboard.html';
+                    if (!window.location.hash.includes('type=recovery')) {
+                        window.location.href = 'dashboard.html';
+                    }
                 }
             }
         },
@@ -276,7 +285,12 @@ const authStore = {
                 const { error } = await supabase.auth.signInWithOAuth({ 
                     provider: 'google',
                     options: {
-                        redirectTo: window.location.origin + '/dashboard.html'
+                        redirectTo: window.location.origin + '/dashboard.html',
+                        scopes: 'https://www.googleapis.com/auth/calendar.readonly',
+                        queryParams: {
+                            access_type: 'offline',
+                            prompt: 'consent'
+                        }
                     }
                 });
                 if (error) throw error;
@@ -304,14 +318,15 @@ const authStore = {
 
         async connectGoogleCalendar() {
             if (isSupabaseConfigured) {
-                const { data, error } = await supabase.auth.signInWithOAuth({
+                const { data, error } = await supabase.auth.linkIdentity({
                     provider: 'google',
                     options: {
                         redirectTo: window.location.origin + '/settings.html',
                         scopes: 'https://www.googleapis.com/auth/calendar.readonly',
                         queryParams: {
                             access_type: 'offline',
-                            prompt: 'consent'
+                            prompt: 'consent',
+                            scope: 'email profile https://www.googleapis.com/auth/calendar.readonly'
                         }
                     }
                 });
@@ -328,6 +343,29 @@ const authStore = {
                 setTimeout(() => window.location.reload(), 500);
             }
         },
+
+    async resetPasswordForEmail(email) {
+        if (isSupabaseConfigured) {
+            const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + '/auth.html#reset',
+            });
+            if (error) throw error;
+            return data;
+        } else {
+            // Mock Flow
+            return true;
+        }
+    },
+
+    async updatePassword(newPassword) {
+        if (isSupabaseConfigured) {
+            const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+            if (error) throw error;
+            return data;
+        } else {
+            return true;
+        }
+    },
 
     async signOut() {
         if (isSupabaseConfigured) {

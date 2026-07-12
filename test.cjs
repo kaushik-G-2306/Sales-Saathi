@@ -1,0 +1,1 @@
+const { createClient } = require('@supabase/supabase-js'); const supabase = createClient('http://localhost', 'eyJh'); supabase.auth.linkIdentity({provider: 'google', options: {scopes: 'https://www.googleapis.com/auth/calendar.readonly', queryParams: {prompt: 'consent', scope: 'foo'}}}).then(function(res) { console.log(res.data.url) });  

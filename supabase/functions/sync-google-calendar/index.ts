@@ -75,7 +75,7 @@ serve(async (req) => {
 
     if (tokenRecords.length === 0) {
       console.log("[SYNC] No tokens found.");
-      return new Response(JSON.stringify({ error: 'No Google Calendar connected' }), { status: 404, headers: corsHeaders });
+      return new Response(JSON.stringify({ success: false, error: 'No Google Calendar connected. Please click Disconnect and Connect again.' }), { status: 200, headers: corsHeaders });
     }
 
     console.log("[SYNC] Tokens loaded.");
@@ -85,11 +85,11 @@ serve(async (req) => {
     const expiryDate = new Date(expires_at);
 
     console.log(`[SYNC] Token expiry check. Now: ${now.toISOString()}, Expiry: ${expiryDate.toISOString()}`);
-    
-    if (now >= expiryDate) {
-      console.log('[SYNC] Access token expired. Refreshing...');
+
+    const refreshGoogleToken = async () => {
+      console.log('[SYNC] Access token invalid or expired. Refreshing...');
       if (!refresh_token) {
-        throw new Error('Access token expired and no refresh token available.');
+        throw new Error('Google Calendar connection has expired or been revoked, and no refresh token is available. Please click Disconnect and Connect again in settings.');
       }
 
       console.log(
@@ -124,7 +124,7 @@ serve(async (req) => {
       if (!tokenRes.ok) {
         const errTxt = await tokenRes.text();
         console.error("[SYNC] Token refresh failed:", errTxt);
-        throw new Error(`Failed to refresh token: ${errTxt}`);
+        throw new Error(`Google Calendar connection has expired or been revoked. Please click Disconnect and Connect again in settings. Details: ${errTxt}`);
       }
 
       console.log("[SYNC] Parsing token refresh response...");
@@ -141,12 +141,21 @@ serve(async (req) => {
         WHERE user_id = ${user.id}
       `;
       console.log('[SYNC] Token refreshed and updated in DB.');
+    };
+    
+    let tokenRefreshed = false;
+    if (now >= expiryDate) {
+      console.log('[SYNC] Access token expired according to expiry date.');
+      await refreshGoogleToken();
+      tokenRefreshed = true;
     } else {
-      console.log("[SYNC] Token is still valid.");
+      console.log("[SYNC] Token is still valid according to expires_at.");
     }
 
     console.log("[SYNC] Preparing Calendar fetch...");
-    const timeMin = new Date().toISOString();
+    const timeMinDate = new Date();
+    timeMinDate.setHours(0, 0, 0, 0);
+    const timeMin = timeMinDate.toISOString();
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 30);
     const timeMax = maxDate.toISOString();
@@ -154,14 +163,32 @@ serve(async (req) => {
     const calUrl = `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime`;
     
     console.log("[SYNC] Calling Google Calendar API...");
-    const calRes = await fetchWithTimeout(calUrl, {
+    let calRes = await fetchWithTimeout(calUrl, {
       headers: { Authorization: `Bearer ${access_token}` },
       timeout: 20000
     });
 
+    if (calRes.status === 401 && !tokenRefreshed) {
+      console.log("[SYNC] Calendar API returned 401 Unauthorized. Attempting reactive token refresh and retry...");
+      try {
+        await refreshGoogleToken();
+        console.log("[SYNC] Retrying Google Calendar API call with new access token...");
+        calRes = await fetchWithTimeout(calUrl, {
+          headers: { Authorization: `Bearer ${access_token}` },
+          timeout: 20000
+        });
+      } catch (refreshErr) {
+        console.error("[SYNC] Reactive token refresh/retry failed:", refreshErr);
+        throw refreshErr;
+      }
+    }
+
     if (!calRes.ok) {
       const errTxt = await calRes.text();
       console.error("[SYNC] Calendar fetch failed:", errTxt);
+      if (calRes.status === 401) {
+        throw new Error("Google Calendar connection has expired or been revoked. Please click Disconnect and Connect again in settings.");
+      }
       throw new Error(`Failed to fetch calendar events: ${errTxt}`);
     }
 
@@ -262,8 +289,8 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('[SYNC] FATAL ERROR:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
