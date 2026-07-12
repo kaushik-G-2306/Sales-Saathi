@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
+  base: '/Sales-Saathi/',
   server: {
     port: 3000,
     strictPort: false, // Automatically find the next available port if 3000 is occupied
