@@ -60,6 +60,13 @@ const authStore = {
                                    window.location.hash.includes('error=') ||
                                    window.location.search.includes('code=');
             
+            if (isAuthCallback) {
+                // Clear the hash from the address bar after a short delay so it doesn't stay stale on reload
+                setTimeout(() => {
+                    history.replaceState(null, null, window.location.pathname + window.location.search);
+                }, 1000);
+            }
+            
             if (!this.isLoggedIn && isProtectedPage && !isAuthCallback) {
                 window.location.href = 'auth.html';
             }

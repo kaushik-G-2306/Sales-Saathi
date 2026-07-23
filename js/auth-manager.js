@@ -18,6 +18,16 @@ const AuthManager = {
             
             this.updateState(session);
 
+            // Clear the stale hash params (e.g. access_token) if present
+            const isAuthCallback = window.location.hash.includes('access_token=') || 
+                                   window.location.hash.includes('error=') ||
+                                   window.location.search.includes('code=');
+            if (isAuthCallback) {
+                setTimeout(() => {
+                    history.replaceState(null, null, window.location.pathname + window.location.search);
+                }, 1000);
+            }
+
             // 2. Listen for realtime auth changes
             supabase.auth.onAuthStateChange((event, session) => {
                 this.updateState(session);

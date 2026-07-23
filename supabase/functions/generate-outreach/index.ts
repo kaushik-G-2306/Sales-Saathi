@@ -1,264 +1,329 @@
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+/**
+ * generate-outreach/index.ts — Sales Saathi
+ * ───────────────────────────────────────────
+ * Deno Edge Function: Personalised Outreach Sequence generation
+ *
+ * Refactored to use the shared security modules:
+ *   env-config  → loadEnvConfig() at cold-start
+ *   guardrails  → validateProspectInput, checkRateLimit, filterOutput, validateOutreachOutput
+ *   prompt-templates → buildGenerateOutreachPrompt
+ *   metrics     → MetricsTimer, computeAccuracy, computeTimeSaved, recordMetric
+ *
+ * REQUEST  POST /functions/v1/generate-outreach
+ * BODY     { brief_id, sender_name?, sender_role? }
+ * HEADERS  Authorization: Bearer <jwt>
+ */
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { loadEnvConfig, safeLog, safeError } from "../_shared/env-config.ts";
+import {
+  validateProspectInput,
+  checkRateLimit,
+  filterOutput,
+  validateOutreachOutput,
+} from "../_shared/guardrails.ts";
+import { buildGenerateOutreachPrompt } from "../_shared/prompt-templates.ts";
+import {
+  MetricsTimer,
+  computeAccuracy,
+  computeTimeSaved,
+  recordMetric,
+} from "../_shared/metrics.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 
-serve(async (req) => {
-  // 1. Handle CORS Preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+// ─── Cold-start: validate env keys once ──────────────────────────────────────
+const env = loadEnvConfig();
+
+const GEMINI_ENDPOINT =
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${env.geminiApiKey}`;
+
+// ─── Handler ──────────────────────────────────────────────────────────────────
+
+Deno.serve(async (req: Request) => {
+  // ── CORS Preflight
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const DEBUG = Deno.env.get('DEBUG_MODE') === 'true';
-
-    // 2. Authentication Validation (matches generate-brief)
-    const authHeader = req.headers.get('Authorization');
-    if (DEBUG) console.log("[DEBUG] AUTH HEADER:", authHeader ? authHeader.substring(0, 30) + '...' : 'MISSING');
-
+    // ── Auth: extract user from JWT ───────────────────────────────────────────
+    const authHeader = req.headers.get("Authorization") ?? "";
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
+      return new Response(JSON.stringify({ error: "Missing Authorization header" }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-
-    let user = null;
-    let authError = null;
-    let supabase = null;
-
-    if (supabaseUrl === '') {
-      if (authHeader === 'Bearer TEST_VALID_JWT') {
-        user = { id: 'mock-user-id' };
-      } else {
-        authError = new Error('Invalid token');
-      }
-    } else {
-      supabase = createClient(supabaseUrl, supabaseAnonKey);
-      const { data, error } = await supabase.auth.getUser(token);
-      user = data?.user;
-      authError = error;
-    }
-
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid token' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const userSupabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: `Bearer ${token}` } }
+    const supabase = createClient(env.supabaseUrl, env.supabaseServiceKey, {
+      global: { headers: { Authorization: authHeader } },
     });
-
-    // 3. Request Schema Validation
-    let requestData;
-    try {
-      requestData = await req.json();
-    } catch (e) {
-      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { brief_id } = requestData;
+    // ── GUARDRAIL: Rate limit ─────────────────────────────────────────────────
+    const rateCheck = checkRateLimit(user.id);
+    if (!rateCheck.ok) {
+      return new Response(JSON.stringify({ error: rateCheck.reason }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ── Parse and validate request body ──────────────────────────────────────
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const rawBody = body as Record<string, unknown>;
+    const brief_id = rawBody.brief_id;
+    const senderName = String(rawBody.sender_name ?? "Sales Rep");
+    const senderRole = String(rawBody.sender_role ?? "Account Executive");
 
     if (!brief_id) {
-      return new Response(JSON.stringify({ error: 'Missing required field: brief_id' }), {
+      return new Response(JSON.stringify({ error: "Missing required field: brief_id" }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // 4. Fetch PreMeetingBrief
-    let brief = null;
-    if (supabaseUrl !== '') {
-      const { data, error } = await userSupabase
-        .from('PreMeetingBriefs')
-        .select('*')
-        .eq('id', brief_id)
-        .single();
-      
-      if (error) {
-        throw new Error(`Failed to fetch brief: ${error.message}`);
-      }
-      brief = data;
-    } else {
-      // Mock data for local testing without Supabase
-      brief = {
-        prospect_name: 'Test Prospect',
-        company: 'Test Company',
-        role: 'Test Role',
-        meeting_type: 'Discovery',
-        generated_brief: { executive_summary: 'Test summary' },
-        enrichment_data: null
-      };
-    }
+    // ── Fetch PreMeetingBrief ────────────────────────────────────────────────
+    const { data: brief, error: briefError } = await supabase
+      .from("PreMeetingBriefs")
+      .select("*")
+      .eq("id", brief_id)
+      .single();
 
-    if (!brief) {
-      return new Response(JSON.stringify({ error: 'Brief not found' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    if (briefError || !brief) {
+      return new Response(
+        JSON.stringify({ error: briefError ? `Failed to fetch brief: ${briefError.message}` : "Brief not found" }),
+        {
+          status: briefError ? 500 : 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     const { prospect_name, company, role, meeting_type, generated_brief, enrichment_data } = brief;
 
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) {
-      return new Response(JSON.stringify({ error: 'GEMINI_API_KEY is not configured.' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // ── GUARDRAIL: Input validation on brief data ────────────────────────────
+    const mappedBriefInput = {
+      companyName: company,
+      prospectName: prospect_name,
+      meetingContext: role ?? "",
+    };
+
+    const inputCheck = validateProspectInput(mappedBriefInput);
+    if (!inputCheck.ok) {
+      safeLog("input_rejected", { userId: user.id, reason: inputCheck.reason });
+      return new Response(JSON.stringify({ error: inputCheck.reason }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // 5. Build AI context
-    const systemInstruction = `You are an elite B2B Sales SDR and Executive Outreach Writer. Generate highly personalized outreach messages based on the prospect data provided. 
-Rules:
-- Personalize based on the prospect's role, company, recent news, and buying signals.
-- Explicitly mention recent news or company context when available.
-- Keep messages concise, punchy, and human-sounding. Avoid generic AI fluff or corporate jargon.
-- Return strictly valid JSON matching the exact requested schema.`;
+    const { companyName, prospectName } = inputCheck.value!;
 
-    const userPrompt = `
-Prospect: ${prospect_name}
-Company: ${company}
-Role: ${role || 'N/A'}
-Meeting Type: ${meeting_type || 'N/A'}
+    // ── Build brief summary for prompt context ───────────────────────────────
+    const briefSummary = generated_brief
+      ? `Executive Summary: ${generated_brief.executive_summary ?? "N/A"}\n` +
+      `Pain Points: ${(generated_brief.likely_pain_points ?? generated_brief.pain_points ?? []).join(", ")}\n` +
+      `Meeting Type: ${meeting_type ?? "N/A"}\n` +
+      `Enrichment: ${enrichment_data ? JSON.stringify(enrichment_data) : "No enrichment data available."}`
+      : "No brief data available.";
 
---- Generated AI Brief Context ---
-${JSON.stringify(generated_brief)}
+    // ── Build engineered prompt ───────────────────────────────────────────────
+    const { systemPrompt, userPrompt, temperature } = buildGenerateOutreachPrompt({
+      companyName,
+      prospectName,
+      briefSummary,
+      senderName,
+      senderRole,
+    });
 
---- Prospect Enrichment & News Data ---
-${enrichment_data ? JSON.stringify(enrichment_data) : 'No enrichment data available. Focus personalization on the prospect role and company context from the generated brief.'}
-`;
+    // ── METRICS: Start timer before AI call ──────────────────────────────────
+    const timer = MetricsTimer.start("generate_outreach");
 
-    const schema = {
-      type: "OBJECT",
-      properties: {
-        subject_line: { type: "STRING" },
-        cold_email: { type: "STRING" },
-        linkedin_request: { type: "STRING" },
-        linkedin_message: { type: "STRING" },
-        followup_email: { type: "STRING" },
-        followup_linkedin: { type: "STRING" }
-      },
-      required: [
-        "subject_line", "cold_email", "linkedin_request", "linkedin_message", "followup_email", "followup_linkedin"
-      ]
-    };
-
-    const geminiPayload = {
-      system_instruction: { parts: { text: systemInstruction } },
-      contents: [{ parts: [{ text: userPrompt }] }],
-      generationConfig: {
-        response_mime_type: "application/json",
-        response_schema: schema
-      }
-    };
-
-    const modelName = 'gemini-2.5-flash-lite';
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`;
-
-    // 6. Call Gemini 2.5 Flash Lite
-    let geminiRes;
-    const retryDelays = [2000, 5000, 10000];
-    let attempts = 0;
-    const startTime = performance.now();
-
-    while (attempts <= retryDelays.length) {
-      geminiRes = await fetch(geminiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(geminiPayload)
+    // ── Gemini call ──────────────────────────────────────────────────────────
+    let rawText: string;
+    try {
+      const geminiRes = await fetch(GEMINI_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+          generationConfig: {
+            temperature,
+            response_mime_type: "application/json",
+          },
+        }),
       });
-      
-      if (geminiRes.ok) break;
-      
-      const errorText = await geminiRes.text();
-      console.error(`[GEMINI LOG] Error on attempt ${attempts + 1}: ${geminiRes.status} - ${errorText}`);
-      
-      if (geminiRes.status === 503 && attempts < retryDelays.length) {
-        await new Promise(res => setTimeout(res, retryDelays[attempts]));
-        attempts++;
-      } else if (geminiRes.status === 503 && attempts === retryDelays.length) {
-        return new Response(JSON.stringify({ error: 'Gemini is currently experiencing high demand. Please try again later.' }), {
-          status: 503,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      } else {
-        throw new Error(`Gemini API Error: ${geminiRes.status} - ${errorText}`);
+
+      if (!geminiRes.ok) {
+        throw new Error(`Gemini returned status ${geminiRes.status}`);
       }
+
+      const geminiJson = await geminiRes.json();
+      rawText = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    } catch (err) {
+      safeError("gemini_call_failed", err, { userId: user.id, company: companyName });
+      return new Response(
+        JSON.stringify({ error: "AI service unavailable. Please retry." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    const endTime = performance.now();
-    const generationTimeMs = Math.round(endTime - startTime);
+    const timing = timer.stop();
 
-    const geminiData = await geminiRes.json();
-    const generatedText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!generatedText) {
-      throw new Error("Failed to extract content from Gemini response.");
+    // ── GUARDRAIL: Output content filter ──────────────────────────────────────
+    const contentCheck = filterOutput(rawText);
+    if (!contentCheck.ok) {
+      safeLog("output_blocked", {
+        userId: user.id,
+        company: companyName,
+        reason: contentCheck.reason,
+      });
+      await recordMetric(supabase, {
+        userId: user.id,
+        company: companyName,
+        functionName: "generate_outreach",
+        ...timing,
+        dataAccuracyScore: 0,
+        filledFields: 0,
+        totalFields: 5,
+        emptyFields: [],
+        minutesSaved: 0,
+        guardrailsPassed: false,
+      });
+      return new Response(JSON.stringify({ error: contentCheck.reason }), {
+        status: 422,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const responsePayload = JSON.parse(generatedText);
-    
-    // Determine personalization level roughly based on whether we had enrichment data
-    const personalizationLevel = enrichment_data ? "High" : "Standard";
+    // ── GUARDRAIL: Schema validation ──────────────────────────────────────────
+    const schemaCheck = validateOutreachOutput(contentCheck.value!);
+    if (!schemaCheck.ok) {
+      safeLog("schema_invalid", {
+        userId: user.id,
+        company: companyName,
+        reason: schemaCheck.reason,
+      });
+      await recordMetric(supabase, {
+        userId: user.id,
+        company: companyName,
+        functionName: "generate_outreach",
+        ...timing,
+        dataAccuracyScore: 0,
+        filledFields: 0,
+        totalFields: 5,
+        emptyFields: [],
+        minutesSaved: 0,
+        guardrailsPassed: false,
+      });
+      return new Response(JSON.stringify({ error: schemaCheck.reason }), {
+        status: 422,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    // 7. Store output into OutreachMessages
+    const outreach = schemaCheck.value!;
+
+    // ── METRICS: Record accuracy and time saved ──────────────────────────────
+    const accuracy = computeAccuracy(
+      outreach as unknown as Record<string, unknown>,
+      "generate_outreach"
+    );
+    const minutesSaved = computeTimeSaved(timing.durationMs);
+
+    await recordMetric(supabase, {
+      userId: user.id,
+      company: companyName,
+      functionName: "generate_outreach",
+      ...timing,
+      ...accuracy,
+      minutesSaved,
+      guardrailsPassed: true,
+    });
+
+    // ── Store output into OutreachMessages ────────────────────────────────────
     let outreachId = null;
     let dbInsertError = null;
 
-    if (user && supabaseUrl !== '') {
-      const { data, error: insertError } = await userSupabase.from('OutreachMessages').insert({
+    const personalizationLevel = enrichment_data ? "High" : "Standard";
+
+    const { data: insertData, error: insertError } = await supabase
+      .from("OutreachMessages")
+      .insert({
         user_id: user.id,
         brief_id: brief_id,
-        prospect_name: prospect_name,
-        company: company,
+        prospect_name: prospectName,
+        company: companyName,
         role: role,
-        subject_line: responsePayload.subject_line,
-        cold_email: responsePayload.cold_email,
-        linkedin_request: responsePayload.linkedin_request,
-        linkedin_message: responsePayload.linkedin_message,
-        followup_email: responsePayload.followup_email,
-        followup_linkedin: responsePayload.followup_linkedin,
+        subject_line: outreach.cold_email_subject,
+        cold_email: outreach.cold_email_body,
+        linkedin_request: outreach.linkedin_connection_request,
+        linkedin_message: outreach.linkedin_message,
+        followup_email: outreach.followup_email,
+        followup_linkedin: "",
         personalization_level: personalizationLevel,
-        model_used: modelName,
-        generation_time_ms: generationTimeMs
-      }).select('id').single();
+        model_used: "gemini-2.5-flash-lite",
+        generation_time_ms: timing.durationMs,
+      })
+      .select("id")
+      .single();
 
-      if (insertError) {
-        console.error("Database Insert Error:", insertError);
-        dbInsertError = insertError.message;
-      } else {
-        outreachId = data.id;
-      }
-    } else if (supabaseUrl === '') {
-      outreachId = 'mock-outreach-id-1234';
+    if (insertError) {
+      safeError("db_insert_failed", insertError, {
+        userId: user.id,
+        company: companyName,
+      });
+      dbInsertError = insertError.message;
+    } else {
+      outreachId = insertData.id;
     }
 
-    // 8. Return JSON response
-    return new Response(JSON.stringify({
-      status: "success",
-      outreach_id: outreachId,
-      data: responsePayload,
-      db_error: dbInsertError || undefined
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    safeLog("outreach_generated", {
+      userId: user.id,
+      company: companyName,
+      durationMs: timing.durationMs,
+      dataAccuracyScore: accuracy.dataAccuracyScore,
+      minutesSaved,
     });
 
+    return new Response(
+      JSON.stringify({
+        status: "success",
+        outreach_id: outreachId,
+        data: outreach,
+        metrics: { accuracy, minutesSaved },
+        db_error: dbInsertError || undefined,
+      }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   } catch (error) {
-    const errorObj = error as Error;
-    return new Response(JSON.stringify({ error: errorObj.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    safeError("generate_outreach_error", error, {});
+    return new Response(
+      JSON.stringify({ error: (error as Error).message }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 });

@@ -58,5 +58,28 @@ This project is completely production-ready and can be deployed directly to Verc
 - **Port issues?** If it doesn't open on 3000, look at the terminal output to see which port Vite automatically selected (e.g., `http://localhost:3001`).
 - **Missing Data?** If integrating the real backend fails, ensure your `.env` variables match the exact keys defined in `.env.example`.
 
+## AI Security Guardrails & Telemetry Integration
+
+This project has been reinforced with a production-grade secure AI execution layer implemented as a shared module across all Supabase Edge Functions (`enrich-prospect`, `generate-brief`, and `generate-outreach`).
+
+### 1. Secure API Key & Environment Handling
+* **Cold-Start Verification**: All required secrets are checked at function cold-start. If any key is missing or malformed, the handler fails fast with a `500` error before processing user input.
+* **Safe Logging**: The customized `safeLog` and `safeError` functions redact sensitive variables (keys, tokens, passwords) automatically before writing logs to stdout/stderr.
+
+### 2. Multi-Layer Guardrail Pipeline
+Every incoming request and outgoing response undergoes a strict sequence of checks:
+1. **Input Sanitization**: Strips HTML tags and non-printable characters.
+2. **Jailbreak/Prompt Injection Detection**: Uses hardened regex patterns to intercept and reject prompt injection attempts before they reach the LLM.
+3. **Rate Limiting**: Restricts users to a maximum of 10 requests per minute to prevent API abuse.
+4. **Output Content Filtering**: Scans generated text to block leaked credentials, AI refusal leakage ("I cannot help with that"), legal/medical advice, and system prompt echo attempts.
+5. **Schema Validation**: Validates the JSON response format against strict TypeScript schemas.
+
+### 3. Business Telemetry & Metrics
+Telemetry is recorded to the `ai_metrics` table for every invocation:
+* **Accuracy Score**: Calculated dynamically based on filled expected fields.
+* **Time Saved**: Baseline of 45 minutes saved per meeting, adjusted for generation time.
+* **Failure Audits**: Even if a request fails the output filter or schema check, it is written to `ai_metrics` with `guardrails_passed: false` to allow auditing and defense tuning.
+
 ---
 *Built for Sales Saathi Platform.*
+
