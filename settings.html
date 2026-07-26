@@ -7,7 +7,23 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="./src/main.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+        <!-- Alpine Auth Pre-registration to prevent undefined $store.auth in Vite production bundles -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            if (!window.Alpine.store('auth')) {
+                window.Alpine.store('auth', {
+                    isLoggedIn: false,
+                    isAuthenticated: false,
+                    user: null,
+                    loading: true,
+                    session: null,
+                    init() {},
+                    signOut() {}
+                });
+            }
+        });
+    </script>
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     
 
@@ -213,7 +229,7 @@
                     console.log("AUTH STORE USER:", Alpine.store('auth')?.user);
                     console.log("AUTH STORE SESSION:", Alpine.store('auth')?.session);
 
-                    if (!this.$store.auth.loading) {
+                    if (!this.$store.auth?.loading) {
                         this.loadProfile();
                     } else {
                         this.$watch('$store.auth.loading', (isLoading) => {
@@ -222,6 +238,11 @@
                             }
                         });
                     }
+                    setTimeout(() => {
+                        if (this.loading) {
+                            this.loadProfile();
+                        }
+                    }, 1500);
                 },
 
                 async loadProfile() {
@@ -244,10 +265,16 @@
                     
                     try {
                         if (u?.id) {
-                            const db = window.db;
-                            const conn = await db.getCalendarConnection(u.id, 'google');
-                            if (conn && conn.connection_status === 'connected') {
-                                this.googleCalendarConnected = true;
+                            let attempts = 0;
+                            while (!window.db && attempts < 30) {
+                                await new Promise(r => setTimeout(r, 100));
+                                attempts++;
+                            }
+                            if (window.db && typeof window.db.getCalendarConnection === 'function') {
+                                const conn = await window.db.getCalendarConnection(u.id, 'google');
+                                if (conn && conn.connection_status === 'connected') {
+                                    this.googleCalendarConnected = true;
+                                }
                             }
                         }
                     } catch(e) {

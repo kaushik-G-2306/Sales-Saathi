@@ -438,8 +438,19 @@ const authStore = {
 function initAlpineAuth() {
     if (window.Alpine && !window.__AUTH_STORE_INITIALIZED__) {
         window.__AUTH_STORE_INITIALIZED__ = true;
-        Alpine.store('auth', authStore);
-        Alpine.store('auth').init();
+        let store = Alpine.store('auth');
+        if (store && store !== authStore) {
+            Object.assign(store, authStore);
+            for (const key of Object.keys(authStore)) {
+                if (typeof authStore[key] === 'function') {
+                    store[key] = authStore[key].bind(store);
+                }
+            }
+        } else {
+            Alpine.store('auth', authStore);
+            store = Alpine.store('auth');
+        }
+        store.init();
     }
 }
 

@@ -8,7 +8,23 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module" src="./src/main.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
+        <!-- Alpine Auth Pre-registration to prevent undefined $store.auth in Vite production bundles -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            if (!window.Alpine.store('auth')) {
+                window.Alpine.store('auth', {
+                    isLoggedIn: false,
+                    isAuthenticated: false,
+                    user: null,
+                    loading: true,
+                    session: null,
+                    init() {},
+                    signOut() {}
+                });
+            }
+        });
+    </script>
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
