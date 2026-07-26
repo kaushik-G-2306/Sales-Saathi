@@ -1,9 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const defaultUrl = 'https://tpmnbglgmfqiiqxdjrwa.supabase.co';
+const defaultAnonKey = 'sb_publishable_fetbb8CLTLMHcM_2bRgn8Q_jQ7wlI5U';
 
-export const isSupabaseConfigured = supabaseUrl !== '' && supabaseAnonKey !== '';
+const supabaseUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL)
+    ? import.meta.env.VITE_SUPABASE_URL
+    : defaultUrl;
+
+const supabaseAnonKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_ANON_KEY)
+    ? import.meta.env.VITE_SUPABASE_ANON_KEY
+    : defaultAnonKey;
+
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
 export const supabaseClientId = isSupabaseConfigured ? crypto.randomUUID() : null;
 console.log('[SUPABASE INIT] isSupabaseConfigured:', isSupabaseConfigured);
@@ -11,6 +19,7 @@ export const supabase = isSupabaseConfigured
     ? (() => {
         console.log(`[SUPABASE INIT] ${supabaseClientId} Creating client...`);
         const client = createClient(supabaseUrl, supabaseAnonKey);
+        client.supabaseUrl = supabaseUrl;
         console.log(`[SUPABASE INIT] ${supabaseClientId} Client created successfully.`);
         return client;
     })() 
@@ -225,4 +234,5 @@ export const db = {
 
 window.db = db;
 window.supabase = supabase;
+window.supabaseUrl = supabaseUrl;
 window.isSupabaseConfigured = isSupabaseConfigured;

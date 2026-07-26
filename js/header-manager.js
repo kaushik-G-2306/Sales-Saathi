@@ -8,8 +8,10 @@ const HeaderManager = {
                 return;
             }
 
-            // Fetch the header HTML
-            const response = await fetch('/components/header.html');
+            // Support both root domains (Netlify/Vercel) and subdirectory domains (GitHub Pages)
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            const basePath = isGitHubPages ? '/Sales-Saathi' : '';
+            const response = await fetch(`${basePath}/components/header.html`);
             if (!response.ok) {
                 throw new Error(`Failed to load header: ${response.statusText}`);
             }

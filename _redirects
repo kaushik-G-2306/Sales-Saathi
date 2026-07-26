@@ -1,0 +1,18 @@
+# Netlify clean URL routing for Sales Saathi pages
+/auth                /auth.html                                200
+/dashboard           /dashboard.html                           200
+/features            /features.html                            200
+/pricing             /pricing.html                             200
+/resources           /resources.html                           200
+/settings            /settings.html                            200
+/solutions           /solutions.html                           200
+/contact             /contact.html                             200
+/brief-history       /brief-history.html                       200
+/brief-result        /brief-result.html                        200
+/onboarding          /onboarding.html                          200
+/payment             /payment.html                             200
+/social-proof        /social-proof.html                        200
+/workflow            /workflow.html                            200
+/account-executives  /solutions/account-executives.html        200
+/revenue-operations  /solutions/revenue-operations.html        200
+/sales-leaders       /solutions/sales-leaders.html             200

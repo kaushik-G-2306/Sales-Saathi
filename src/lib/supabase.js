@@ -19,6 +19,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 // Create a single supabase client for interacting with your database
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+supabase.supabaseUrl = supabaseUrl;
 
 const isDev = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV) 
     || (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') 
