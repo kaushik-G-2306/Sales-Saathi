@@ -142,7 +142,7 @@
                 async saveProfile() {
                     this.loading = true;
                     try {
-                        const { db } = await import('./src/db.js');
+                        const db = window.db;
                         await db.updateUser(this.$store.auth.user.id, this.profile);
                         
                         // Update local store

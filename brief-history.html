@@ -116,38 +116,48 @@
                 },
 
                 async init() {
-                    setTimeout(async () => {
-                        try {
-                            const { db, supabase, isSupabaseConfigured } = await import('./src/db.js');
-                            
-                            let user = null;
-                            if (isSupabaseConfigured) {
-                                const { data } = await supabase.auth.getSession();
-                                user = data?.session?.user;
-                            } else {
-                                const mockSession = localStorage.getItem('sales_saathi_mock_session');
-                                if (mockSession) {
-                                    user = JSON.parse(mockSession);
-                                }
+                    let attempts = 0;
+                    while (!window.db && attempts < 20) {
+                        await new Promise(r => setTimeout(r, 100));
+                        attempts++;
+                    }
+                    if (!window.db) {
+                        console.error("Database client failed to initialize.");
+                        this.loading = false;
+                        return;
+                    }
+                    try {
+                        const db = window.db;
+                        const supabase = window.supabase;
+                        const isSupabaseConfigured = window.isSupabaseConfigured;
+                        
+                        let user = null;
+                        if (isSupabaseConfigured) {
+                            const { data } = await supabase.auth.getSession();
+                            user = data?.session?.user;
+                        } else {
+                            const mockSession = localStorage.getItem('sales_saathi_mock_session');
+                            if (mockSession) {
+                                user = JSON.parse(mockSession);
                             }
-
-                            if (!user) {
-                                window.location.href = 'auth.html';
-                                return;
-                            }
-
-                            this.briefs = await db.getUserBriefs(user.id);
-                        } catch (err) {
-                            console.error("Failed to load briefs:", err);
-                        } finally {
-                            this.loading = false;
                         }
-                    }, 150);
+
+                        if (!user) {
+                            window.location.href = 'auth.html';
+                            return;
+                        }
+
+                        this.briefs = await db.getUserBriefs(user.id);
+                    } catch (err) {
+                        console.error("Failed to load briefs:", err);
+                    } finally {
+                        this.loading = false;
+                    }
                 },
 
                 async deleteBrief(id) {
                     if(confirm("Are you sure you want to delete this brief?")) {
-                        const { db } = await import('./src/db.js');
+                        const db = window.db;
                         await db.deleteBrief(id);
                         this.briefs = this.briefs.filter(b => b.id !== id);
                     }

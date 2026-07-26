@@ -622,22 +622,30 @@
                         return;
                     }
                     // Wait for main.js / Supabase client to initialise
-                    setTimeout(async () => {
-                        try {
-                            const { db } = await import('./src/db.js');
-                            this.brief = await db.getBrief(id);
-                            if (!this.brief) {
-                                alert('Brief not found.');
-                                window.location.href = 'dashboard.html';
-                            }
-                        } catch (err) {
-                            console.error('Failed to load brief:', err);
-                            alert('Error loading brief: ' + err.message);
+                    let attempts = 0;
+                    while (!window.db && attempts < 20) {
+                        await new Promise(r => setTimeout(r, 100));
+                        attempts++;
+                    }
+                    if (!window.db) {
+                        alert('Error loading brief: Database client not ready.');
+                        window.location.href = 'dashboard.html';
+                        return;
+                    }
+                    try {
+                        const db = window.db;
+                        this.brief = await db.getBrief(id);
+                        if (!this.brief) {
+                            alert('Brief not found.');
                             window.location.href = 'dashboard.html';
-                        } finally {
-                            this.loading = false;
                         }
-                    }, 500);
+                    } catch (err) {
+                        console.error('Failed to load brief:', err);
+                        alert('Error loading brief: ' + err.message);
+                        window.location.href = 'dashboard.html';
+                    } finally {
+                        this.loading = false;
+                    }
                 },
 
                 downloadPDF() {

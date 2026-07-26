@@ -244,7 +244,7 @@
                     
                     try {
                         if (u?.id) {
-                            const { db } = await import('./src/db.js');
+                            const db = window.db;
                             const conn = await db.getCalendarConnection(u.id, 'google');
                             if (conn && conn.connection_status === 'connected') {
                                 this.googleCalendarConnected = true;
@@ -277,7 +277,9 @@
                 async disconnectGoogleCalendar() {
                     this.msg = 'Disconnecting...';
                     try {
-                        const { db, isSupabaseConfigured, supabase } = await import('./src/db.js');
+                        const db = window.db;
+                        const isSupabaseConfigured = window.isSupabaseConfigured;
+                        const supabase = window.supabase;
                         const u = this.$store.auth.user;
                         
                         if (isSupabaseConfigured) {
@@ -309,7 +311,7 @@
                     this.msg = 'Starting sync...';
                     
                     try {
-                        const { isSupabaseConfigured } = await import('./src/db.js');
+                        const isSupabaseConfigured = window.isSupabaseConfigured;
                         if (isSupabaseConfigured) {
                             const response = await window.supabase.functions.invoke("sync-google-calendar");
                             const data = response.data;
@@ -403,7 +405,7 @@
                 async saveProfile() {
                     this.msg = '';
                     try {
-                        const { db } = await import('./src/db.js');
+                        const db = window.db;
                         await db.updateUser(this.$store.auth.user.id, {
                             name: this.profile.name,
                             role: this.profile.role,
