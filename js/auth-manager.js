@@ -1,15 +1,6 @@
 import { supabase } from '../src/lib/supabase.js';
 import { SubscriptionService } from './permissions/subscriptionService.js';
 
-// Ensure Alpine store is created before Alpine initializes if possible
-document.addEventListener('alpine:init', () => {
-    window.Alpine.store('auth', {
-        isAuthenticated: false,
-        isLoggedIn: false,
-        user: null
-    });
-});
-
 const AuthManager = {
     async init() {
         try {
@@ -40,9 +31,15 @@ const AuthManager = {
 
     async updateState(session) {
         const isAuthenticated = !!session;
-        const user = session ? session.user : null;
+        let user = session ? session.user : null;
 
         if (user) {
+            user = {
+                ...user,
+                name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+                email: user.email,
+                plan: user.user_metadata?.subscription_tier || 'Free Trial'
+            };
             await SubscriptionService.loadFromSupabase(user.id);
         } else {
             SubscriptionService.setPlan('free');

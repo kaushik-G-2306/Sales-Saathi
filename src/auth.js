@@ -9,16 +9,6 @@ function getRedirectUrl(targetPage = 'dashboard.html') {
     return `${window.location.origin}${basePath}/${targetPage}`;
 }
 
-document.addEventListener('alpine:init', () => {
-    if (window.Alpine && !window.Alpine.store('auth')) {
-        window.Alpine.store('auth', {
-            isLoggedIn: false,
-            isAuthenticated: false,
-            user: null
-        });
-    }
-});
-
 const authStore = {
         isLoggedIn: false,
         isAuthenticated: false,
@@ -183,7 +173,7 @@ const authStore = {
             }
             // Ensure name is always populated even if DB record has empty name
             if (!userRecord.name) {
-                userRecord.name = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+                userRecord.name = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User';
             }
             userRecord.user_metadata = {
                 full_name: userRecord.name || session.user.user_metadata?.full_name || 'User',
@@ -191,6 +181,20 @@ const authStore = {
                 subscription_tier: userRecord.plan || 'Free Trial'
             };
             this.user = userRecord;
+            this.isLoggedIn = true;
+            this.isAuthenticated = true;
+            this.loading = false;
+            if (window.Alpine && window.Alpine.store) {
+                try {
+                    const s = window.Alpine.store('auth');
+                    if (s) {
+                        s.isLoggedIn = true;
+                        s.isAuthenticated = true;
+                        s.user = userRecord;
+                        s.loading = false;
+                    }
+                } catch (e) {}
+            }
             
             // If user is on a public auth page and successfully logged in, redirect to dashboard
             if (window.location.pathname.endsWith('auth.html') || window.location.pathname === '/' || window.location.pathname.endsWith('index.html')) {
@@ -207,6 +211,16 @@ const authStore = {
             this.isLoggedIn = false;
             this.isAuthenticated = false;
             this.user = null;
+            if (window.Alpine && window.Alpine.store) {
+                try {
+                    const s = window.Alpine.store('auth');
+                    if (s) {
+                        s.isLoggedIn = false;
+                        s.isAuthenticated = false;
+                        s.user = null;
+                    }
+                } catch (e) {}
+            }
             if (!isSupabaseConfigured) {
                 localStorage.removeItem('sales_saathi_mock_session');
             }

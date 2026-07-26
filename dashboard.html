@@ -407,12 +407,12 @@
                     <template x-if="$store.auth.isLoggedIn">
                         <div class="relative" x-data="{ profileOpen: false }" @click.away="profileOpen = false">
                             <button @click="profileOpen = !profileOpen" class="flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-brandIndigo rounded-full pr-2">
-                                <div class="text-right hidden xl:block">
-                                    <p class="text-sm font-bold text-slate-900 dark:text-white leading-tight" x-text="$store.auth.user?.name || 'Account'"></p>
+                                <div class="text-right hidden sm:block">
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white leading-tight" x-text="$store.auth.user?.name || $store.auth.user?.user_metadata?.full_name || $store.auth.user?.email?.split('@')[0] || 'Account'"></p>
                                     <p class="text-[10px] font-semibold text-brandIndigo dark:text-indigo-400 uppercase tracking-wider" x-text="$store.auth.user?.plan || 'Free Trial'"></p>
                                 </div>
                                 <div class="w-10 h-10 rounded-full border border-slate-200 dark:border-darkBorder overflow-hidden bg-slate-100 dark:bg-darkCard">
-                                    <img :src="'https://ui-avatars.com/api/?name=' + encodeURIComponent($store.auth.user?.name || 'U') + '&background=4f46e5&color=fff&bold=true'" :alt="$store.auth.user?.name || 'User'" class="w-full h-full object-cover" />
+                                    <img :src="'https://ui-avatars.com/api/?name=' + encodeURIComponent($store.auth.user?.name || $store.auth.user?.user_metadata?.full_name || $store.auth.user?.email || 'U') + '&background=4f46e5&color=fff&bold=true'" :alt="$store.auth.user?.name || 'User'" class="w-full h-full object-cover" />
                                 </div>
                             </button>
                             <div x-show="profileOpen" x-transition.opacity.duration.200ms x-cloak class="absolute top-full right-0 mt-3 w-56 bg-white dark:bg-[#121215] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl py-2 overflow-hidden z-50">
@@ -592,7 +592,7 @@
                 <!-- Section 1: Interactive Welcome Banner & Radial Score -->
                 <section class="relative bg-gradient-to-r from-brandIndigo/10 via-brandViolet/5 to-transparent border border-brandIndigo/20 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
                     <div class="relative z-10 w-full md:w-auto">
-                        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight" x-text="(new Date().getHours() < 12 ? 'Good Morning' : new Date().getHours() < 17 ? 'Good Afternoon' : 'Good Evening') + ', ' + (($store.auth.user?.name || '').split(' ')[0] || 'there') + ' 👋'"></h1>
+                        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight" x-text="(new Date().getHours() < 12 ? 'Good Morning' : new Date().getHours() < 17 ? 'Good Afternoon' : 'Good Evening') + ', ' + (($store.auth.user?.name || $store.auth.user?.user_metadata?.full_name || $store.auth.user?.email || '').split('@')[0].split(' ')[0] || 'Kaushik') + ' 👋'"></h1>
                         <div class="flex items-center gap-3 mt-6">
                             <button @click="activeView = 'briefs'" class="px-5 py-2.5 rounded-xl bg-brandIndigo text-white font-bold text-sm shadow-md hover:bg-indigo-500 hover:-translate-y-0.5 transition-all">Prepare Meeting</button>
                             <button @click="activeView = 'outreach'" class="px-5 py-2.5 rounded-xl bg-white dark:bg-white/10 text-slate-700 dark:text-white font-bold text-sm shadow-sm border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/20 transition-all">Generate Outreach</button>
