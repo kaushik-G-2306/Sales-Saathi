@@ -9,8 +9,19 @@ function getRedirectUrl(targetPage = 'dashboard.html') {
     return `${window.location.origin}${basePath}/${targetPage}`;
 }
 
+document.addEventListener('alpine:init', () => {
+    if (window.Alpine && !window.Alpine.store('auth')) {
+        window.Alpine.store('auth', {
+            isLoggedIn: false,
+            isAuthenticated: false,
+            user: null
+        });
+    }
+});
+
 const authStore = {
         isLoggedIn: false,
+        isAuthenticated: false,
         user: null,
         loading: true,
 
@@ -51,8 +62,17 @@ const authStore = {
                 // Mock Session
                 const mockSession = localStorage.getItem('sales_saathi_mock_session');
                 if (mockSession) {
-                    this.user = JSON.parse(mockSession);
+                    const parsedUser = JSON.parse(mockSession);
+                    if (!parsedUser.user_metadata) {
+                        parsedUser.user_metadata = {
+                            full_name: parsedUser.name || 'User',
+                            avatar_url: '',
+                            subscription_tier: parsedUser.plan || 'Free Trial'
+                        };
+                    }
+                    this.user = parsedUser;
                     this.isLoggedIn = true;
+                    this.isAuthenticated = true;
                 }
             }
             this.loading = false;
@@ -81,6 +101,7 @@ const authStore = {
         async handleSession(session) {
             console.log('--- handleSession executing ---');
             this.isLoggedIn = true;
+            this.isAuthenticated = true;
 
             console.log("Session:", session);
             console.log("Provider:", session?.user?.app_metadata?.provider);
@@ -164,6 +185,11 @@ const authStore = {
             if (!userRecord.name) {
                 userRecord.name = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
             }
+            userRecord.user_metadata = {
+                full_name: userRecord.name || session.user.user_metadata?.full_name || 'User',
+                avatar_url: session.user.user_metadata?.avatar_url || '',
+                subscription_tier: userRecord.plan || 'Free Trial'
+            };
             this.user = userRecord;
             
             // If user is on a public auth page and successfully logged in, redirect to dashboard
@@ -179,6 +205,7 @@ const authStore = {
 
         clearSession() {
             this.isLoggedIn = false;
+            this.isAuthenticated = false;
             this.user = null;
             if (!isSupabaseConfigured) {
                 localStorage.removeItem('sales_saathi_mock_session');
@@ -229,6 +256,7 @@ const authStore = {
                 localStorage.setItem('sales_saathi_mock_session', JSON.stringify(newUser));
                 this.user = newUser;
                 this.isLoggedIn = true;
+                this.isAuthenticated = true;
                 return { user: newUser, session: true };
             }
         },
@@ -247,6 +275,7 @@ const authStore = {
                 localStorage.setItem('sales_saathi_mock_session', JSON.stringify(user));
                 this.user = user;
                 this.isLoggedIn = true;
+                this.isAuthenticated = true;
                 return { user, session: true };
             }
         },
@@ -289,6 +318,7 @@ const authStore = {
                 localStorage.setItem('sales_saathi_mock_session', JSON.stringify(user));
                 this.user = user;
                 this.isLoggedIn = true;
+                this.isAuthenticated = true;
                 return { user, session: true };
             }
         },
@@ -391,12 +421,22 @@ const authStore = {
     }
 };
 
-if (window.Alpine) {
-    Alpine.store('auth', authStore);
-    Alpine.store('auth').init();
-} else {
-    document.addEventListener('alpine:init', () => {
+function initAlpineAuth() {
+    if (window.Alpine && !window.__AUTH_STORE_INITIALIZED__) {
+        window.__AUTH_STORE_INITIALIZED__ = true;
         Alpine.store('auth', authStore);
         Alpine.store('auth').init();
+    }
+}
+
+if (window.Alpine) {
+    initAlpineAuth();
+} else {
+    document.addEventListener('alpine:init', () => {
+        initAlpineAuth();
     });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    initAlpineAuth();
+});

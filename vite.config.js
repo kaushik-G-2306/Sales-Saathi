@@ -21,6 +21,13 @@ function copyStaticAssetsPlugin() {
       if (fs.existsSync(redirectsPath)) {
         fs.cpSync(redirectsPath, resolve(__dirname, 'dist/_redirects'));
       }
+      const distJs = resolve(__dirname, 'dist/js');
+      if (!fs.existsSync(distJs)) {
+        fs.mkdirSync(distJs, { recursive: true });
+      }
+      if (fs.existsSync(resolve(__dirname, 'js'))) {
+        fs.cpSync(resolve(__dirname, 'js'), distJs, { recursive: true });
+      }
     }
   };
 }

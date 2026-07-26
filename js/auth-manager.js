@@ -5,6 +5,7 @@ import { SubscriptionService } from './permissions/subscriptionService.js';
 document.addEventListener('alpine:init', () => {
     window.Alpine.store('auth', {
         isAuthenticated: false,
+        isLoggedIn: false,
         user: null
     });
 });
@@ -53,12 +54,13 @@ const AuthManager = {
                     const store = window.Alpine.store('auth');
                     if (store) {
                         store.isAuthenticated = isAuthenticated;
+                        store.isLoggedIn = isAuthenticated;
                         store.user = user;
                     } else {
-                        window.Alpine.store('auth', { isAuthenticated, user });
+                        window.Alpine.store('auth', { isAuthenticated, isLoggedIn: isAuthenticated, user });
                     }
                 } catch (e) {
-                    window.Alpine.store('auth', { isAuthenticated, user });
+                    window.Alpine.store('auth', { isAuthenticated, isLoggedIn: isAuthenticated, user });
                 }
             }
         };
