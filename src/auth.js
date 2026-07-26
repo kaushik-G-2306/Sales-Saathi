@@ -3,6 +3,12 @@ import { supabase, isSupabaseConfigured, db, supabaseClientId } from './db.js';
 // Set VITE_DEBUG_MODE=true in .env to enable verbose console output during development.
 const DEBUG = import.meta.env.VITE_DEBUG_MODE === 'true';
 
+function getRedirectUrl(targetPage = 'dashboard.html') {
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    const basePath = isGitHubPages ? '/Sales-Saathi' : '';
+    return `${window.location.origin}${basePath}/${targetPage}`;
+}
+
 const authStore = {
         isLoggedIn: false,
         user: null,
@@ -190,7 +196,7 @@ const authStore = {
                     password,
                     options: { 
                         data: { full_name: name },
-                        emailRedirectTo: window.location.origin + '/onboarding.html'
+                        emailRedirectTo: getRedirectUrl('onboarding.html')
                     }
                 });
                 if (error) throw error;
@@ -250,7 +256,7 @@ const authStore = {
                 const { error } = await supabase.auth.signInWithOtp({ 
                     email,
                     options: {
-                        emailRedirectTo: window.location.origin + window.location.pathname.replace('auth.html', 'dashboard.html')
+                        emailRedirectTo: getRedirectUrl('dashboard.html')
                     }
                 });
                 if (error) throw error;
@@ -292,7 +298,7 @@ const authStore = {
                 const { error } = await supabase.auth.signInWithOAuth({ 
                     provider: 'google',
                     options: {
-                        redirectTo: window.location.origin + window.location.pathname.replace('auth.html', 'dashboard.html'),
+                        redirectTo: getRedirectUrl('dashboard.html'),
                         scopes: 'https://www.googleapis.com/auth/calendar.readonly',
                         queryParams: {
                             access_type: 'offline',
